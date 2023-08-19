@@ -1,0 +1,46 @@
+specVersion: v0.1.0
+package:
+  name: "substreams_template"
+  version: v0.1.0
+
+imports:
+  database_change: https://github.com/streamingfast/substreams-sink-database-changes/releases/download/v1.2.0/substreams-database-change-v1.2.0.spkg
+
+protobuf:
+  files:
+    - erc721.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_transfers
+    kind: map
+    initialBlock: 12287507
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:eth.erc721.v1.Transfers
+
+  - name: store_transfers
+    kind: store
+    initialBlock: 12287507
+    updatePolicy: add
+    valueType: int64
+    inputs:
+      - map: map_transfers
+
+  - name: db_out
+    kind: map
+    initialBlock: 12287507
+    inputs:
+      - source: sf.substreams.v1.Clock
+      - map: map_transfers
+      - store: store_transfers
+        mode: deltas
+    output:
+      type: proto:sf.substreams.sink.database.v1.DatabaseChanges
