@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package acme.block_meta.v1;
+
+message BlockMeta {
+  string hash = 1;
+  uint64 number = 2;
+  string parent_hash = 3;
+  string timestamp = 4;
+}

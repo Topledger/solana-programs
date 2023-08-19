@@ -1,7 +1,6 @@
 [package]
-name = "substreams-template"
-version = "0.1.0"
-description = "Substream template demo project"
+name = "solana-programs"
+version = "1.0.0"
 edition = "2021"
 repository = "https://github.com/streamingfast/substreams-template"
 license = "Apache 2.0"
