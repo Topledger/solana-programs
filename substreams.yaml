@@ -1,23 +1,28 @@
 specVersion: v0.1.0
 package:
-  name: 'substreams_ethereum_quickstart'
+  name: 'tl_solana_programs'
   version: v1.0.0
 
 protobuf:
   files:
-    - block_meta.proto
+    - bubblegum_meta.proto
   importPaths:
     - ./proto
+
+imports:
+  address_lookup_tables: https://github.com/streamingfast/substreams-solana-address-lookup-table/releases/download/v0.1.1/address-lookup-table-v0.1.1.spkg
+
 
 binaries:
   default:
     type: wasm/rust-v1
-    file: ./target/wasm32-unknown-unknown/release/substreams.wasm
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
 
 modules:
   - name: map_block
     kind: map
     inputs:
-      - source: sf.ethereum.type.v2.Block
+      - source: sf.solana.type.v1.Block
+      - store: address_lookup_tables:store_address_lookup_tables
     output:
-      type: proto:acme.block_meta.v1.BlockMeta
+      type: proto:sf.solana.block_meta.v1.BlockMeta

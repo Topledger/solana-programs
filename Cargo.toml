@@ -1,36 +1,27 @@
 [package]
-name = "solana-programs"
+name = "substreams-solana-quickstart"
 version = "1.0.0"
 edition = "2021"
-repository = "https://github.com/streamingfast/substreams-template"
-license = "Apache 2.0"
 
 [lib]
 name = "substreams"
 crate-type = ["cdylib"]
 
 [dependencies]
-anyhow = "1"
-ethabi = "17"
-hex-literal = "0.3"
-num-bigint = "0.4"
+substreams = "0.5.0"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
 prost = "0.11"
-# Use latest from https://crates.io/crates/substreams
-substreams = "0.5"
-# Use latest from https://crates.io/crates/substreams-database-change
-substreams-database-change = "1.2"
-# Use latest from https://crates.io/crates/substreams-ethereum
-substreams-ethereum = "0.9"
-
-# Required so that ethabi > ethereum-types build correctly under wasm32-unknown-unknown
-[target.wasm32-unknown-unknown.dependencies]
-getrandom = { version = "0.2", features = ["custom"] }
-
-[build-dependencies]
-anyhow = "1"
-substreams-ethereum = "0.9"
+num-bigint = "0.4"
+bs58 = "0.5.0"
+borsh = { version = "0.10.3"}
 
 [profile.release]
 lto = true
 opt-level = 's'
 strip = "debuginfo"
+
+
+
+
+
+
