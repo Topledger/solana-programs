@@ -5,30 +5,27 @@ use core::fmt;
 
 use borsh::{BorshDeserialize, BorshSerialize};
 
-use crate::pb::sf::solana::block_meta::v1::Arg;
-// use solana_program::pubkey::Pubkey;
-
-const CreateTreeDiscriminator: u64 = u64::from_le_bytes([165, 83, 136, 142, 89, 202, 47, 220]);
-const SetTreeDelegateDiscriminator: u64 = u64::from_le_bytes([253, 118, 66, 37, 190, 49, 154, 102]);
-const MintV1Discriminator: u64 = u64::from_le_bytes([145, 98, 192, 118, 184, 147, 118, 104]);
-const MintToCollectionV1Discriminator: u64 =
+const CREATETREEDISCRIMINATOR: u64 = u64::from_le_bytes([165, 83, 136, 142, 89, 202, 47, 220]);
+const SETTREEDELEGATEDISCRIMINATOR: u64 = u64::from_le_bytes([253, 118, 66, 37, 190, 49, 154, 102]);
+const MINTV1DISCRIMINATOR: u64 = u64::from_le_bytes([145, 98, 192, 118, 184, 147, 118, 104]);
+const MINTTOCOLLECTIONV1DISCRIMINATOR: u64 =
     u64::from_le_bytes([153, 18, 178, 47, 197, 158, 86, 15]);
-const VerifyCreatorDiscriminator: u64 = u64::from_le_bytes([52, 17, 96, 132, 71, 4, 85, 194]);
-const UnverifyCreatorDiscriminator: u64 =
+const VERIFYCREATORDISCRIMINATOR: u64 = u64::from_le_bytes([52, 17, 96, 132, 71, 4, 85, 194]);
+const UNVERIFYCREATORDISCRIMINATOR: u64 =
     u64::from_le_bytes([107, 178, 57, 39, 105, 115, 112, 152]);
-const VerifyCollectionDiscriminator: u64 =
+const VERIFYCOLLECTIONDISCRIMINATOR: u64 =
     u64::from_le_bytes([56, 113, 101, 253, 79, 55, 122, 169]);
-const UnverifyCollectionDiscriminator: u64 =
+const UNVERIFYCOLLECTIONDISCRIMINATOR: u64 =
     u64::from_le_bytes([250, 251, 42, 106, 41, 137, 186, 168]);
-const SetAndVerifyCollectionDiscriminator: u64 =
+const SETANDVERIFYCOLLECTIONDISCRIMINATOR: u64 =
     u64::from_le_bytes([235, 242, 121, 216, 158, 234, 180, 234]);
-const TransferDiscriminator: u64 = u64::from_le_bytes([163, 52, 200, 231, 140, 3, 69, 186]);
-const DelegateDiscriminator: u64 = u64::from_le_bytes([90, 147, 75, 178, 85, 88, 4, 137]);
-const BurnDiscriminator: u64 = u64::from_le_bytes([116, 110, 29, 56, 107, 219, 42, 93]);
-const RedeemDiscriminator: u64 = u64::from_le_bytes([184, 12, 86, 149, 70, 196, 97, 225]);
-const CancelRedeemDiscriminator: u64 = u64::from_le_bytes([111, 76, 232, 50, 39, 175, 48, 242]);
-const DecompressV1Discriminator: u64 = u64::from_le_bytes([54, 85, 76, 70, 228, 250, 164, 81]);
-const CompressDiscriminator: u64 = u64::from_le_bytes([82, 193, 176, 117, 176, 21, 115, 253]);
+const TRANSFERDISCRIMINATOR: u64 = u64::from_le_bytes([163, 52, 200, 231, 140, 3, 69, 186]);
+const DELEGATEDISCRIMINATOR: u64 = u64::from_le_bytes([90, 147, 75, 178, 85, 88, 4, 137]);
+const BURNDISCRIMINATOR: u64 = u64::from_le_bytes([116, 110, 29, 56, 107, 219, 42, 93]);
+const REDEEMDISCRIMINATOR: u64 = u64::from_le_bytes([184, 12, 86, 149, 70, 196, 97, 225]);
+const CANCELREDEEMDISCRIMINATOR: u64 = u64::from_le_bytes([111, 76, 232, 50, 39, 175, 48, 242]);
+const DECOMPRESSV1DISCRIMINATOR: u64 = u64::from_le_bytes([54, 85, 76, 70, 228, 250, 164, 81]);
+const COMPRESSDISCRIMINATOR: u64 = u64::from_le_bytes([82, 193, 176, 117, 176, 21, 115, 253]);
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
 pub struct PubkeyLayout {
@@ -306,68 +303,68 @@ pub fn parse(bytes_stream: Vec<u8>) -> Instruction {
     let discriminator = Discriminator::try_from_slice(&disc_bytes).unwrap().value;
 
     match discriminator {
-        CreateTreeDiscriminator => {
+        CREATETREEDISCRIMINATOR => {
             instruction_name = String::from("CreateTree");
             createTreeArgs = CreateTreeLayout::try_from_slice(rest).unwrap();
         }
-        SetTreeDelegateDiscriminator => {
+        SETTREEDELEGATEDISCRIMINATOR => {
             instruction_name = String::from("SetTreeDelegate");
             setTreeDelegateArgs = SetTreeDelegateLayout::try_from_slice(rest).unwrap();
         }
-        MintV1Discriminator => {
+        MINTV1DISCRIMINATOR => {
             instruction_name = String::from("MintV1");
             mintV1Args = MintV1Layout::try_from_slice(rest).unwrap();
         }
-        MintToCollectionV1Discriminator => {
+        MINTTOCOLLECTIONV1DISCRIMINATOR => {
             instruction_name = String::from("MintToCollectionV1");
             mintToCollectionV1Args = MintToCollectionV1Layout::try_from_slice(rest).unwrap();
         }
-        VerifyCreatorDiscriminator => {
+        VERIFYCREATORDISCRIMINATOR => {
             instruction_name = String::from("VerifyCreator");
             verifyCreatorArgs = VerifyCreatorLayout::try_from_slice(rest).unwrap();
         }
-        UnverifyCreatorDiscriminator => {
+        UNVERIFYCREATORDISCRIMINATOR => {
             instruction_name = String::from("UnverifyCreator");
             unverifyCreatorArgs = UnverifyCreatorLayout::try_from_slice(rest).unwrap();
         }
-        VerifyCollectionDiscriminator => {
+        VERIFYCOLLECTIONDISCRIMINATOR => {
             instruction_name = String::from("VerifyCollection");
             verifyCollectionArgs = VerifyCollectionLayout::try_from_slice(rest).unwrap();
         }
-        UnverifyCollectionDiscriminator => {
+        UNVERIFYCOLLECTIONDISCRIMINATOR => {
             instruction_name = String::from("UnverifyCollection");
             unverifyCollectionArgs = UnverifyCollectionLayout::try_from_slice(rest).unwrap();
         }
-        SetAndVerifyCollectionDiscriminator => {
+        SETANDVERIFYCOLLECTIONDISCRIMINATOR => {
             instruction_name = String::from("SetAndVerifyCollection");
             setAndVerifyCollectionArgs =
                 SetAndVerifyCollectionLayout::try_from_slice(rest).unwrap();
         }
-        TransferDiscriminator => {
+        TRANSFERDISCRIMINATOR => {
             instruction_name = String::from("Transfer");
             transferArgs = TransferLayout::try_from_slice(rest).unwrap();
         }
-        DelegateDiscriminator => {
+        DELEGATEDISCRIMINATOR => {
             instruction_name = String::from("Delegate");
             delegateArgs = DelegateLayout::try_from_slice(rest).unwrap();
         }
-        BurnDiscriminator => {
+        BURNDISCRIMINATOR => {
             instruction_name = String::from("Burn");
             burnArgs = BurnLayout::try_from_slice(rest).unwrap();
         }
-        RedeemDiscriminator => {
+        REDEEMDISCRIMINATOR => {
             instruction_name = String::from("Redeem");
             redeemArgs = RedeemLayout::try_from_slice(rest).unwrap();
         }
-        CancelRedeemDiscriminator => {
+        CANCELREDEEMDISCRIMINATOR => {
             instruction_name = String::from("CancelRedeem");
             cancelRedeemArgs = CancelRedeemLayout::try_from_slice(rest).unwrap();
         }
-        DecompressV1Discriminator => {
+        DECOMPRESSV1DISCRIMINATOR => {
             instruction_name = String::from("DecompressV1");
             decompressV1Args = DecompressV1Layout::try_from_slice(rest).unwrap();
         }
-        CompressDiscriminator => {
+        COMPRESSDISCRIMINATOR => {
             instruction_name = String::from("Compress");
             compressArgs = CompressLayout::try_from_slice(rest).unwrap();
         }

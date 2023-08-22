@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(non_snake_case)]
+
 mod constants;
 mod utils;
 mod pb;
@@ -26,8 +30,6 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
     {
         if let Some(transaction) = trx.transaction {
 
-            
-            let trx_hash = bs58::encode(&transaction.signatures[0]).into_string();
             let msg = transaction.message.unwrap();
             let mut accounts = vec![];
             let mut writable_accounts = vec![];
