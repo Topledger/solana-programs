@@ -5,41 +5,38 @@
 mod constants;
 mod utils;
 mod pb;
+mod instruction;
 
 use pb::sf::solana::block_meta::v1::{
     Arg, BubblegumMeta, Collection, Creator, Message, MetadataArgs, Uses, Metadata, Output,
 };
-
 use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-
-mod instruction;
 use instruction::{parse, Instruction};
 use utils::convert_to_date;
 use substreams::store::{StoreGet, StoreGetArray};
 
 #[substreams::handlers::map]
 fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) -> Result<Output, substreams::errors::Error> {
-    // log::info!("{:#?}", block);
-
+    let slot = block.slot;
+    let parent_slot = block.parent_slot;
+    let timestamp = block.block_time.as_ref().unwrap().timestamp;
     let mut data: Vec<BubblegumMeta> = vec![];
 
-    for trx in block
-        .clone().transactions_owned()
-        .filter(|txn| txn.meta().is_some())
-    {
+    for trx in block.transactions_owned() {
         if let Some(transaction) = trx.transaction {
-
+            let meta = trx.meta.unwrap();
             let msg = transaction.message.unwrap();
             let mut accounts = vec![];
             let mut writable_accounts = vec![];
             let mut readable_accounts = vec![];
+
             msg.account_keys
                 .into_iter()
                 .for_each(|addr| accounts.push(bs58::encode(addr).into_string()));
             msg.address_table_lookups.into_iter().for_each(|addr| {
                 let acc = bs58::encode(&addr.account_key).into_string();
-                match address_lookup_table_store.get_last(format!("table:{acc}")) {
+                match address_lookup_table_store.get_last(format!("table:{}", acc)) {
                     None => panic!("Address Lookup Table Account {} does not exist", acc),
                     Some(accs) => {
                         addr.writable_indexes.into_iter().for_each(|idx| {
@@ -55,68 +52,61 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
             accounts.append(&mut writable_accounts);
             accounts.append(&mut readable_accounts);
 
-
-
-            
-            for (idx, inst) in msg.instructions.iter().enumerate() {
-                
+            for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
-                
-                
+
                 if program != constants::BUBBLEGUM_PROGRAM_ADDRESS {
                     continue;
                 }
-                
+
                 data.push(BubblegumMeta {
-                    block_date: convert_to_date(block.block_time.as_ref().unwrap().timestamp),
-                    block_time: block.block_time.as_ref().unwrap().timestamp,
+                    block_date: convert_to_date(timestamp),
+                    block_time: timestamp,
                     tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
                     dapp: constants::BUBBLEGUM_PROGRAM_ADDRESS.to_string(),
-                    block_slot: block.parent_slot + 1,
+                    block_slot: parent_slot,
                     instruction_index: inst.program_id_index,
                     is_inner_instruction: false,
                     inner_instruction_index: 0,
-                    arg: Some(get_arg(inst.clone().data))
+                    arg: Some(get_arg(inst.data))
                 });
 
-                let meta = trx.meta.as_ref().unwrap();
                 meta.inner_instructions
                     .iter()
-                    .filter(|&inner_instruction| inner_instruction.index == idx as u32)
+                    .filter(|inner_instruction| inner_instruction.index == idx as u32)
                     .for_each(|inner_instruction| {
                         inner_instruction.instructions
                         .iter()
-                        .for_each(|inner_inst: &substreams_solana::pb::sf::solana::r#type::v1::InnerInstruction| {
+                        .for_each(|inner_inst| {
                             let program = &accounts[inner_inst.program_id_index as usize];
                             if program == constants::BUBBLEGUM_PROGRAM_ADDRESS {
                                 data.push(BubblegumMeta {
-                                    block_date: convert_to_date(block.block_time.as_ref().unwrap().timestamp),
-                                    block_time: block.block_time.as_ref().unwrap().timestamp,
+                                    block_date: convert_to_date(timestamp),
+                                    block_time: timestamp,
                                     tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
                                     dapp: constants::BUBBLEGUM_PROGRAM_ADDRESS.to_string(),
-                                    block_slot: block.parent_slot + 1,
+                                    block_slot: parent_slot + 1,
                                     instruction_index: inst.program_id_index,
                                     is_inner_instruction: true,
                                     inner_instruction_index: inner_inst.program_id_index,
-                                    arg: Some(get_arg(inner_inst.clone().data))
+                                    arg: Some(get_arg(inner_inst.data.clone()))
                                 });
                             }
                         })
                     });
             }
-            
         }
     }
 
-    log::info!("{:#?}", block.slot);
+    log::info!("{:#?}", slot);
     log::info!("{:#?}", data.len());
+
     Ok(Output{data})
 }
 
 fn get_arg(instruction_data: Vec<u8>) -> Arg {
     let mut arg: Arg = Arg::default();
     let instruction: Instruction = parse(instruction_data);
-
 
     match instruction.name.as_str() {
         "CreateTree" => {
