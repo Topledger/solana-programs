@@ -8,17 +8,12 @@ use borsh::{BorshDeserialize, BorshSerialize};
 const CREATETREEDISCRIMINATOR: u64 = u64::from_le_bytes([165, 83, 136, 142, 89, 202, 47, 220]);
 const SETTREEDELEGATEDISCRIMINATOR: u64 = u64::from_le_bytes([253, 118, 66, 37, 190, 49, 154, 102]);
 const MINTV1DISCRIMINATOR: u64 = u64::from_le_bytes([145, 98, 192, 118, 184, 147, 118, 104]);
-const MINTTOCOLLECTIONV1DISCRIMINATOR: u64 =
-    u64::from_le_bytes([153, 18, 178, 47, 197, 158, 86, 15]);
+const MINTTOCOLLECTIONV1DISCRIMINATOR: u64 = u64::from_le_bytes([153, 18, 178, 47, 197, 158, 86, 15]);
 const VERIFYCREATORDISCRIMINATOR: u64 = u64::from_le_bytes([52, 17, 96, 132, 71, 4, 85, 194]);
-const UNVERIFYCREATORDISCRIMINATOR: u64 =
-    u64::from_le_bytes([107, 178, 57, 39, 105, 115, 112, 152]);
-const VERIFYCOLLECTIONDISCRIMINATOR: u64 =
-    u64::from_le_bytes([56, 113, 101, 253, 79, 55, 122, 169]);
-const UNVERIFYCOLLECTIONDISCRIMINATOR: u64 =
-    u64::from_le_bytes([250, 251, 42, 106, 41, 137, 186, 168]);
-const SETANDVERIFYCOLLECTIONDISCRIMINATOR: u64 =
-    u64::from_le_bytes([235, 242, 121, 216, 158, 234, 180, 234]);
+const UNVERIFYCREATORDISCRIMINATOR: u64 = u64::from_le_bytes([107, 178, 57, 39, 105, 115, 112, 152]);
+const VERIFYCOLLECTIONDISCRIMINATOR: u64 = u64::from_le_bytes([56, 113, 101, 253, 79, 55, 122, 169]);
+const UNVERIFYCOLLECTIONDISCRIMINATOR: u64 = u64::from_le_bytes([250, 251, 42, 106, 41, 137, 186, 168]);
+const SETANDVERIFYCOLLECTIONDISCRIMINATOR: u64 = u64::from_le_bytes([235, 242, 121, 216, 158, 234, 180, 234]);
 const TRANSFERDISCRIMINATOR: u64 = u64::from_le_bytes([163, 52, 200, 231, 140, 3, 69, 186]);
 const DELEGATEDISCRIMINATOR: u64 = u64::from_le_bytes([90, 147, 75, 178, 85, 88, 4, 137]);
 const BURNDISCRIMINATOR: u64 = u64::from_le_bytes([116, 110, 29, 56, 107, 219, 42, 93]);
@@ -277,7 +272,7 @@ pub struct Instruction {
     pub compressArgs: CompressLayout,
 }
 
-pub fn parse(bytes_stream: Vec<u8>) -> Instruction {
+pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     // let mut bytes_stream = bs58::decode(base58_string).into_vec().unwrap();
     let mut instruction_name = String::default();
 
@@ -289,8 +284,7 @@ pub fn parse(bytes_stream: Vec<u8>) -> Instruction {
     let mut unverifyCreatorArgs: UnverifyCreatorLayout = UnverifyCreatorLayout::default();
     let mut verifyCollectionArgs: VerifyCollectionLayout = VerifyCollectionLayout::default();
     let mut unverifyCollectionArgs: UnverifyCollectionLayout = UnverifyCollectionLayout::default();
-    let mut setAndVerifyCollectionArgs: SetAndVerifyCollectionLayout =
-        SetAndVerifyCollectionLayout::default();
+    let mut setAndVerifyCollectionArgs: SetAndVerifyCollectionLayout = SetAndVerifyCollectionLayout::default();
     let mut transferArgs: TransferLayout = TransferLayout::default();
     let mut delegateArgs: DelegateLayout = DelegateLayout::default();
     let mut burnArgs: BurnLayout = BurnLayout::default();
@@ -301,6 +295,8 @@ pub fn parse(bytes_stream: Vec<u8>) -> Instruction {
 
     let (disc_bytes, rest) = bytes_stream.split_at(8);
     let discriminator = Discriminator::try_from_slice(&disc_bytes).unwrap().value;
+
+    // let mutt :T
 
     match discriminator {
         CREATETREEDISCRIMINATOR => {

@@ -12,7 +12,7 @@ use pb::sf::solana::block_meta::v1::{
 };
 use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use instruction::{parse, Instruction};
+use instruction::{parse_instruction, Instruction};
 use utils::convert_to_date;
 use substreams::store::{StoreGet, StoreGetArray};
 
@@ -49,6 +49,8 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
                 }
             });
 
+            
+
             accounts.append(&mut writable_accounts);
             accounts.append(&mut readable_accounts);
 
@@ -58,6 +60,7 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
                 if program != constants::BUBBLEGUM_PROGRAM_ADDRESS {
                     continue;
                 }
+                
 
                 data.push(BubblegumMeta {
                     block_date: convert_to_date(timestamp),
@@ -68,7 +71,7 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
                     instruction_index: inst.program_id_index,
                     is_inner_instruction: false,
                     inner_instruction_index: 0,
-                    arg: Some(get_arg(inst.data))
+                    arg: Some(get_arg(inst.data, &inst.accounts, &accounts))
                 });
 
                 meta.inner_instructions
@@ -89,7 +92,7 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
                                     instruction_index: inst.program_id_index,
                                     is_inner_instruction: true,
                                     inner_instruction_index: inner_inst.program_id_index,
-                                    arg: Some(get_arg(inner_inst.data.clone()))
+                                    arg: Some(get_arg(inner_inst.data.clone(), &inner_inst.accounts, &accounts))
                                 });
                             }
                         })
@@ -104,9 +107,9 @@ fn map_block(block: Block, address_lookup_table_store: StoreGetArray<String>) ->
     Ok(Output{data})
 }
 
-fn get_arg(instruction_data: Vec<u8>) -> Arg {
+fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<String>) -> Arg {
     let mut arg: Arg = Arg::default();
-    let instruction: Instruction = parse(instruction_data);
+    let instruction: Instruction = parse_instruction(instruction_data);
 
     match instruction.name.as_str() {
         "CreateTree" => {
