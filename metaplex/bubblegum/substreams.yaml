@@ -1,11 +1,11 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_programs'
+  name: 'tl_solana_programs_metaplex_bubblegum'
   version: v1.0.0
 
 protobuf:
   files:
-    - bubblegum_meta.proto
+    - main.proto
   importPaths:
     - ./proto
 
