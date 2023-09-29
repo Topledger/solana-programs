@@ -1,4 +1,7 @@
-# substreams-bubblegum
+# Solana Substreams
+
+Substreams for popular dApps on Solana.
+Every project is a seperate substream and can be used independently.
 
 ### Generate protos
 ```bash
