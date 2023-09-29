@@ -2,7 +2,6 @@ extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt;
 use std::default;
-use substreams::log;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
 pub struct PubkeyLayout {

@@ -8,7 +8,7 @@ mod pb;
 mod utils;
 
 use instruction::{parse_instruction, Instruction};
-use pb::sf::solana::block_meta::v1::{Arg, Output, SplTokenMeta};
+use pb::sf::solana::spl::v1::{Arg, Output, SplTokenMeta};
 use substreams::log;
 use substreams::store::{StoreGet, StoreGetArray};
 use substreams_solana::pb::sf::solana::r#type::v1::Block;

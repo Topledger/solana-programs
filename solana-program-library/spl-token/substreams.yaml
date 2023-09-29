@@ -25,4 +25,4 @@ modules:
       - source: sf.solana.type.v1.Block
       - store: address_lookup_tables:store_address_lookup_tables
     output:
-      type: proto:sf.solana.block_meta.v1.Output
+      type: proto:sf.solana.spl.v1.Output
