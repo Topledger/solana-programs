@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_programs_metaplex_bubblegum'
+  name: 'tl_solana_programs_spl_token'
   version: v1.0.0
 
 protobuf:

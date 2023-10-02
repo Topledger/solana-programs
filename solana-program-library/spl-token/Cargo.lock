@@ -569,7 +569,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "substreams-solana-quickstart"
+name = "substreams-solana-spl-token"
 version = "1.0.0"
 dependencies = [
  "borsh",
