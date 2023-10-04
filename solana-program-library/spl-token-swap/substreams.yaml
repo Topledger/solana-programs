@@ -1,6 +1,6 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_programs_spl_token'
+  name: 'tl_solana_programs_spl_token_swap'
   version: v1.0.0
 
 protobuf:
@@ -25,4 +25,4 @@ modules:
       - source: sf.solana.type.v1.Block
       - store: address_lookup_tables:store_address_lookup_tables
     output:
-      type: proto:sf.solana.spl.v1.Output
+      type: proto:sf.solana.spl.token.swap.v1.Output

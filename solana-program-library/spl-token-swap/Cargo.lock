@@ -569,7 +569,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "substreams-solana-spl-token"
+name = "substreams-solana-spl-token-swap"
 version = "1.0.0"
 dependencies = [
  "borsh",
