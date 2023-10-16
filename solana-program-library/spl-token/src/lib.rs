@@ -106,9 +106,7 @@ fn map_block(
     }
 
     log::info!("{:#?}", slot);
-    log::info!("{:#?}", data.len());
-
-    Ok(Output { data })
+    return Ok(Output { data });
 }
 
 fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<String>) -> Arg {
@@ -127,7 +125,7 @@ fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<
                 instruction
                     .initializeMintArgs
                     .freeze_authority
-                    .unwrap()
+                    .unwrap_or_default()
                     .value,
             );
         }

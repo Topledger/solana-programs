@@ -278,7 +278,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     match discriminator {
         0 => {
             instruction_name = String::from("InitializeMint");
-            initializeMintArgs = InitializeMintLayout::try_from_slice(rest).unwrap();
+            initializeMintArgs = InitializeMintLayout::try_from_slice(rest).unwrap_or_default();
         }
         1 => {
             instruction_name = String::from("InitializeAccount");
@@ -302,7 +302,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         6 => {
             instruction_name = String::from("SetAuthority");
-            setAuthorityArgs = SetAuthorityLayout::try_from_slice(rest).unwrap();
+            setAuthorityArgs = SetAuthorityLayout::try_from_slice(rest).unwrap_or_default();
         }
         7 => {
             instruction_name = String::from("MintTo");
@@ -314,15 +314,12 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         9 => {
             instruction_name = String::from("CloseAccount");
-            closeAccountArgs = CloseAccountLayout::try_from_slice(rest).unwrap();
         }
         10 => {
             instruction_name = String::from("FreezeAccount");
-            freezeAccountArgs = FreezeAccountLayout::try_from_slice(rest).unwrap();
         }
         11 => {
             instruction_name = String::from("ThawAccount");
-            thawAccountArgs = ThawAccountLayout::try_from_slice(rest).unwrap();
         }
         12 => {
             instruction_name = String::from("TransferChecked");
@@ -358,7 +355,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         20 => {
             instruction_name = String::from("InitializeMint2");
-            initializeMint2Args = InitializeMint2Layout::try_from_slice(rest).unwrap();
+            initializeMint2Args = InitializeMint2Layout::try_from_slice(rest).unwrap_or_default();
         }
         21 => {
             instruction_name = String::from("GetAccountDataSize");
@@ -384,41 +381,28 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         26 => {
             instruction_name = String::from("TransferFeeExtension");
-            transferFeeExtensionArgs = TransferFeeExtensionLayout::try_from_slice(rest).unwrap();
         }
         27 => {
             instruction_name = String::from("ConfidentialTransferExtension");
-            confidentialTransferExtensionArgs =
-                ConfidentialTransferExtensionLayout::try_from_slice(rest).unwrap();
         }
         28 => {
             instruction_name = String::from("DefaultAccountStateExtension");
-            defaultAccountStateExtensionArgs =
-                DefaultAccountStateExtensionLayout::try_from_slice(rest).unwrap();
         }
         29 => {
             instruction_name = String::from("Reallocate");
-            reallocateArgs = ReallocateLayout::try_from_slice(rest).unwrap();
         }
         30 => {
             instruction_name = String::from("MemoTransferExtension");
-            memoTransferExtensionArgs = MemoTransferExtensionLayout::try_from_slice(rest).unwrap();
         }
         31 => {
             instruction_name = String::from("CreateNativeMint");
-            createNativeMintArgs = CreateNativeMintLayout::try_from_slice(rest).unwrap();
         }
         32 => {
             instruction_name = String::from("InitializeNonTransferableMint");
-            initializeNonTransferableMintArgs =
-                InitializeNonTransferableMintLayout::try_from_slice(rest).unwrap();
         }
         33 => {
             instruction_name = String::from("InterestBearingMintExtension");
-            interestBearingMintExtensionArgs =
-                InterestBearingMintExtensionLayout::try_from_slice(rest).unwrap();
         }
-
         _ => {}
     }
 

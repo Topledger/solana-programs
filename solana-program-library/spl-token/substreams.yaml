@@ -5,7 +5,7 @@ package:
 
 protobuf:
   files:
-    - main.proto
+    - output.proto
   importPaths:
     - ./proto
 
