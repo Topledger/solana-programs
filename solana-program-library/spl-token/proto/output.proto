@@ -18,18 +18,35 @@ message SplTokenMeta {
   Arg arg = 10;
 }
 
+message Accounts {
+  string mint = 1;
+  string rent_sysvar = 2;
+  string account = 3;
+  string owner = 4;
+  repeated string signer_accounts = 5;
+  string source = 6;
+  string destination = 7;
+  string delegate = 8;
+  string authority = 9;
+  string payer = 10;
+  string fund_relocation_sys_program = 11;
+  string funding_account = 12;
+  string mint_funding_sys_program = 13;
+}
+
 message Arg {
   string instruction_type = 1;
-  uint64 amount = 2;
-  string authority_type = 3;
-  string freeze_authority = 4;
-  int32 freeze_authority_option = 5;
-  string mint_authority = 6;
-  string new_authority = 7;
-  int32 new_authority_option = 8;
-  string owner = 9;
-  int32 decimals = 10;
-  int32 extension_type = 11;
-  string ui_amount = 12;
-  int32 status = 13;
+  Accounts accounts = 2;
+  uint64 amount = 3;
+  string authority_type = 4;
+  string freeze_authority = 5;
+  int32 freeze_authority_option = 6;
+  string mint_authority = 7;
+  string new_authority = 8;
+  int32 new_authority_option = 9;
+  string owner = 10;
+  int32 decimals = 11;
+  int32 extension_type = 12;
+  string ui_amount = 13;
+  int32 status = 14;
 }

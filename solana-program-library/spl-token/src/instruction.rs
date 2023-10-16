@@ -185,9 +185,27 @@ pub struct InitializeNonTransferableMintLayout {}
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 pub struct InterestBearingMintExtensionLayout {}
 
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+pub struct InstructionAccounts {
+    pub mint: String,
+    pub rent_sysvar: String,
+    pub account: String,
+    pub owner: String,
+    pub signer_accounts: Vec<String>,
+    pub source: String,
+    pub destination: String,
+    pub delegate: String,
+    pub authority: String,
+    pub payer: String,
+    pub fund_relocation_sys_program: String,
+    pub funding_account: String,
+    pub mint_funding_sys_program: String,
+}
+
 #[derive(Debug)]
 pub struct Instruction {
     pub name: String,
+    pub instruction_accounts: InstructionAccounts,
     pub initializeMintArgs: InitializeMintLayout,
     pub initializeAccountArgs: InitializeAccountLayout,
     pub initializeMultisigArgs: InitializeMultisigLayout,
@@ -224,9 +242,10 @@ pub struct Instruction {
     pub interestBearingMintExtensionArgs: InterestBearingMintExtensionLayout,
 }
 
-pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
+pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instruction {
     // let mut bytes_stream = bs58::decode(base58_string).into_vec().unwrap();
     let mut instruction_name = String::default();
+    let mut instruction_accounts = InstructionAccounts::default();
 
     let mut initializeMintArgs: InitializeMintLayout = InitializeMintLayout::default();
     let mut initializeAccountArgs: InitializeAccountLayout = InitializeAccountLayout::default();
@@ -237,9 +256,9 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     let mut setAuthorityArgs: SetAuthorityLayout = SetAuthorityLayout::default();
     let mut mintToArgs: MintToLayout = MintToLayout::default();
     let mut burnArgs: BurnLayout = BurnLayout::default();
-    let mut closeAccountArgs: CloseAccountLayout = CloseAccountLayout::default();
-    let mut freezeAccountArgs: FreezeAccountLayout = FreezeAccountLayout::default();
-    let mut thawAccountArgs: ThawAccountLayout = ThawAccountLayout::default();
+    let closeAccountArgs: CloseAccountLayout = CloseAccountLayout::default();
+    let freezeAccountArgs: FreezeAccountLayout = FreezeAccountLayout::default();
+    let thawAccountArgs: ThawAccountLayout = ThawAccountLayout::default();
     let mut transferCheckedArgs: TransferCheckedLayout = TransferCheckedLayout::default();
     let mut approveCheckedArgs: ApproveCheckedLayout = ApproveCheckedLayout::default();
     let mut mintToCheckedArgs: MintToCheckedLayout = MintToCheckedLayout::default();
@@ -257,19 +276,19 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     let mut uiAmountToAmountArgs: UiAmountToAmountLayout = UiAmountToAmountLayout::default();
     let mut initializeMintCloseAuthorityArgs: InitializeMintCloseAuthorityLayout =
         InitializeMintCloseAuthorityLayout::default();
-    let mut transferFeeExtensionArgs: TransferFeeExtensionLayout =
+    let transferFeeExtensionArgs: TransferFeeExtensionLayout =
         TransferFeeExtensionLayout::default();
-    let mut confidentialTransferExtensionArgs: ConfidentialTransferExtensionLayout =
+    let confidentialTransferExtensionArgs: ConfidentialTransferExtensionLayout =
         ConfidentialTransferExtensionLayout::default();
-    let mut defaultAccountStateExtensionArgs: DefaultAccountStateExtensionLayout =
+    let defaultAccountStateExtensionArgs: DefaultAccountStateExtensionLayout =
         DefaultAccountStateExtensionLayout::default();
-    let mut reallocateArgs: ReallocateLayout = ReallocateLayout::default();
-    let mut memoTransferExtensionArgs: MemoTransferExtensionLayout =
+    let reallocateArgs: ReallocateLayout = ReallocateLayout::default();
+    let memoTransferExtensionArgs: MemoTransferExtensionLayout =
         MemoTransferExtensionLayout::default();
-    let mut createNativeMintArgs: CreateNativeMintLayout = CreateNativeMintLayout::default();
-    let mut initializeNonTransferableMintArgs: InitializeNonTransferableMintLayout =
+    let createNativeMintArgs: CreateNativeMintLayout = CreateNativeMintLayout::default();
+    let initializeNonTransferableMintArgs: InitializeNonTransferableMintLayout =
         InitializeNonTransferableMintLayout::default();
-    let mut interestBearingMintExtensionArgs: InterestBearingMintExtensionLayout =
+    let interestBearingMintExtensionArgs: InterestBearingMintExtensionLayout =
         InterestBearingMintExtensionLayout::default();
 
     let (disc_bytes, rest) = bytes_stream.split_at(1);
@@ -278,104 +297,260 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     match discriminator {
         0 => {
             instruction_name = String::from("InitializeMint");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+            instruction_accounts.rent_sysvar = accounts.get(1).unwrap().to_string();
+
             initializeMintArgs = InitializeMintLayout::try_from_slice(rest).unwrap_or_default();
         }
         1 => {
             instruction_name = String::from("InitializeAccount");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             initializeAccountArgs = InitializeAccountLayout::try_from_slice(rest).unwrap();
         }
         2 => {
             instruction_name = String::from("InitializeMultisig");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.rent_sysvar = accounts.get(1).unwrap().to_string();
+            if accounts.len() > 2 {
+                instruction_accounts.signer_accounts = accounts.split_at(2).1.to_vec();
+            }
+
             initializeMultisigArgs = InitializeMultisigLayout::try_from_slice(rest).unwrap();
         }
         3 => {
             instruction_name = String::from("Transfer");
+
+            instruction_accounts.source = accounts.get(0).unwrap().to_string();
+            instruction_accounts.destination = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             transferArgs = TransferLayout::try_from_slice(rest).unwrap();
         }
         4 => {
             instruction_name = String::from("Approve");
+
+            instruction_accounts.source = accounts.get(0).unwrap().to_string();
+            instruction_accounts.delegate = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             approveArgs = ApproveLayout::try_from_slice(rest).unwrap();
         }
         5 => {
             instruction_name = String::from("Revoke");
+
+            instruction_accounts.source = accounts.get(0).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(1).unwrap().to_string();
+            if accounts.len() > 2 {
+                instruction_accounts.signer_accounts = accounts.split_at(2).1.to_vec();
+            }
+
             revokeArgs = RevokeLayout::try_from_slice(rest).unwrap();
         }
         6 => {
             instruction_name = String::from("SetAuthority");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.authority = accounts.get(1).unwrap().to_string();
+            if accounts.len() > 2 {
+                instruction_accounts.signer_accounts = accounts.split_at(2).1.to_vec();
+            }
+
             setAuthorityArgs = SetAuthorityLayout::try_from_slice(rest).unwrap_or_default();
         }
         7 => {
             instruction_name = String::from("MintTo");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+            instruction_accounts.account = accounts.get(1).unwrap().to_string();
+            instruction_accounts.authority = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             mintToArgs = MintToLayout::try_from_slice(rest).unwrap();
         }
         8 => {
             instruction_name = String::from("Burn");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             burnArgs = BurnLayout::try_from_slice(rest).unwrap();
         }
         9 => {
             instruction_name = String::from("CloseAccount");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.destination = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
         }
         10 => {
             instruction_name = String::from("FreezeAccount");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
         }
         11 => {
             instruction_name = String::from("ThawAccount");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
         }
         12 => {
             instruction_name = String::from("TransferChecked");
+
+            instruction_accounts.source = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.destination = accounts.get(2).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(3).unwrap().to_string();
+            if accounts.len() > 4 {
+                instruction_accounts.signer_accounts = accounts.split_at(4).1.to_vec();
+            }
+
             transferCheckedArgs = TransferCheckedLayout::try_from_slice(rest).unwrap();
         }
         13 => {
             instruction_name = String::from("ApproveChecked");
+
+            instruction_accounts.source = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.delegate = accounts.get(2).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(3).unwrap().to_string();
+            if accounts.len() > 4 {
+                instruction_accounts.signer_accounts = accounts.split_at(4).1.to_vec();
+            }
+
             approveCheckedArgs = ApproveCheckedLayout::try_from_slice(rest).unwrap();
         }
         14 => {
             instruction_name = String::from("MintToChecked");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+            instruction_accounts.account = accounts.get(1).unwrap().to_string();
+            instruction_accounts.authority = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             mintToCheckedArgs = MintToCheckedLayout::try_from_slice(rest).unwrap();
         }
         15 => {
             instruction_name = String::from("BurnChecked");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(2).unwrap().to_string();
+            if accounts.len() > 3 {
+                instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
+            }
+
             burnCheckedArgs = BurnCheckedLayout::try_from_slice(rest).unwrap();
         }
         16 => {
             instruction_name = String::from("InitializeAccount2");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.rent_sysvar = accounts.get(2).unwrap().to_string();
+
             initializeAccount2Args = InitializeAccount2Layout::try_from_slice(rest).unwrap();
         }
         17 => {
             instruction_name = String::from("SyncNative");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+
             syncNativeArgs = SyncNativeLayout::try_from_slice(rest).unwrap();
         }
         18 => {
             instruction_name = String::from("InitializeAccount3");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+
             initializeAccount3Args = InitializeAccount3Layout::try_from_slice(rest).unwrap();
         }
         19 => {
             instruction_name = String::from("InitializeMultisig2");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            if accounts.len() > 1 {
+                instruction_accounts.signer_accounts = accounts.split_at(1).1.to_vec();
+            }
+
             initializeMultisig2Args = InitializeMultisig2Layout::try_from_slice(rest).unwrap();
         }
         20 => {
             instruction_name = String::from("InitializeMint2");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+
             initializeMint2Args = InitializeMint2Layout::try_from_slice(rest).unwrap_or_default();
         }
         21 => {
             instruction_name = String::from("GetAccountDataSize");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+
             getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
         }
         22 => {
             instruction_name = String::from("InitializeImmutableOwner");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+
             initializeImmutableOwnerArgs =
                 InitializeImmutableOwnerLayout::try_from_slice(rest).unwrap();
         }
         23 => {
             instruction_name = String::from("AmountToUiAmount");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+
             amountToUiAmountArgs = AmountToUiAmountLayout::try_from_slice(rest).unwrap();
         }
         24 => {
             instruction_name = String::from("UiAmountToAmount");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+
             uiAmountToAmountArgs = UiAmountToAmountLayout::try_from_slice(rest).unwrap();
         }
         25 => {
             instruction_name = String::from("InitializeMintCloseAuthority");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
+
             initializeMintCloseAuthorityArgs =
                 InitializeMintCloseAuthorityLayout::try_from_slice(rest).unwrap();
         }
@@ -390,15 +565,29 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         29 => {
             instruction_name = String::from("Reallocate");
+
+            instruction_accounts.account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.payer = accounts.get(1).unwrap().to_string();
+            instruction_accounts.fund_relocation_sys_program = accounts.get(2).unwrap().to_string();
+            instruction_accounts.owner = accounts.get(3).unwrap().to_string();
+            if accounts.len() > 4 {
+                instruction_accounts.signer_accounts = accounts.split_at(4).1.to_vec();
+            }
         }
         30 => {
             instruction_name = String::from("MemoTransferExtension");
         }
         31 => {
             instruction_name = String::from("CreateNativeMint");
+
+            instruction_accounts.funding_account = accounts.get(0).unwrap().to_string();
+            instruction_accounts.mint = accounts.get(1).unwrap().to_string();
+            instruction_accounts.mint_funding_sys_program = accounts.get(2).unwrap().to_string();
         }
         32 => {
             instruction_name = String::from("InitializeNonTransferableMint");
+
+            instruction_accounts.mint = accounts.get(0).unwrap().to_string();
         }
         33 => {
             instruction_name = String::from("InterestBearingMintExtension");
@@ -408,6 +597,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
 
     let result: Instruction = Instruction {
         name: instruction_name,
+        instruction_accounts: instruction_accounts,
         initializeMintArgs: initializeMintArgs,
         initializeAccountArgs: initializeAccountArgs,
         initializeMultisigArgs: initializeMultisigArgs,

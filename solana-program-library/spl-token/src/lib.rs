@@ -8,7 +8,7 @@ mod pb;
 mod utils;
 
 use instruction::{parse_instruction, Instruction};
-use pb::sf::solana::spl::v1::{Arg, Output, SplTokenMeta};
+use pb::sf::solana::spl::v1::{Accounts, Arg, Output, SplTokenMeta};
 use substreams::log;
 use substreams::store::{StoreGet, StoreGetArray};
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
@@ -110,8 +110,25 @@ fn map_block(
 }
 
 fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<String>) -> Arg {
+    let account_args = prepare_account_args(account_indices, accounts);
     let mut arg: Arg = Arg::default();
-    let instruction: Instruction = parse_instruction(instruction_data);
+    let instruction: Instruction = parse_instruction(instruction_data, account_args);
+
+    arg.accounts = Some(Accounts {
+        mint: instruction.instruction_accounts.mint,
+        rent_sysvar: instruction.instruction_accounts.rent_sysvar,
+        account: instruction.instruction_accounts.account,
+        owner: instruction.instruction_accounts.owner,
+        signer_accounts: instruction.instruction_accounts.signer_accounts,
+        source: instruction.instruction_accounts.source,
+        destination: instruction.instruction_accounts.destination,
+        delegate: instruction.instruction_accounts.delegate,
+        authority: instruction.instruction_accounts.authority,
+        payer: instruction.instruction_accounts.payer,
+        fund_relocation_sys_program: instruction.instruction_accounts.fund_relocation_sys_program,
+        funding_account: instruction.instruction_accounts.funding_account,
+        mint_funding_sys_program: instruction.instruction_accounts.mint_funding_sys_program,
+    });
 
     match instruction.name.as_str() {
         "InitializeMint" => {
@@ -276,4 +293,12 @@ fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<
 
 fn get_b58_string(data: [u8; 32]) -> String {
     return bs58::encode(data).into_string();
+}
+
+fn prepare_account_args(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {
+    let mut instruction_accounts: Vec<String> = vec![];
+    for (index, &el) in account_indices.iter().enumerate() {
+        instruction_accounts.push(accounts.as_slice()[el as usize].to_string());
+    }
+    return instruction_accounts;
 }
