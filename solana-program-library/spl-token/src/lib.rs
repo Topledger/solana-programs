@@ -38,7 +38,7 @@ fn map_block(
             msg.address_table_lookups.into_iter().for_each(|addr| {
                 let acc = bs58::encode(&addr.account_key).into_string();
                 match address_lookup_table_store.get_last(format!("table:{}", acc)) {
-                    None => panic!("Address Lookup Table Account {} does not exist", acc),
+                    None => {}
                     Some(accs) => {
                         addr.writable_indexes.into_iter().for_each(|idx| {
                             writable_accounts.push(accs[idx as usize].clone());

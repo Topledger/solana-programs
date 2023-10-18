@@ -312,8 +312,6 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             if accounts.len() > 3 {
                 instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
             }
-
-            initializeAccountArgs = InitializeAccountLayout::try_from_slice(rest).unwrap();
         }
         2 => {
             instruction_name = String::from("InitializeMultisig");
@@ -358,8 +356,6 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             if accounts.len() > 2 {
                 instruction_accounts.signer_accounts = accounts.split_at(2).1.to_vec();
             }
-
-            revokeArgs = RevokeLayout::try_from_slice(rest).unwrap();
         }
         6 => {
             instruction_name = String::from("SetAuthority");
