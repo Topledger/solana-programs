@@ -63,25 +63,27 @@ fn map_block(
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
 
-                if program != constants::PROGRAM_ADDRESS {
-                    continue;
+                if program == constants::PROGRAM_ADDRESS {
+                    let outer_arg = get_outer_arg(inst.data, &inst.accounts, &accounts);
+                    data.push(SplTokenMeta {
+                        block_date: convert_to_date(timestamp),
+                        block_time: timestamp,
+                        tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
+                        dapp: constants::PROGRAM_ADDRESS.to_string(),
+                        block_slot: parent_slot,
+                        instruction_index: inst.program_id_index,
+                        is_inner_instruction: false,
+                        inner_instruction_index: 0,
+                        instruction_type: outer_arg.instruction_type,
+                        input_accounts: outer_arg.input_accounts,
+                        outer_program: program.to_string(),
+                        args: outer_arg.arg,
+                    })
                 }
 
-                let outer_arg = get_outer_arg(inst.data, &inst.accounts, &accounts);
+                
 
-                data.push(SplTokenMeta {
-                    block_date: convert_to_date(timestamp),
-                    block_time: timestamp,
-                    tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
-                    dapp: constants::PROGRAM_ADDRESS.to_string(),
-                    block_slot: parent_slot,
-                    instruction_index: inst.program_id_index,
-                    is_inner_instruction: false,
-                    inner_instruction_index: 0,
-                    instruction_type: outer_arg.instruction_type,
-                    input_accounts: outer_arg.input_accounts,
-                    args: outer_arg.arg,
-                });
+                
 
                 meta.inner_instructions
                     .iter()
@@ -91,8 +93,8 @@ fn map_block(
                             .instructions
                             .iter()
                             .for_each(|inner_inst| {
-                                let program = &accounts[inner_inst.program_id_index as usize];
-                                if program == constants::PROGRAM_ADDRESS {
+                                let inner_program = &accounts[inner_inst.program_id_index as usize];
+                                if inner_program == constants::PROGRAM_ADDRESS {
                                     let outer_arg = get_outer_arg(
                                         inner_inst.data.clone(),
                                         &inner_inst.accounts,
@@ -111,6 +113,7 @@ fn map_block(
                                         inner_instruction_index: inner_inst.program_id_index,
                                         instruction_type: outer_arg.instruction_type,
                                         input_accounts: outer_arg.input_accounts,
+                                        outer_program: program.to_string(),
                                         args: outer_arg.arg,
                                     });
                                 }

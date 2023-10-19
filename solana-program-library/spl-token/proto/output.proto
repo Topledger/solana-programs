@@ -18,6 +18,7 @@ message SplTokenMeta {
   required string instruction_type = 9;
   required Accounts input_accounts = 10;
   required Arg args = 11;
+  required string outer_program = 12;
 }
 
 message Accounts {

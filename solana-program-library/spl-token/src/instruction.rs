@@ -523,7 +523,13 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             instruction_accounts.mint = accounts.get(0).unwrap().to_string();
 
-            getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
+            if rest.len() > 1 {
+                let (rest_split, _) = rest.split_at(1);
+                getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest_split).unwrap();
+            } else {
+                getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
+            }
+
         }
         22 => {
             instruction_name = String::from("InitializeImmutableOwner");
