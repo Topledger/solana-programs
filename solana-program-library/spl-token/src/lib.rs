@@ -14,6 +14,13 @@ use substreams::store::{StoreGet, StoreGetArray};
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use utils::convert_to_date;
 
+#[derive(Default)]
+pub struct OuterArg {
+    pub instruction_type: String,
+    pub input_accounts: Accounts,
+    pub arg: Arg,
+}
+
 #[substreams::handlers::map]
 fn map_block(
     block: Block,
@@ -60,6 +67,8 @@ fn map_block(
                     continue;
                 }
 
+                let outer_arg = get_outer_arg(inst.data, &inst.accounts, &accounts);
+
                 data.push(SplTokenMeta {
                     block_date: convert_to_date(timestamp),
                     block_time: timestamp,
@@ -69,7 +78,9 @@ fn map_block(
                     instruction_index: inst.program_id_index,
                     is_inner_instruction: false,
                     inner_instruction_index: 0,
-                    arg: Some(get_arg(inst.data, &inst.accounts, &accounts)),
+                    instruction_type: outer_arg.instruction_type,
+                    input_accounts: outer_arg.input_accounts,
+                    args: outer_arg.arg,
                 });
 
                 meta.inner_instructions
@@ -82,6 +93,12 @@ fn map_block(
                             .for_each(|inner_inst| {
                                 let program = &accounts[inner_inst.program_id_index as usize];
                                 if program == constants::PROGRAM_ADDRESS {
+                                    let outer_arg = get_outer_arg(
+                                        inner_inst.data.clone(),
+                                        &inner_inst.accounts,
+                                        &accounts,
+                                    );
+
                                     data.push(SplTokenMeta {
                                         block_date: convert_to_date(timestamp),
                                         block_time: timestamp,
@@ -92,11 +109,9 @@ fn map_block(
                                         instruction_index: inst.program_id_index,
                                         is_inner_instruction: true,
                                         inner_instruction_index: inner_inst.program_id_index,
-                                        arg: Some(get_arg(
-                                            inner_inst.data.clone(),
-                                            &inner_inst.accounts,
-                                            &accounts,
-                                        )),
+                                        instruction_type: outer_arg.instruction_type,
+                                        input_accounts: outer_arg.input_accounts,
+                                        args: outer_arg.arg,
                                     });
                                 }
                             })
@@ -109,35 +124,43 @@ fn map_block(
     return Ok(Output { data });
 }
 
-fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<String>) -> Arg {
+fn get_outer_arg(
+    instruction_data: Vec<u8>,
+    account_indices: &Vec<u8>,
+    accounts: &Vec<String>,
+) -> OuterArg {
     let account_args = prepare_account_args(account_indices, accounts);
+    let mut outerArg: OuterArg = OuterArg::default();
     let mut arg: Arg = Arg::default();
     let instruction: Instruction = parse_instruction(instruction_data, account_args);
 
-    arg.accounts = Some(Accounts {
-        mint: instruction.instruction_accounts.mint,
-        rent_sysvar: instruction.instruction_accounts.rent_sysvar,
-        account: instruction.instruction_accounts.account,
-        owner: instruction.instruction_accounts.owner,
+    outerArg.input_accounts = Accounts {
+        mint: Some(instruction.instruction_accounts.mint),
+        rent_sysvar: Some(instruction.instruction_accounts.rent_sysvar),
+        account: Some(instruction.instruction_accounts.account),
+        owner: Some(instruction.instruction_accounts.owner),
         signer_accounts: instruction.instruction_accounts.signer_accounts,
-        source: instruction.instruction_accounts.source,
-        destination: instruction.instruction_accounts.destination,
-        delegate: instruction.instruction_accounts.delegate,
-        authority: instruction.instruction_accounts.authority,
-        payer: instruction.instruction_accounts.payer,
-        fund_relocation_sys_program: instruction.instruction_accounts.fund_relocation_sys_program,
-        funding_account: instruction.instruction_accounts.funding_account,
-        mint_funding_sys_program: instruction.instruction_accounts.mint_funding_sys_program,
-    });
+        source: Some(instruction.instruction_accounts.source),
+        destination: Some(instruction.instruction_accounts.destination),
+        delegate: Some(instruction.instruction_accounts.delegate),
+        authority: Some(instruction.instruction_accounts.authority),
+        payer: Some(instruction.instruction_accounts.payer),
+        fund_relocation_sys_program: Some(
+            instruction.instruction_accounts.fund_relocation_sys_program,
+        ),
+        funding_account: Some(instruction.instruction_accounts.funding_account),
+        mint_funding_sys_program: Some(instruction.instruction_accounts.mint_funding_sys_program),
+    };
 
     match instruction.name.as_str() {
         "InitializeMint" => {
-            arg.instruction_type = String::from("InitializeMint");
-            arg.decimals = i32::from(instruction.initializeMintArgs.decimals);
+            outerArg.instruction_type = String::from("InitializeMint");
+            arg.decimals = Some(i32::from(instruction.initializeMintArgs.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMintArgs.mint_authority.value);
-            arg.freeze_authority_option =
-                i32::from(instruction.initializeMintArgs.freeze_authority_option);
+            arg.freeze_authority_option = Some(i32::from(
+                instruction.initializeMintArgs.freeze_authority_option,
+            ));
             arg.freeze_authority = get_b58_string(
                 instruction
                     .initializeMintArgs
@@ -147,87 +170,88 @@ fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<
             );
         }
         "InitializeAccount" => {
-            arg.instruction_type = String::from("InitializeAccount");
+            outerArg.instruction_type = String::from("InitializeAccount");
         }
         "InitializeMultisig" => {
-            arg.instruction_type = String::from("InitializeMultisig");
-            arg.status = i32::from(instruction.initializeMultisigArgs.status);
+            outerArg.instruction_type = String::from("InitializeMultisig");
+            arg.status = Some(i32::from(instruction.initializeMultisigArgs.status));
         }
         "Transfer" => {
-            arg.instruction_type = String::from("Transfer");
-            arg.amount = instruction.transferArgs.amount;
+            outerArg.instruction_type = String::from("Transfer");
+            arg.amount = Some(instruction.transferArgs.amount);
         }
         "Approve" => {
-            arg.instruction_type = String::from("Approve");
-            arg.amount = instruction.approveArgs.amount;
+            outerArg.instruction_type = String::from("Approve");
+            arg.amount = Some(instruction.approveArgs.amount);
         }
         "Revoke" => {
-            arg.instruction_type = String::from("Revoke");
+            outerArg.instruction_type = String::from("Revoke");
         }
         "SetAuthority" => {
-            arg.instruction_type = String::from("SetAuthority");
-            arg.authority_type = instruction.setAuthorityArgs.authority_type.to_string();
-            arg.new_authority_option = i32::from(instruction.setAuthorityArgs.new_authority_option);
+            outerArg.instruction_type = String::from("SetAuthority");
+            arg.authority_type = Some(instruction.setAuthorityArgs.authority_type.to_string());
+            arg.new_authority_option =
+                Some(i32::from(instruction.setAuthorityArgs.new_authority_option));
             if instruction.setAuthorityArgs.new_authority.is_some() {
                 arg.new_authority =
                     get_b58_string(instruction.setAuthorityArgs.new_authority.unwrap().value);
             }
         }
         "MintTo" => {
-            arg.instruction_type = String::from("MintTo");
-            arg.amount = instruction.mintToArgs.amount;
+            outerArg.instruction_type = String::from("MintTo");
+            arg.amount = Some(instruction.mintToArgs.amount);
         }
         "Burn" => {
-            arg.instruction_type = String::from("Burn");
-            arg.amount = instruction.burnArgs.amount;
+            outerArg.instruction_type = String::from("Burn");
+            arg.amount = Some(instruction.burnArgs.amount);
         }
         "CloseAccount" => {
-            arg.instruction_type = String::from("CloseAccount");
+            outerArg.instruction_type = String::from("CloseAccount");
         }
         "FreezeAccount" => {
-            arg.instruction_type = String::from("FreezeAccount");
+            outerArg.instruction_type = String::from("FreezeAccount");
         }
         "ThawAccount" => {
-            arg.instruction_type = String::from("ThawAccount");
+            outerArg.instruction_type = String::from("ThawAccount");
         }
         "TransferChecked" => {
-            arg.instruction_type = String::from("TransferChecked");
-            arg.amount = instruction.transferCheckedArgs.amount;
-            arg.decimals = i32::from(instruction.transferCheckedArgs.decimals);
+            outerArg.instruction_type = String::from("TransferChecked");
+            arg.amount = Some(instruction.transferCheckedArgs.amount);
+            arg.decimals = Some(i32::from(instruction.transferCheckedArgs.decimals));
         }
         "ApproveChecked" => {
-            arg.instruction_type = String::from("ApproveChecked");
-            arg.amount = instruction.approveCheckedArgs.amount;
-            arg.decimals = i32::from(instruction.approveCheckedArgs.decimals);
+            outerArg.instruction_type = String::from("ApproveChecked");
+            arg.amount = Some(instruction.approveCheckedArgs.amount);
+            arg.decimals = Some(i32::from(instruction.approveCheckedArgs.decimals));
         }
         "MintToChecked" => {
-            arg.instruction_type = String::from("MintToChecked");
-            arg.amount = instruction.mintToCheckedArgs.amount;
-            arg.decimals = i32::from(instruction.mintToCheckedArgs.decimals);
+            outerArg.instruction_type = String::from("MintToChecked");
+            arg.amount = Some(instruction.mintToCheckedArgs.amount);
+            arg.decimals = Some(i32::from(instruction.mintToCheckedArgs.decimals));
         }
         "BurnChecked" => {
-            arg.instruction_type = String::from("BurnChecked");
-            arg.amount = instruction.burnCheckedArgs.amount;
-            arg.decimals = i32::from(instruction.burnCheckedArgs.decimals);
+            outerArg.instruction_type = String::from("BurnChecked");
+            arg.amount = Some(instruction.burnCheckedArgs.amount);
+            arg.decimals = Some(i32::from(instruction.burnCheckedArgs.decimals));
         }
         "InitializeAccount2" => {
-            arg.instruction_type = String::from("InitializeAccount2");
+            outerArg.instruction_type = String::from("InitializeAccount2");
             arg.owner = get_b58_string(instruction.initializeAccount2Args.owner.value);
         }
         "SyncNative" => {
-            arg.instruction_type = String::from("SyncNative");
+            outerArg.instruction_type = String::from("SyncNative");
         }
         "InitializeAccount3" => {
-            arg.instruction_type = String::from("InitializeAccount3");
+            outerArg.instruction_type = String::from("InitializeAccount3");
             arg.owner = get_b58_string(instruction.initializeAccount3Args.owner.value);
         }
         "InitializeMultisig2" => {
-            arg.instruction_type = String::from("InitializeMultisig2");
-            arg.status = i32::from(instruction.initializeMultisig2Args.status);
+            outerArg.instruction_type = String::from("InitializeMultisig2");
+            arg.status = Some(i32::from(instruction.initializeMultisig2Args.status));
         }
         "InitializeMint2" => {
-            arg.instruction_type = String::from("InitializeMint2");
-            arg.decimals = i32::from(instruction.initializeMint2Args.decimals);
+            outerArg.instruction_type = String::from("InitializeMint2");
+            arg.decimals = Some(i32::from(instruction.initializeMint2Args.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMint2Args.mint_authority.value);
             if instruction.initializeMint2Args.freeze_authority.is_some() {
@@ -241,58 +265,60 @@ fn get_arg(instruction_data: Vec<u8>, account_indices: &Vec<u8>, accounts: &Vec<
             }
         }
         "GetAccountDataSize" => {
-            arg.instruction_type = String::from("GetAccountDataSize");
-            arg.extension_type = i32::from(instruction.getAccountDataSizeArgs.extension_type);
+            outerArg.instruction_type = String::from("GetAccountDataSize");
+            arg.extension_type = Some(i32::from(instruction.getAccountDataSizeArgs.extension_type));
         }
         "InitializeImmutableOwner" => {
-            arg.instruction_type = String::from("InitializeImmutableOwner");
+            outerArg.instruction_type = String::from("InitializeImmutableOwner");
         }
         "AmountToUiAmount" => {
-            arg.instruction_type = String::from("AmountToUiAmount");
-            arg.amount = instruction.amountToUiAmountArgs.amount;
+            outerArg.instruction_type = String::from("AmountToUiAmount");
+            arg.amount = Some(instruction.amountToUiAmountArgs.amount);
         }
         "UiAmountToAmount" => {
-            arg.instruction_type = String::from("UiAmountToAmount");
-            arg.ui_amount = instruction.uiAmountToAmountArgs.ui_amount;
+            outerArg.instruction_type = String::from("UiAmountToAmount");
+            arg.ui_amount = Some(instruction.uiAmountToAmountArgs.ui_amount);
         }
         "InitializeMintCloseAuthority" => {
-            arg.instruction_type = String::from("InitializeMintCloseAuthority");
+            outerArg.instruction_type = String::from("InitializeMintCloseAuthority");
             arg.owner = get_b58_string(instruction.initializeMintCloseAuthorityArgs.owner.value);
         }
         "TransferFeeExtension" => {
-            arg.instruction_type = String::from("TransferFeeExtension");
+            outerArg.instruction_type = String::from("TransferFeeExtension");
         }
         "ConfidentialTransferExtension" => {
-            arg.instruction_type = String::from("ConfidentialTransferExtension");
+            outerArg.instruction_type = String::from("ConfidentialTransferExtension");
         }
         "DefaultAccountStateExtension" => {
-            arg.instruction_type = String::from("DefaultAccountStateExtension");
+            outerArg.instruction_type = String::from("DefaultAccountStateExtension");
         }
         "Reallocate" => {
-            arg.instruction_type = String::from("Reallocate");
+            outerArg.instruction_type = String::from("Reallocate");
         }
         "MemoTransferExtension" => {
-            arg.instruction_type = String::from("MemoTransferExtension");
+            outerArg.instruction_type = String::from("MemoTransferExtension");
         }
         "CreateNativeMint" => {
-            arg.instruction_type = String::from("CreateNativeMint");
+            outerArg.instruction_type = String::from("CreateNativeMint");
         }
         "InitializeNonTransferableMint" => {
-            arg.instruction_type = String::from("InitializeNonTransferableMint");
+            outerArg.instruction_type = String::from("InitializeNonTransferableMint");
         }
         "InterestBearingMintExtension" => {
-            arg.instruction_type = String::from("InterestBearingMintExtension");
+            outerArg.instruction_type = String::from("InterestBearingMintExtension");
         }
         _ => {
-            arg.instruction_type = String::from("Unknown Instruction");
+            outerArg.instruction_type = String::from("Unknown Instruction");
         }
     }
 
-    return arg;
+    outerArg.arg = arg;
+
+    return outerArg;
 }
 
-fn get_b58_string(data: [u8; 32]) -> String {
-    return bs58::encode(data).into_string();
+fn get_b58_string(data: [u8; 32]) -> Option<String> {
+    return Some(bs58::encode(data).into_string());
 }
 
 fn prepare_account_args(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {

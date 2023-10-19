@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package sf.solana.spl.v1;
 
@@ -7,46 +7,46 @@ message Output {
 }
 
 message SplTokenMeta {
-  string block_date = 1;
-  int64 block_time = 2;
-  string tx_id = 3;
-  string dapp = 4;
-  uint64 block_slot = 5;
-  uint32 instruction_index = 7;
-  bool is_inner_instruction = 8;
-  uint32 inner_instruction_index = 9;
-  Arg arg = 10;
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 6;
+  required bool is_inner_instruction = 7;
+  required uint32 inner_instruction_index = 8;
+  required string instruction_type = 9;
+  required Accounts input_accounts = 10;
+  required Arg args = 11;
 }
 
 message Accounts {
-  string mint = 1;
-  string rent_sysvar = 2;
-  string account = 3;
-  string owner = 4;
+  optional string mint = 1;
+  optional string rent_sysvar = 2;
+  optional string account = 3;
+  optional string owner = 4;
   repeated string signer_accounts = 5;
-  string source = 6;
-  string destination = 7;
-  string delegate = 8;
-  string authority = 9;
-  string payer = 10;
-  string fund_relocation_sys_program = 11;
-  string funding_account = 12;
-  string mint_funding_sys_program = 13;
+  optional string source = 6;
+  optional string destination = 7;
+  optional string delegate = 8;
+  optional string authority = 9;
+  optional string payer = 10;
+  optional string fund_relocation_sys_program = 11;
+  optional string funding_account = 12;
+  optional string mint_funding_sys_program = 13;
 }
 
 message Arg {
-  string instruction_type = 1;
-  Accounts accounts = 2;
-  uint64 amount = 3;
-  string authority_type = 4;
-  string freeze_authority = 5;
-  int32 freeze_authority_option = 6;
-  string mint_authority = 7;
-  string new_authority = 8;
-  int32 new_authority_option = 9;
-  string owner = 10;
-  int32 decimals = 11;
-  int32 extension_type = 12;
-  string ui_amount = 13;
-  int32 status = 14;
+  optional uint64 amount = 1;
+  optional string authority_type = 2;
+  optional string freeze_authority = 3;
+  optional int32 freeze_authority_option = 4;
+  optional string mint_authority = 5;
+  optional string new_authority = 6;
+  optional int32 new_authority_option = 7;
+  optional string owner = 8;
+  optional int32 decimals = 9;
+  optional int32 extension_type = 10;
+  optional string ui_amount = 11;
+  optional int32 status = 12;
 }
