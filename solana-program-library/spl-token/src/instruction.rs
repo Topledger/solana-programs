@@ -1,7 +1,7 @@
 extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt;
-use std::default;
+
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
 pub struct PubkeyLayout {
@@ -248,11 +248,11 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
     let mut instruction_accounts = InstructionAccounts::default();
 
     let mut initializeMintArgs: InitializeMintLayout = InitializeMintLayout::default();
-    let mut initializeAccountArgs: InitializeAccountLayout = InitializeAccountLayout::default();
+    let initializeAccountArgs: InitializeAccountLayout = InitializeAccountLayout::default();
     let mut initializeMultisigArgs: InitializeMultisigLayout = InitializeMultisigLayout::default();
     let mut transferArgs: TransferLayout = TransferLayout::default();
     let mut approveArgs: ApproveLayout = ApproveLayout::default();
-    let mut revokeArgs: RevokeLayout = RevokeLayout::default();
+    let revokeArgs: RevokeLayout = RevokeLayout::default();
     let mut setAuthorityArgs: SetAuthorityLayout = SetAuthorityLayout::default();
     let mut mintToArgs: MintToLayout = MintToLayout::default();
     let mut burnArgs: BurnLayout = BurnLayout::default();
