@@ -30,6 +30,8 @@ pub struct SplTokenMeta {
     pub input_accounts: Accounts,
     #[prost(message, required, tag="11")]
     pub args: Arg,
+    #[prost(string, required, tag="12")]
+    pub outer_program: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
