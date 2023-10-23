@@ -10,7 +10,6 @@ mod utils;
 use instruction::{parse_instruction, Instruction};
 use pb::sf::solana::spl::v1::{Accounts, Arg, Output, SplTokenMeta};
 use substreams::log;
-use substreams::store::{StoreGet, StoreGetArray};
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
 use utils::convert_to_date;
@@ -23,14 +22,11 @@ pub struct OuterArg {
 }
 
 #[substreams::handlers::map]
-fn map_block(
-    block: Block,
-    address_lookup_table_store: StoreGetArray<String>,
-) -> Result<Output, substreams::errors::Error> {
+fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let slot = block.slot;
     let parent_slot = block.parent_slot;
     let timestamp = block.block_time.as_ref().unwrap().timestamp;
-    
+
     let mut data: Vec<SplTokenMeta> = vec![];
 
     for trx in block.transactions_owned() {
@@ -38,37 +34,18 @@ fn map_block(
             let meta = trx.meta.unwrap();
             let msg = transaction.message.unwrap();
             let mut accounts = vec![];
-            let mut writable_accounts = vec![];
-            let mut readable_accounts = vec![];
             let pre_token_balances = meta.pre_token_balances;
 
             msg.account_keys
                 .into_iter()
                 .for_each(|addr| accounts.push(bs58::encode(addr).into_string()));
-            msg.address_table_lookups.into_iter().for_each(|addr| {
-                let acc = bs58::encode(&addr.account_key).into_string();
-                match address_lookup_table_store.get_last(format!("table:{}", acc)) {
-                    None => {}
-                    Some(accs) => {
-                        addr.writable_indexes.into_iter().for_each(|idx| {
-                            writable_accounts.push(accs[idx as usize].clone());
-                        });
-                        addr.readonly_indexes.into_iter().for_each(|idx| {
-                            readable_accounts.push(accs[idx as usize].clone());
-                        })
-                    }
-                }
-            });
-
-            accounts.append(&mut writable_accounts);
-            accounts.append(&mut readable_accounts);
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
 
                 if program == constants::PROGRAM_ADDRESS {
                     let outer_arg = get_outer_arg(inst.data, &inst.accounts, &accounts);
-                    let obj: SplTokenMeta  = SplTokenMeta {
+                    let obj: SplTokenMeta = SplTokenMeta {
                         block_date: convert_to_date(timestamp),
                         block_time: timestamp,
                         tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
@@ -86,18 +63,12 @@ fn map_block(
                     data.push(handle_mints(obj, &pre_token_balances, &accounts));
                 }
 
-                
-
-                
                 meta.inner_instructions
                     .iter()
                     .filter(|inner_instruction| inner_instruction.index == idx as u32)
                     .for_each(|inner_instruction| {
-                        inner_instruction
-                            .instructions
-                            .iter()
-                            .enumerate()
-                            .for_each(|(inner_idx, inner_inst)| {
+                        inner_instruction.instructions.iter().enumerate().for_each(
+                            |(inner_idx, inner_inst)| {
                                 let inner_program = &accounts[inner_inst.program_id_index as usize];
                                 if inner_program == constants::PROGRAM_ADDRESS {
                                     let outer_arg = get_outer_arg(
@@ -124,7 +95,8 @@ fn map_block(
 
                                     data.push(handle_mints(obj, &pre_token_balances, &accounts));
                                 }
-                            })
+                            },
+                        )
                     });
             }
         }
@@ -137,20 +109,21 @@ fn map_block(
 fn handle_mints(
     mut obj: SplTokenMeta,
     pre_token_balances: &Vec<TokenBalance>,
-    accounts: &Vec<String>
+    accounts: &Vec<String>,
 ) -> SplTokenMeta {
-
     if obj.instruction_type == "Transfer" {
-
-        let index = accounts.iter().position(|r| r == &obj.input_accounts.source.clone().unwrap()).unwrap();
+        let index = accounts
+            .iter()
+            .position(|r| r == &obj.input_accounts.source.clone().unwrap())
+            .unwrap();
         pre_token_balances
-        .iter()
-        .filter(|token_balance| token_balance.account_index == index as u32)
-        .for_each(|token_balance| {
-            obj.input_accounts.mint = Some(token_balance.mint.clone());
-        })
+            .iter()
+            .filter(|token_balance| token_balance.account_index == index as u32)
+            .for_each(|token_balance| {
+                obj.input_accounts.mint = Some(token_balance.mint.clone());
+            })
     }
-    return obj
+    return obj;
 }
 
 fn get_outer_arg(
