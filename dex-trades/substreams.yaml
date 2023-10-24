@@ -1,0 +1,34 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_dex_trades_1_0_1'
+  version: v1.0.1
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+imports:
+  address_lookup_tables: https://github.com/streamingfast/substreams-solana-address-lookup-table/releases/download/v0.1.1/address-lookup-table-v0.1.1.spkg
+
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block_before_lookup
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.dex.trades.v1.Output
+  - name: map_block
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+      - store: address_lookup_tables:store_address_lookup_tables
+    output:
+      type: proto:sf.solana.dex.trades.v1.Output
