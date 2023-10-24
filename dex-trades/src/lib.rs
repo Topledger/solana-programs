@@ -272,8 +272,6 @@ fn get_trade_instruction(
                 dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
                     instruction_data,
                     account_args,
-                    &post_token_balances,
-                    accounts,
                 );
         }
         "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {

@@ -39,15 +39,20 @@ pub fn parse_trade_instruction(
                 accounts,
             );
 
-            let mut tuples = vec![obj_a, obj_b, obj_c];
-            tuples.sort_by_key(|k| (k.0 * 1000000000000.0 as f64) as u128);
+            let (vault_a, vault_b) = if obj_a.0 == 0.0 {
+                (obj_b.1.clone(), obj_c.1.clone())
+            } else if obj_b.0 == 0.0 {
+                (obj_a.1.clone(), obj_c.1.clone())
+            } else {
+                (obj_a.1.clone(), obj_b.1.clone())
+            };
 
             result = Some(TradeInstruction {
                 dapp_address: String::from("MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky"),
                 name: String::from("Exchange"),
                 amm: accounts.get(0).unwrap().to_string(),
-                vault_a: tuples.get(2).unwrap().1.clone(),
-                vault_b: tuples.get(0).unwrap().1.clone(),
+                vault_a,
+                vault_b,
             });
         }
         _ => {}
