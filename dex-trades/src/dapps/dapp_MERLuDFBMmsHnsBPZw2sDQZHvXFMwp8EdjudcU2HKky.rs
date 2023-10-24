@@ -1,7 +1,6 @@
 use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
 
 use crate::trade_instruction::TradeInstruction;
-use substreams::log;
 
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
@@ -41,7 +40,7 @@ pub fn parse_trade_instruction(
             );
 
             let mut tuples = vec![obj_a, obj_b, obj_c];
-            tuples.sort_by_key(|k| (k.0 * 100000 as f64) as u128);
+            tuples.sort_by_key(|k| (k.0 * 1000000000000.0 as f64) as u128);
 
             result = Some(TradeInstruction {
                 dapp_address: String::from("MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky"),

@@ -11,6 +11,7 @@ use substreams::log;
 use substreams::store::{StoreGet, StoreGetArray};
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
 use utils::convert_to_date;
+use utils::get_mint;
 mod trade_instruction;
 
 #[substreams::handlers::map]
@@ -271,6 +272,8 @@ fn get_trade_instruction(
                 dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
                     instruction_data,
                     account_args,
+                    &post_token_balances,
+                    accounts,
                 );
         }
         "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {
@@ -432,6 +435,8 @@ fn get_trade_instruction(
                 dapps::dapp_675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8::parse_trade_instruction(
                     instruction_data,
                     account_args,
+                    &post_token_balances,
+                    accounts,
                 );
         }
         "27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv" => {
@@ -439,6 +444,8 @@ fn get_trade_instruction(
                 dapps::dapp_27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv::parse_trade_instruction(
                     instruction_data,
                     account_args,
+                    &post_token_balances,
+                    accounts,
                 );
         }
         "BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p" => {
@@ -484,23 +491,6 @@ fn prepare_account_args(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Ve
         instruction_accounts.push(accounts.as_slice()[el as usize].to_string());
     }
     return instruction_accounts;
-}
-
-fn get_mint(
-    address: &String,
-    token_balances: &Vec<TokenBalance>,
-    accounts: &Vec<String>,
-) -> String {
-    let index = accounts.iter().position(|r| r == address).unwrap();
-    let mut result: String = String::new();
-
-    token_balances
-        .iter()
-        .filter(|token_balance| token_balance.account_index == index as u32)
-        .for_each(|token_balance| {
-            result = token_balance.mint.clone();
-        });
-    return result;
 }
 
 fn get_amt(
