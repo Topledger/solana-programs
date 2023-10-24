@@ -61,7 +61,7 @@ fn process_block(
                         block_time: timestamp,
                         signer: accounts.get(0).unwrap().to_string(),
                         pool_address: td.amm,
-                        base_mint: get_mint(&td.vault_a, &pre_token_balances, &accounts),
+                        base_mint: get_mint(&td.vault_a, &post_token_balances, &accounts),
                         quote_mint: get_mint(&td.vault_b, &pre_token_balances, &accounts),
                         base_amount: get_amt(
                             &td.vault_a,
@@ -468,13 +468,13 @@ fn prepare_account_args(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Ve
 
 fn get_mint(
     address: &String,
-    pre_token_balances: &Vec<TokenBalance>,
+    token_balances: &Vec<TokenBalance>,
     accounts: &Vec<String>,
 ) -> String {
     let index = accounts.iter().position(|r| r == address).unwrap();
     let mut result: String = String::new();
 
-    pre_token_balances
+    token_balances
         .iter()
         .filter(|token_balance| token_balance.account_index == index as u32)
         .for_each(|token_balance| {

@@ -15,8 +15,8 @@ pub fn parse_trade_instruction(
                 dapp_address: String::from("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"),
                 name: String::from("SwapBaseIn"),
                 amm: accounts.get(1).unwrap().to_string(),
-                vault_a: accounts.get(5).unwrap().to_string(),
-                vault_b: accounts.get(6).unwrap().to_string(),
+                vault_a: accounts.get(4).unwrap().to_string(),
+                vault_b: accounts.get(5).unwrap().to_string(),
             });
         }
         _ => {}
