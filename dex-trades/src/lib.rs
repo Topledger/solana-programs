@@ -49,8 +49,14 @@ fn process_block(
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
-                let trade_data =
-                    get_trade_instruction(program, inst.data, &inst.accounts, &accounts);
+                let trade_data = get_trade_instruction(
+                    program,
+                    inst.data,
+                    &inst.accounts,
+                    &accounts,
+                    &pre_token_balances,
+                    &post_token_balances,
+                );
                 if trade_data.is_some() {
                     let td = trade_data.unwrap();
 
@@ -100,6 +106,8 @@ fn process_block(
                                     inner_inst.data.clone(),
                                     &inner_inst.accounts,
                                     &accounts,
+                                    &pre_token_balances,
+                                    &post_token_balances,
                                 );
 
                                 if trade_data.is_some() {
@@ -209,6 +217,8 @@ fn get_trade_instruction(
     instruction_data: Vec<u8>,
     account_indices: &Vec<u8>,
     accounts: &Vec<String>,
+    pre_token_balances: &Vec<TokenBalance>,
+    post_token_balances: &Vec<TokenBalance>,
 ) -> Option<trade_instruction::TradeInstruction> {
     let account_args = prepare_account_args(account_indices, accounts);
 
@@ -452,6 +462,16 @@ fn get_trade_instruction(
                     account_args,
                 );
         }
+        "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky" => {
+            result =
+                dapps::dapp_MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky::parse_trade_instruction(
+                    instruction_data,
+                    account_args,
+                    &pre_token_balances,
+                    &post_token_balances,
+                    accounts,
+                );
+        }
         _ => {}
     }
 
@@ -511,6 +531,6 @@ fn get_amt(
     return (post_balance - pre_balance).abs();
 }
 
-fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> u64 {
-    return post_balances[0] - pre_balances[0];
+fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
+    return (post_balances[0] - pre_balances[0]) as i64;
 }

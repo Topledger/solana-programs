@@ -46,7 +46,7 @@ pub struct TradeData {
     pub inner_program: ::prost::alloc::string::String,
     #[prost(uint64, required, tag="19")]
     pub txn_fee: u64,
-    #[prost(uint64, required, tag="20")]
-    pub signer_sol_change: u64,
+    #[prost(int64, required, tag="20")]
+    pub signer_sol_change: i64,
 }
 // @@protoc_insertion_point(module)
