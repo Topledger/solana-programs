@@ -221,7 +221,7 @@ fn get_trade_instruction(
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
 ) -> Option<trade_instruction::TradeInstruction> {
-    let account_args = prepare_account_args(account_indices, accounts);
+    let input_accounts = prepare_input_accounts(account_indices, accounts);
 
     let mut result = None;
     match dapp_address.as_str() {
@@ -229,210 +229,210 @@ fn get_trade_instruction(
             result =
                 dapps::dapp_CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j" => {
             result =
                 dapps::dapp_Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB" => {
             result =
                 dapps::dapp_Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY" => {
             result =
                 dapps::dapp_PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr" => {
             result =
                 dapps::dapp_SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX" => {
             result =
                 dapps::dapp_srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
             result =
                 dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {
             result =
                 dapps::dapp_whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S" => {
             result =
                 dapps::dapp_EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c" => {
             result =
                 dapps::dapp_2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ" => {
             result =
                 dapps::dapp_SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK" => {
             result =
                 dapps::dapp_CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP" => {
             result =
                 dapps::dapp_9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "AMM55ShdkoGRB5jVYPjWziwk8m5MpwyDgsMWHaMSQWH6" => {
             result =
                 dapps::dapp_AMM55ShdkoGRB5jVYPjWziwk8m5MpwyDgsMWHaMSQWH6::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4" => {
             result =
                 dapps::dapp_CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "cysPXAjehMpVKUapzbMCCnpFxUFFryEWEaLgnb9NrR8" => {
             result =
                 dapps::dapp_cysPXAjehMpVKUapzbMCCnpFxUFFryEWEaLgnb9NrR8::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "7WduLbRfYhTJktjLw5FDEyrqoEv61aTTCuGAetgLjzN5" => {
             result =
                 dapps::dapp_7WduLbRfYhTJktjLw5FDEyrqoEv61aTTCuGAetgLjzN5::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin" => {
             result =
                 dapps::dapp_9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn" => {
             result =
                 dapps::dapp_GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1" => {
             result =
                 dapps::dapp_SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "SCHAtsf8mbjyjiv4LkhLKutTf6JnZAbdJKFkXQNMFHZ" => {
             result =
                 dapps::dapp_SCHAtsf8mbjyjiv4LkhLKutTf6JnZAbdJKFkXQNMFHZ::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "dp2waEWSBy5yKmq65ergoU3G6qRLmqa6K7We4rZSKph" => {
             result =
                 dapps::dapp_dp2waEWSBy5yKmq65ergoU3G6qRLmqa6K7We4rZSKph::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn" => {
             result =
                 dapps::dapp_4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg" => {
             result =
                 dapps::dapp_BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o" => {
             result =
                 dapps::dapp_EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh" => {
             result =
                 dapps::dapp_CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP" => {
             result =
                 dapps::dapp_PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag" => {
             result =
                 dapps::dapp_D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "2KehYt3KsEQR53jYcxjbQp2d2kCp4AkuQW68atufRwSr" => {
             result =
                 dapps::dapp_2KehYt3KsEQR53jYcxjbQp2d2kCp4AkuQW68atufRwSr::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8" => {
             result =
                 dapps::dapp_675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                     &post_token_balances,
                     accounts,
                 );
@@ -441,7 +441,7 @@ fn get_trade_instruction(
             result =
                 dapps::dapp_27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                     &post_token_balances,
                     accounts,
                 );
@@ -450,28 +450,28 @@ fn get_trade_instruction(
             result =
                 dapps::dapp_BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X" => {
             result =
                 dapps::dapp_FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "9tKE7Mbmj4mxDjWatikzGAtkoWosiiZX9y6J4Hfm2R8H" => {
             result =
                 dapps::dapp_9tKE7Mbmj4mxDjWatikzGAtkoWosiiZX9y6J4Hfm2R8H::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                 );
         }
         "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky" => {
             result =
                 dapps::dapp_MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky::parse_trade_instruction(
                     instruction_data,
-                    account_args,
+                    input_accounts,
                     &pre_token_balances,
                     &post_token_balances,
                     accounts,
@@ -483,7 +483,7 @@ fn get_trade_instruction(
     return result;
 }
 
-fn prepare_account_args(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {
+fn prepare_input_accounts(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {
     let mut instruction_accounts: Vec<String> = vec![];
     for (index, &el) in account_indices.iter().enumerate() {
         instruction_accounts.push(accounts.as_slice()[el as usize].to_string());
