@@ -2,7 +2,6 @@ extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt;
 
-
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
 pub struct PubkeyLayout {
     pub value: [u8; 32],
@@ -351,7 +350,12 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
             }
 
-            approveArgs = ApproveLayout::try_from_slice(rest).unwrap();
+            if rest.len() > 8 {
+                let (rest_split, _) = rest.split_at(8);
+                approveArgs = ApproveLayout::try_from_slice(rest_split).unwrap();
+            } else {
+                approveArgs = ApproveLayout::try_from_slice(rest).unwrap();
+            }
         }
         5 => {
             instruction_name = String::from("Revoke");
@@ -525,11 +529,11 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             if rest.len() > 1 {
                 let (rest_split, _) = rest.split_at(1);
-                getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest_split).unwrap();
+                getAccountDataSizeArgs =
+                    GetAccountDataSizeLayout::try_from_slice(rest_split).unwrap();
             } else {
                 getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
             }
-
         }
         22 => {
             instruction_name = String::from("InitializeImmutableOwner");
