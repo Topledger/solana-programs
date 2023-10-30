@@ -46,6 +46,18 @@ pub fn parse_logs(log_messages: &Vec<String>) -> Option<Event> {
     return result;
 }
 
+pub fn enrich_with_events_data(trade_data: &mut TradeData, log_messages: &Vec<String>) -> () {
+    let event_data = parse_logs(log_messages);
+    if event_data.is_some() {
+        let event_data_unwraped = event_data.unwrap();
+        trade_data.amount = event_data_unwraped.current_price as f64;
+        trade_data.taker_fee = event_data_unwraped.tswap_fee as f64;
+        trade_data.maker_fee = -0.004 * event_data_unwraped.current_price as f64;
+        trade_data.amm_fee = event_data_unwraped.mm_fee as f64;
+        trade_data.royalty = event_data_unwraped.creators_fee as f64;
+    }
+}
+
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
@@ -73,15 +85,7 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
             trade_data.seller = input_accounts.get(10).unwrap().to_string();
 
-            let event_data = parse_logs(log_messages);
-            if event_data.is_some() {
-                let event_data_unwraped = event_data.unwrap();
-                trade_data.amount = event_data_unwraped.current_price as f64;
-                trade_data.taker_fee = event_data_unwraped.tswap_fee as f64;
-                trade_data.maker_fee = -0.004 * event_data_unwraped.current_price as f64;
-                trade_data.amm_fee = event_data_unwraped.mm_fee as f64;
-                trade_data.royalty = event_data_unwraped.creators_fee as f64;
-            }
+            enrich_with_events_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
@@ -97,15 +101,7 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(11).unwrap().to_string();
             trade_data.seller = input_accounts.get(9).unwrap().to_string();
 
-            let event_data = parse_logs(log_messages);
-            if event_data.is_some() {
-                let event_data_unwraped = event_data.unwrap();
-                trade_data.amount = event_data_unwraped.current_price as f64;
-                trade_data.taker_fee = event_data_unwraped.tswap_fee as f64;
-                trade_data.maker_fee = -0.004 * event_data_unwraped.current_price as f64;
-                trade_data.amm_fee = event_data_unwraped.mm_fee as f64;
-                trade_data.royalty = event_data_unwraped.creators_fee as f64;
-            }
+            enrich_with_events_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
@@ -121,15 +117,7 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
             trade_data.seller = input_accounts.get(7).unwrap().to_string();
 
-            let event_data = parse_logs(log_messages);
-            if event_data.is_some() {
-                let event_data_unwraped = event_data.unwrap();
-                trade_data.amount = event_data_unwraped.current_price as f64;
-                trade_data.taker_fee = event_data_unwraped.tswap_fee as f64;
-                trade_data.maker_fee = -0.004 * event_data_unwraped.current_price as f64;
-                trade_data.amm_fee = event_data_unwraped.mm_fee as f64;
-                trade_data.royalty = event_data_unwraped.creators_fee as f64;
-            }
+            enrich_with_events_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
@@ -145,15 +133,7 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
             trade_data.seller = input_accounts.get(10).unwrap().to_string();
 
-            let event_data = parse_logs(log_messages);
-            if event_data.is_some() {
-                let event_data_unwraped = event_data.unwrap();
-                trade_data.amount = event_data_unwraped.current_price as f64;
-                trade_data.taker_fee = event_data_unwraped.tswap_fee as f64;
-                trade_data.maker_fee = -0.004 * event_data_unwraped.current_price as f64;
-                trade_data.amm_fee = event_data_unwraped.mm_fee as f64;
-                trade_data.royalty = event_data_unwraped.creators_fee as f64;
-            }
+            enrich_with_events_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
