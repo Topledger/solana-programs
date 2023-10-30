@@ -82,7 +82,7 @@ pub fn parse_trade_instruction(
             trade_data.currency = "SOL".to_string();
 
             trade_data.mint = input_accounts.get(6).unwrap().to_string();
-            trade_data.buyer = input_accounts.get(8).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(9).unwrap().to_string();
             trade_data.seller = input_accounts.get(10).unwrap().to_string();
 
             enrich_with_events_data(&mut trade_data, log_messages);
