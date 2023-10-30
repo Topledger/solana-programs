@@ -186,6 +186,17 @@ fn get_trade_data(
                     log_messages,
                 );
         }
+        "M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K" => {
+            result =
+                dapps::dapp_M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    pre_token_balances,
+                    post_token_balances,
+                    log_messages,
+                );
+        }
         _ => {}
     }
 
