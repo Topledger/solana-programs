@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+package sf.solana.nft.trades.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required uint64 txn_fee = 5;
+  required string mint = 6;
+  required double amount = 7;
+  required string currency = 8;
+  required string category = 9;
+  required string buyer = 10;
+  required string seller = 11;
+  required double taker_fee = 12;
+  required double maker_fee = 13;
+  required double amm_fee = 14;
+  required double royalty = 15;
+  required string instruction_type = 16;
+  required uint32 instruction_index = 17;
+  required string outer_program = 18;
+  required string inner_program = 19;
+  required uint32 inner_instruxtion_index = 20;
+  required bool is_inner_instruction = 21;
+  required string platform = 22;
+}
