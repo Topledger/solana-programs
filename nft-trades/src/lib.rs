@@ -9,7 +9,7 @@ mod utils;
 use pb::sf::solana::nft::trades::v1::{Output, TradeData};
 use substreams::log;
 use substreams::store::{StoreGet, StoreGetArray};
-use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
+use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use utils::convert_to_date;
 
 #[substreams::handlers::map]
@@ -54,8 +54,8 @@ fn process_block(
                     inst.data,
                     &inst.accounts,
                     &accounts,
-                    &pre_token_balances,
-                    &post_token_balances,
+                    &pre_balances,
+                    &post_balances,
                     &meta.log_messages,
                 );
                 if trade_data.is_some() {
@@ -87,8 +87,8 @@ fn process_block(
                                     inner_inst.data.clone(),
                                     &inner_inst.accounts,
                                     &accounts,
-                                    &pre_token_balances,
-                                    &post_token_balances,
+                                    &pre_balances,
+                                    &post_balances,
                                     &meta.log_messages,
                                 );
                                 if trade_data.is_some() {
@@ -167,8 +167,8 @@ fn get_trade_data(
     instruction_data: Vec<u8>,
     account_indices: &Vec<u8>,
     accounts: &Vec<String>,
-    pre_token_balances: &Vec<TokenBalance>,
-    post_token_balances: &Vec<TokenBalance>,
+    pre_balances: &Vec<u64>,
+    post_balances: &Vec<u64>,
     log_messages: &Vec<String>,
 ) -> Option<TradeData> {
     let input_accounts = prepare_input_accounts(account_indices, accounts);
@@ -180,9 +180,6 @@ fn get_trade_data(
                 dapps::dapp_TSWAPaqyCSx2KABk68Shruf4rp7CxcNi8hAsbdwmHbN::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
-                    accounts,
-                    pre_token_balances,
-                    post_token_balances,
                     log_messages,
                 );
         }
@@ -191,11 +188,18 @@ fn get_trade_data(
                 dapps::dapp_M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
-                    accounts,
-                    pre_token_balances,
-                    post_token_balances,
                     log_messages,
                 );
+        }
+        "hadeK9DLv9eA7ya5KCTqSvSvRZeJC3JgD5a9Y3CNbvu" => {
+            result =
+                dapps::dapp_hadeK9DLv9eA7ya5KCTqSvSvRZeJC3JgD5a9Y3CNbvu::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                )
         }
         _ => {}
     }

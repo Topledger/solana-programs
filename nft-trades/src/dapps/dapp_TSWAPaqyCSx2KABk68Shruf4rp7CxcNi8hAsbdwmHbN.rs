@@ -1,6 +1,5 @@
 use base64::{engine::general_purpose, Engine as _};
 use borsh::{BorshDeserialize, BorshSerialize};
-use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
 
 use crate::pb::sf::solana::nft::trades::v1::TradeData;
 
@@ -61,9 +60,6 @@ pub fn enrich_with_events_data(trade_data: &mut TradeData, log_messages: &Vec<St
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
-    accounts: &Vec<String>,
-    pre_token_balances: &Vec<TokenBalance>,
-    post_token_balances: &Vec<TokenBalance>,
     log_messages: &Vec<String>,
 ) -> Option<TradeData> {
     let (disc_bytes, rest) = bytes_stream.split_at(8);
