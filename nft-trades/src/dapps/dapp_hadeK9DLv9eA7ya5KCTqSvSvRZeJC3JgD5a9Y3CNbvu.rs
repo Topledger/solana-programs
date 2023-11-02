@@ -98,7 +98,7 @@ pub fn parse_trade_instruction(
                 post_balances,
             );
             trade_data.amount = get_sol_balance_change(
-                &input_accounts.get(2).unwrap().to_string(),
+                &input_accounts.get(6).unwrap().to_string(),
                 accounts,
                 pre_balances,
                 post_balances,

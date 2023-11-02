@@ -6,7 +6,7 @@ build:
 
 .PHONY: stream_old
 stream_old: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block_before_lookup -s 152961928 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml map_block_before_lookup -s 152413812 -t +1
 
 .PHONY: stream
 stream: build
