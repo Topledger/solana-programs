@@ -201,6 +201,17 @@ fn get_trade_data(
                     post_balances,
                 )
         }
+        "mmm3XBJg5gk8XJxEKBvdgptZz6SgK4tXvn36sodowMc" => {
+            result =
+                dapps::dapp_mmm3XBJg5gk8XJxEKBvdgptZz6SgK4tXvn36sodowMc::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                    log_messages,
+                );
+        }
         _ => {}
     }
 

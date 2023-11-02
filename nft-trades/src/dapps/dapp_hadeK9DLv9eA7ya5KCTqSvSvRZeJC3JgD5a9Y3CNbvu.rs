@@ -123,31 +123,3 @@ fn get_sol_balance_change(
     let post_balance = post_balances[index];
     return post_balance as f64 - pre_balance as f64;
 }
-
-// fn get_amt(
-//     address: &String,
-//     pre_token_balances: &Vec<TokenBalance>,
-//     post_token_balances: &Vec<TokenBalance>,
-//     accounts: &Vec<String>,
-// ) -> f64 {
-//     let index = accounts.iter().position(|r| r == address).unwrap();
-
-//     let mut pre_balance: f64 = 0 as f64;
-//     let mut post_balance: f64 = 0 as f64;
-
-//     pre_token_balances
-//         .iter()
-//         .filter(|token_balance| token_balance.account_index == index as u32)
-//         .for_each(|token_balance: &TokenBalance| {
-//             pre_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
-//         });
-
-//     post_token_balances
-//         .iter()
-//         .filter(|token_balance| token_balance.account_index == index as u32)
-//         .for_each(|token_balance: &TokenBalance| {
-//             post_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
-//         });
-
-//     return post_balance - pre_balance;
-// }
