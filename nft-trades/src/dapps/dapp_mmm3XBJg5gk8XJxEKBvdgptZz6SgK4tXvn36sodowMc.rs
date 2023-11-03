@@ -55,8 +55,8 @@ struct SolOcpFulfillBuyLayout {
     takerFeeBp: i16,
 }
 
-pub fn parse_logs(log_messages: &Vec<String>) -> Option<(f64, f64)> {
-    let mut result: Option<(f64, f64)> = None;
+pub fn parse_logs(log_messages: &Vec<String>) -> Option<(f64, f64, f64)> {
+    let mut result: Option<(f64, f64, f64)> = None;
 
     for log_message in log_messages {
         if log_message.starts_with("Program log: ") & log_message.contains("royalty") {
@@ -68,7 +68,10 @@ pub fn parse_logs(log_messages: &Vec<String>) -> Option<(f64, f64)> {
 
             let royalty_value = json_obj.get_mut("royalty_paid").unwrap();
             let royalty_numeric: f64 = royalty_value.to_string().parse().unwrap();
-            result = Some((amm_fee_numeric, royalty_numeric));
+
+            let amount_value = json_obj.get_mut("total_price").unwrap();
+            let amount_numeric: f64 = amount_value.to_string().parse().unwrap();
+            result = Some((amm_fee_numeric, royalty_numeric, amount_numeric));
         }
     }
 
@@ -81,6 +84,7 @@ pub fn enrich_with_logs_data(trade_data: &mut TradeData, log_messages: &Vec<Stri
         let log_data_unwraped = log_data.unwrap();
         trade_data.amm_fee = log_data_unwraped.0;
         trade_data.royalty = log_data_unwraped.1;
+        trade_data.amount = log_data_unwraped.2;
     }
 }
 
@@ -124,9 +128,6 @@ pub fn parse_trade_instruction(
             trade_data.buyer = buyer.to_string();
             trade_data.seller = input_accounts.get(0).unwrap().to_string();
 
-            trade_data.amount =
-                get_sol_balance_change(&buyer.to_string(), accounts, pre_balances, post_balances);
-
             let instruction_data = SolFulfillBuyLayout::try_from_slice(rest).unwrap();
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
@@ -147,9 +148,6 @@ pub fn parse_trade_instruction(
             trade_data.mint = input_accounts.get(8).unwrap().to_string();
             trade_data.buyer = buyer.to_string();
             trade_data.seller = input_accounts.get(4).unwrap().to_string();
-
-            trade_data.amount =
-                get_sol_balance_change(&buyer.to_string(), accounts, pre_balances, post_balances);
 
             let instruction_data = SolFulfillSellLayout::try_from_slice(rest).unwrap();
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
@@ -172,9 +170,6 @@ pub fn parse_trade_instruction(
             trade_data.buyer = buyer.to_string();
             trade_data.seller = input_accounts.get(0).unwrap().to_string();
 
-            trade_data.amount =
-                get_sol_balance_change(&buyer.to_string(), accounts, pre_balances, post_balances);
-
             let instruction_data = SolMip1FulfillBuyLayout::try_from_slice(rest).unwrap();
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
@@ -196,9 +191,6 @@ pub fn parse_trade_instruction(
             trade_data.buyer = buyer.to_string();
             trade_data.seller = input_accounts.get(4).unwrap().to_string();
 
-            trade_data.amount =
-                get_sol_balance_change(&buyer.to_string(), accounts, pre_balances, post_balances);
-
             let instruction_data = SolMip1FulfillSellLayout::try_from_slice(rest).unwrap();
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
@@ -219,9 +211,6 @@ pub fn parse_trade_instruction(
             trade_data.mint = input_accounts.get(7).unwrap().to_string();
             trade_data.buyer = buyer.to_string();
             trade_data.seller = input_accounts.get(0).unwrap().to_string();
-
-            trade_data.amount =
-                get_sol_balance_change(&buyer.to_string(), accounts, pre_balances, post_balances);
 
             let instruction_data = SolOcpFulfillBuyLayout::try_from_slice(rest).unwrap();
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
