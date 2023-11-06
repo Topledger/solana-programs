@@ -30,15 +30,12 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let mut data: Vec<SplTokenMeta> = vec![];
 
     for trx in block.transactions_owned() {
+        let accounts = trx.resolved_accounts_as_strings();
         if let Some(transaction) = trx.transaction {
             let meta = trx.meta.unwrap();
             let msg = transaction.message.unwrap();
-            let mut accounts = vec![];
             let pre_token_balances = meta.pre_token_balances;
 
-            msg.account_keys
-                .into_iter()
-                .for_each(|addr| accounts.push(bs58::encode(addr).into_string()));
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
@@ -102,8 +99,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         }
     }
 
-    log::info!("{:#?}", slot);
-    return Ok(Output { data });
+    Ok(Output { data })
 }
 
 fn handle_mints(

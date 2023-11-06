@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_dex_trades_1_0_6'
-  version: v1.0.6
+  name: 'tl_solana_dex_trades_1_0_7'
+  version: v1.0.7
 
 protobuf:
   files:
@@ -9,8 +9,6 @@ protobuf:
   importPaths:
     - ./proto
 
-imports:
-  address_lookup_tables: https://github.com/streamingfast/substreams-solana-address-lookup-table/releases/download/v0.1.1/address-lookup-table-v0.1.1.spkg
 
 
 binaries:
@@ -29,6 +27,5 @@ modules:
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block
-      - store: address_lookup_tables:store_address_lookup_tables
     output:
       type: proto:sf.solana.dex.trades.v1.Output
