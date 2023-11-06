@@ -6,11 +6,11 @@ build:
 
 .PHONY: stream_old
 stream_old: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block_before_lookup -s 1991000 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml map_block_before_lookup -s 190599999 -t +10000
 
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 155901338 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 190599999 -t +1
 
 .PHONY: protogen
 protogen:

@@ -14,22 +14,16 @@ use utils::convert_to_date;
 use utils::get_mint;
 mod trade_instruction;
 
-#[substreams::handlers::map]
-fn map_block_before_lookup(block: Block) -> Result<Output, substreams::errors::Error> {
-    process_block(block, None)
-}
 
 #[substreams::handlers::map]
 fn map_block(
     block: Block,
-    address_lookup_table_store: StoreGetArray<String>,
 ) -> Result<Output, substreams::errors::Error> {
-    process_block(block, Some(address_lookup_table_store))
+    process_block(block)
 }
 
 fn process_block(
-    block: Block,
-    address_lookup_table_store: Option<StoreGetArray<String>>,
+    block: Block
 ) -> Result<Output, substreams::errors::Error> {
     let slot = block.slot;
     let parent_slot = block.parent_slot;
@@ -38,6 +32,7 @@ fn process_block(
     let mut data: Vec<TradeData> = vec![];
 
     for trx in block.transactions_owned() {
+        let accounts = trx.resolved_accounts_as_strings();
         if let Some(transaction) = trx.transaction {
             let meta = trx.meta.unwrap();
             let pre_balances = meta.pre_balances;
@@ -46,7 +41,7 @@ fn process_block(
             let post_token_balances = meta.post_token_balances;
 
             let msg = transaction.message.unwrap();
-            let accounts = prepare_accounts(&msg, &address_lookup_table_store);
+            
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
@@ -170,48 +165,6 @@ fn process_block(
     return Ok(Output { data });
 }
 
-fn prepare_accounts(
-    msg: &substreams_solana::pb::sf::solana::r#type::v1::Message,
-    address_lookup_table_store: &Option<StoreGetArray<String>>,
-) -> Vec<String> {
-    let mut accounts = vec![];
-    let mut writable_accounts = vec![];
-    let mut readable_accounts = vec![];
-
-    msg.clone()
-        .account_keys
-        .into_iter()
-        .for_each(|addr| accounts.push(bs58::encode(addr).into_string()));
-
-    if address_lookup_table_store.is_some() {
-        msg.clone()
-            .address_table_lookups
-            .into_iter()
-            .for_each(|addr| {
-                let acc = bs58::encode(&addr.account_key).into_string();
-                match address_lookup_table_store
-                    .as_ref()
-                    .unwrap()
-                    .get_last(format!("table:{}", acc))
-                {
-                    None => {}
-                    Some(accs) => {
-                        addr.writable_indexes.into_iter().for_each(|idx| {
-                            writable_accounts.push(accs[idx as usize].clone());
-                        });
-                        addr.readonly_indexes.into_iter().for_each(|idx| {
-                            readable_accounts.push(accs[idx as usize].clone());
-                        })
-                    }
-                }
-            });
-
-        accounts.append(&mut writable_accounts);
-        accounts.append(&mut readable_accounts);
-    }
-
-    return accounts;
-}
 
 fn get_trade_instruction(
     dapp_address: &String,
