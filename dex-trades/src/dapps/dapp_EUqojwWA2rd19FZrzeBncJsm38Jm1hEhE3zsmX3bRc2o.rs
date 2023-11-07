@@ -13,7 +13,7 @@ pub fn parse_trade_instruction(
     match discriminator {
         5 => {
             result = Some(TradeInstruction {
-                dapp_address: String::from("BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg"),
+                dapp_address: String::from("EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o"),
                 name: String::from("SettleFunds"),
                 amm: accounts.get(0).unwrap().to_string(),
                 vault_a: accounts.get(8).unwrap().to_string(),
