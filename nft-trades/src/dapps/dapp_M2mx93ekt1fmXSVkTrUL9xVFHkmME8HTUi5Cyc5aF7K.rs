@@ -101,12 +101,13 @@ pub fn parse_trade_instruction(
             trade_data.seller = input_accounts.get(2).unwrap().to_string();
 
             let instruction_data = OCPExecuteSaleV2Layout::try_from_slice(rest).unwrap();
-            trade_data.amount = instruction_data.price as f64;
             trade_data.taker_fee =
                 ((instruction_data.takerFeeBp as u64 * instruction_data.price) / 10000) as f64;
             trade_data.maker_fee =
                 ((instruction_data.makerFeeBp as u64 * instruction_data.price) / 10000) as f64;
+            trade_data.amount = instruction_data.price as f64 + trade_data.maker_fee as f64 + trade_data.taker_fee as f64;
             trade_data.amm_fee = 0.0;
+            
             enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
