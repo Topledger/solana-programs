@@ -100,7 +100,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     }
 
     log::info!("{:#?}", slot);
-    return Ok(Output { data });
+    Ok(Output { data })
 }
 
 fn get_trade_data(

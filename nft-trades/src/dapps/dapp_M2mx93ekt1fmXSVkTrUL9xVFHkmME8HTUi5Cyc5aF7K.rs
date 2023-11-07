@@ -123,7 +123,7 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(1).unwrap().to_string();
             trade_data.seller = input_accounts.get(2).unwrap().to_string();
 
-            let mut instruction_data: MIP1ExecuteSaleV2Layout;
+            let instruction_data: MIP1ExecuteSaleV2Layout;
             if rest.len() > 12 {
                 let (rest_split, _) = rest.split_at(12);
                 instruction_data = MIP1ExecuteSaleV2Layout::try_from_slice(rest_split).unwrap();
