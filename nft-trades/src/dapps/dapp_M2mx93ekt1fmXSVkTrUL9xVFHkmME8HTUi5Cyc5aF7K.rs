@@ -122,7 +122,14 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(1).unwrap().to_string();
             trade_data.seller = input_accounts.get(2).unwrap().to_string();
 
-            let instruction_data = MIP1ExecuteSaleV2Layout::try_from_slice(rest).unwrap();
+            let mut instruction_data: MIP1ExecuteSaleV2Layout;
+            if rest.len() > 12 {
+                let (rest_split, _) = rest.split_at(12);
+                instruction_data = MIP1ExecuteSaleV2Layout::try_from_slice(rest_split).unwrap();
+            } else {
+                instruction_data = MIP1ExecuteSaleV2Layout::try_from_slice(rest).unwrap();
+            }
+
             trade_data.amount = instruction_data.price as f64;
             trade_data.taker_fee =
                 ((instruction_data.takerFeeBp as u64 * instruction_data.price) / 10000) as f64;

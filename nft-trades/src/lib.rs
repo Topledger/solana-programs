@@ -11,17 +11,8 @@ use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use utils::convert_to_date;
 
-
 #[substreams::handlers::map]
-fn map_block(
-    block: Block
-) -> Result<Output, substreams::errors::Error> {
-    process_block(block)
-}
-
-fn process_block(
-    block: Block
-) -> Result<Output, substreams::errors::Error> {
+fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let slot = block.slot;
     let parent_slot = block.parent_slot;
     let timestamp = block.block_time.as_ref().unwrap().timestamp;
@@ -111,7 +102,6 @@ fn process_block(
     log::info!("{:#?}", slot);
     return Ok(Output { data });
 }
-
 
 fn get_trade_data(
     dapp_address: &String,

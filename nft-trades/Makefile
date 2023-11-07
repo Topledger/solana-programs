@@ -4,13 +4,9 @@ ENDPOINT ?= mainnet.sol.streamingfast.io:443
 build:
 	LDFLAGS="-Wl,-no_compact_unwind" cargo build --target wasm32-unknown-unknown --release
 
-.PHONY: stream_old
-stream_old: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block_before_lookup -s 152413812 -t +1
-
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 176272658 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 196658470 -t +1
 
 .PHONY: protogen
 protogen:
