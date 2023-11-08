@@ -78,7 +78,14 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(0).unwrap().to_string();
             trade_data.seller = input_accounts.get(1).unwrap().to_string();
 
-            let instruction_data = ExecuteSaleV2Layout::try_from_slice(rest).unwrap();
+            let instruction_data: ExecuteSaleV2Layout;
+            if rest.len() > 38 {
+                let (rest_split, _) = rest.split_at(38);
+                instruction_data = ExecuteSaleV2Layout::try_from_slice(rest_split).unwrap();
+            } else {
+                instruction_data = ExecuteSaleV2Layout::try_from_slice(rest).unwrap();
+            }
+
             trade_data.amount = instruction_data.price as f64;
             trade_data.taker_fee =
                 ((instruction_data.takerFeeBp as u64 * instruction_data.price) / 10000) as f64;
@@ -105,9 +112,11 @@ pub fn parse_trade_instruction(
                 ((instruction_data.takerFeeBp as u64 * instruction_data.price) / 10000) as f64;
             trade_data.maker_fee =
                 ((instruction_data.makerFeeBp as u64 * instruction_data.price) / 10000) as f64;
-            trade_data.amount = instruction_data.price as f64 + trade_data.maker_fee as f64 + trade_data.taker_fee as f64;
+            trade_data.amount = instruction_data.price as f64
+                + trade_data.maker_fee as f64
+                + trade_data.taker_fee as f64;
             trade_data.amm_fee = 0.0;
-            
+
             enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
