@@ -387,7 +387,12 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
             }
 
-            mintToArgs = MintToLayout::try_from_slice(rest).unwrap();
+            if rest.len() > 8 {
+                let (rest_split, _) = rest.split_at(8);
+                mintToArgs = MintToLayout::try_from_slice(rest_split).unwrap();
+            } else {
+                mintToArgs = MintToLayout::try_from_slice(rest).unwrap();
+            }
         }
         8 => {
             instruction_name = String::from("Burn");
