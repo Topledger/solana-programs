@@ -12,11 +12,11 @@ pub fn parse_trade_instruction(
     match discriminator {
         1 => {
             result = Some(TradeInstruction {
-                dapp_address: String::from("SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1"),
+                dapp_address: String::from("6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319"),
                 name: String::from("Swap"),
                 amm: accounts.get(0).unwrap().to_string(),
-                vault_a: accounts.get(4).unwrap().to_string(),
-                vault_b: accounts.get(5).unwrap().to_string(),
+                vault_a: accounts.get(5).unwrap().to_string(),
+                vault_b: accounts.get(6).unwrap().to_string(),
             });
         }
         _ => {}

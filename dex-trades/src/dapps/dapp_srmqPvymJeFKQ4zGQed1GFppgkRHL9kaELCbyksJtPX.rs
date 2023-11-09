@@ -6,7 +6,7 @@ pub fn parse_trade_instruction(
 ) -> Option<TradeInstruction> {
     let (disc_bytes, rest) = bytes_stream.split_at(2);
     let disc_bytes_arr: [u8; 2] = disc_bytes.to_vec().try_into().unwrap();
-    let discriminator: u16 = u16::from_le_bytes(disc_bytes_arr);
+    let discriminator: u16 = u16::from_be_bytes(disc_bytes_arr);
 
     let mut result = None;
 

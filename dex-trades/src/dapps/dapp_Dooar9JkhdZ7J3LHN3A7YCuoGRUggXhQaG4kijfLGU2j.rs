@@ -10,7 +10,7 @@ pub fn parse_trade_instruction(
     let mut result = None;
 
     match discriminator {
-        0 => {
+        1 => {
             result = Some(TradeInstruction {
                 dapp_address: String::from("Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j"),
                 name: String::from("Swap"),
