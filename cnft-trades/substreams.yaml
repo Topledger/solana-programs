@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_dex_trades_1_0_10'
-  version: v1.0.10
+  name: 'tl_solana_cnft_trades_1_0_0'
+  version: v1.0.0
 
 protobuf:
   files:
@@ -10,22 +10,15 @@ protobuf:
     - ./proto
 
 
-
 binaries:
   default:
     type: wasm/rust-v1
     file: target/wasm32-unknown-unknown/release/substreams.wasm
 
 modules:
-  - name: map_block_before_lookup
-    kind: map
-    inputs:
-      - source: sf.solana.type.v1.Block
-    output:
-      type: proto:sf.solana.dex.trades.v1.Output
   - name: map_block
     kind: map
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:sf.solana.dex.trades.v1.Output
+      type: proto:sf.solana.cnft.trades.v1.Output

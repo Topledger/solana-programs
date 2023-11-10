@@ -1,0 +1,31 @@
+syntax = "proto2";
+
+package sf.solana.cnft.trades.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required string signer = 5;
+  required uint64 txn_fee = 6;
+  required string merkle_tree = 7;
+  required string leaf_id = 8;
+  required double amount = 9;
+  required string currency = 10;
+  required string category = 11;
+  required string buyer = 12;
+  required string seller = 13;
+  required double taker_fee = 14;
+  required double maker_fee = 15;
+  required double amm_fee = 16;
+  required double royalty = 17;
+  required string instruction_type = 18;
+  required uint32 instruction_index = 19;
+  required string outer_program = 20;
+  required string platform = 21;
+}
