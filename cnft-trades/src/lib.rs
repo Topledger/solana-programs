@@ -89,6 +89,16 @@ fn get_trade_data(
                     inner_instructions,
                 );
         }
+        "M3mxk5W2tt27WGT7THox7PmgRDp4m6NEhL5xvxrBfS1" => {
+            result =
+                dapps::dapp_M3mxk5W2tt27WGT7THox7PmgRDp4m6NEhL5xvxrBfS1::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    log_messages,
+                    inner_instructions,
+                )
+        }
         _ => {}
     }
 
