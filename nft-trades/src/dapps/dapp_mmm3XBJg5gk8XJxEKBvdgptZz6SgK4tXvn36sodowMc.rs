@@ -133,7 +133,6 @@ pub fn parse_trade_instruction(
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
 
             enrich_with_logs_data(&mut trade_data, log_messages);
-            enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
@@ -153,7 +152,6 @@ pub fn parse_trade_instruction(
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
 
-            enrich_with_logs_data(&mut trade_data, log_messages);
             enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
@@ -175,7 +173,6 @@ pub fn parse_trade_instruction(
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
 
             enrich_with_logs_data(&mut trade_data, log_messages);
-            enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
@@ -196,7 +193,6 @@ pub fn parse_trade_instruction(
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
 
             enrich_with_logs_data(&mut trade_data, log_messages);
-            enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);
         }
@@ -216,7 +212,6 @@ pub fn parse_trade_instruction(
             trade_data.taker_fee = instruction_data.takerFeeBp as f64 * trade_data.amount / 10000.0;
             trade_data.maker_fee = instruction_data.makerFeeBp as f64 * trade_data.amount / 10000.0;
 
-            enrich_with_logs_data(&mut trade_data, log_messages);
             enrich_with_logs_data(&mut trade_data, log_messages);
 
             result = Some(trade_data);

@@ -33,12 +33,13 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(2).unwrap().to_string();
             trade_data.seller = input_accounts.get(4).unwrap().to_string();
 
-            trade_data.maker_fee = get_sol_balance_change(
-                &input_accounts.get(5).unwrap().to_string(),
-                accounts,
-                pre_balances,
-                post_balances,
-            );
+            trade_data.maker_fee = -1.0
+                * get_sol_balance_change(
+                    &input_accounts.get(5).unwrap().to_string(),
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                );
             trade_data.amount = get_sol_balance_change(
                 &input_accounts.get(2).unwrap().to_string(),
                 accounts,
@@ -62,12 +63,13 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(5).unwrap().to_string();
             trade_data.seller = input_accounts.get(3).unwrap().to_string();
 
-            trade_data.maker_fee = get_sol_balance_change(
-                &input_accounts.get(6).unwrap().to_string(),
-                accounts,
-                pre_balances,
-                post_balances,
-            );
+            trade_data.maker_fee = -1.0
+                * get_sol_balance_change(
+                    &input_accounts.get(6).unwrap().to_string(),
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                );
             trade_data.amount = get_sol_balance_change(
                 &input_accounts.get(9).unwrap().to_string(),
                 accounts,
@@ -91,12 +93,13 @@ pub fn parse_trade_instruction(
             trade_data.buyer = input_accounts.get(6).unwrap().to_string();
             trade_data.seller = input_accounts.get(2).unwrap().to_string();
 
-            trade_data.maker_fee = get_sol_balance_change(
-                &input_accounts.get(8).unwrap().to_string(),
-                accounts,
-                pre_balances,
-                post_balances,
-            );
+            trade_data.maker_fee = -1.0
+                * get_sol_balance_change(
+                    &input_accounts.get(8).unwrap().to_string(),
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                );
             trade_data.amount = get_sol_balance_change(
                 &input_accounts.get(6).unwrap().to_string(),
                 accounts,
@@ -121,5 +124,5 @@ fn get_sol_balance_change(
     let index = accounts.iter().position(|r| r == address).unwrap();
     let pre_balance = pre_balances[index];
     let post_balance = post_balances[index];
-    return post_balance as f64 - pre_balance as f64;
+    return pre_balance as f64 - post_balance as f64;
 }
