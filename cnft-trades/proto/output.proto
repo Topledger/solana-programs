@@ -14,7 +14,7 @@ message TradeData {
   required string signer = 5;
   required uint64 txn_fee = 6;
   required string merkle_tree = 7;
-  required string leaf_id = 8;
+  required uint32 leaf_id = 8;
   required double amount = 9;
   required string currency = 10;
   required string category = 11;

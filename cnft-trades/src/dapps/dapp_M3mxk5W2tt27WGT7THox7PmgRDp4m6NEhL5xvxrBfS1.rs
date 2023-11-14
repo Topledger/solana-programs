@@ -1,3 +1,4 @@
+use borsh::{BorshDeserialize, BorshSerialize};
 use serde_json::Value;
 use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 
@@ -41,6 +42,15 @@ pub fn enrich_with_logs_data(trade_data: &mut TradeData, log_messages: &Vec<Stri
     }
 }
 
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+pub struct BubblegumTransferLayout {
+    root: [u8; 32],
+    dataHash: [u8; 32],
+    creatorHash: [u8; 32],
+    nonce: u64,
+    index: u32,
+}
+
 pub fn enrich_with_inner_instructions_data(
     trade_data: &mut TradeData,
     accounts: &Vec<String>,
@@ -53,16 +63,17 @@ pub fn enrich_with_inner_instructions_data(
             .enumerate()
             .for_each(|(inner_idx, inner_inst)| {
                 let inner_program = &accounts[inner_inst.program_id_index as usize];
+                let (discriminator, rest) = inner_inst.data.split_at(8);
+
                 if inner_program
                     .as_str()
                     .eq("BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY")
-                    & inner_inst
-                        .data
-                        .clone()
-                        .starts_with(&[163, 52, 200, 231, 140, 3, 69, 186])
+                    & inner_inst.data.clone().starts_with(discriminator)
                 {
+                    let transfer_data = BubblegumTransferLayout::try_from_slice(rest).unwrap();
+                    trade_data.leaf_id = transfer_data.index;
+
                     let input_accounts = prepare_input_accounts(&inner_inst.accounts, accounts);
-                    trade_data.leaf_id = input_accounts.get(3).unwrap().to_string();
                     trade_data.merkle_tree = input_accounts.get(4).unwrap().to_string();
                 }
             })

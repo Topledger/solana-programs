@@ -22,8 +22,8 @@ pub struct TradeData {
     pub txn_fee: u64,
     #[prost(string, required, tag="7")]
     pub merkle_tree: ::prost::alloc::string::String,
-    #[prost(string, required, tag="8")]
-    pub leaf_id: ::prost::alloc::string::String,
+    #[prost(uint32, required, tag="8")]
+    pub leaf_id: u32,
     #[prost(double, required, tag="9")]
     pub amount: f64,
     #[prost(string, required, tag="10")]
