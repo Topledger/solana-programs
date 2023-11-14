@@ -90,7 +90,7 @@ pub fn parse_trade_instruction(
             trade_data.platform = "magiceden".to_string();
             trade_data.currency = "SOL".to_string();
 
-            trade_data.signer = input_accounts.get(0).unwrap().to_string();
+            trade_data.signer = accounts.get(0).unwrap().to_string();
             trade_data.buyer = input_accounts.get(0).unwrap().to_string();
             trade_data.seller = input_accounts.get(11).unwrap().to_string();
 
