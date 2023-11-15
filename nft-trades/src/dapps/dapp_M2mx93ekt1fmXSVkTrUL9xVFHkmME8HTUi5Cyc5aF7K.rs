@@ -19,14 +19,14 @@ pub struct ExecuteSaleV2Layout {
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 pub struct OCPExecuteSaleV2Layout {
     price: u64,
-    makerFeeBp: u16,
+    makerFeeBp: i16,
     takerFeeBp: u16,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 pub struct MIP1ExecuteSaleV2Layout {
     price: u64,
-    makerFeeBp: u16,
+    makerFeeBp: i16,
     takerFeeBp: u16,
 }
 
