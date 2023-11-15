@@ -172,7 +172,8 @@ pub fn parse_trade_instruction(
                 trade_data.category = "sell".to_string();
             }
 
-            let instruction_data = BuyLayout::try_from_slice(rest).unwrap();
+            let mut mut_rest = rest.clone();
+            let instruction_data = BuyLayout::deserialize(&mut mut_rest).unwrap();
 
             trade_data.amount = instruction_data.maxAmount as f64;
             trade_data.taker_fee = 0.014 * trade_data.amount;
