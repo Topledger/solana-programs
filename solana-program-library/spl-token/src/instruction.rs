@@ -1,5 +1,6 @@
 extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
+use substreams::log;
 use core::fmt;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
@@ -500,7 +501,12 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             instruction_accounts.account = accounts.get(0).unwrap().to_string();
 
-            syncNativeArgs = SyncNativeLayout::try_from_slice(rest).unwrap();
+            if rest.len() > 0 {
+                let (rest_split, _) = rest.split_at(0);
+                syncNativeArgs = SyncNativeLayout::try_from_slice(rest_split).unwrap();
+            } else {
+                syncNativeArgs = SyncNativeLayout::try_from_slice(rest).unwrap();
+            }
         }
         18 => {
             instruction_name = String::from("InitializeAccount3");
@@ -536,6 +542,9 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 let (rest_split, _) = rest.split_at(1);
                 getAccountDataSizeArgs =
                     GetAccountDataSizeLayout::try_from_slice(rest_split).unwrap();
+            } else if rest.len() == 0 {
+                getAccountDataSizeArgs = GetAccountDataSizeLayout::default();
+
             } else {
                 getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
             }
