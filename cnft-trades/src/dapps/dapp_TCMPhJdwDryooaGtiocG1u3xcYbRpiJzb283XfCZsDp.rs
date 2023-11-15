@@ -172,8 +172,7 @@ pub fn parse_trade_instruction(
                 trade_data.category = "sell".to_string();
             }
 
-            let mut mut_rest = rest.clone();
-            let instruction_data = BuyLayout::deserialize(&mut mut_rest).unwrap();
+            let instruction_data = BuyLayout::deserialize(&mut rest.clone()).unwrap();
 
             trade_data.amount = instruction_data.maxAmount as f64;
             trade_data.taker_fee = 0.014 * trade_data.amount;
@@ -198,7 +197,7 @@ pub fn parse_trade_instruction(
 
             trade_data.category = "sell".to_string();
 
-            let instruction_data = TakeBidFullMetaLayout::try_from_slice(rest).unwrap();
+            let instruction_data = TakeBidFullMetaLayout::deserialize(&mut rest.clone()).unwrap();
 
             trade_data.amount = instruction_data.minAmount as f64;
             trade_data.taker_fee = 0.014 * trade_data.amount;
@@ -224,7 +223,7 @@ pub fn parse_trade_instruction(
 
             trade_data.category = "sell".to_string();
 
-            let instruction_data = TakeBidMetaHashLayout::try_from_slice(rest).unwrap();
+            let instruction_data = TakeBidMetaHashLayout::deserialize(&mut rest.clone()).unwrap();
 
             trade_data.amount = instruction_data.minAmount as f64;
             trade_data.taker_fee = 0.014 * trade_data.amount;
