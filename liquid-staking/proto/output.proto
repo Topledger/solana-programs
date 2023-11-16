@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+package sf.solana.liquid.staking.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required string signer = 5;
+  required double amount = 6;
+  required string instruction_type = 7;
+  required string stake_pool = 8;
+  required string withdraw_authority = 9;
+  required string reserve_stake = 10;
+  required string validator_stake = 11;
+  required string pool_mint = 12;
+  required string fee_account = 13;
+  required double withdraw_fee = 14;
+  required double mint_amount = 15;
+  required double burn_amount = 16;
+}
