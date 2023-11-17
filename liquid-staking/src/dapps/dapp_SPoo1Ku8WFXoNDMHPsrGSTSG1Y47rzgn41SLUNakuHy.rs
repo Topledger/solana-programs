@@ -1,7 +1,10 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
-use crate::{pb::sf::solana::liquid::staking::v1::TradeData, utils::prepare_input_accounts};
+use crate::{
+    pb::sf::solana::liquid::staking::v1::TradeData,
+    utils::{get_token_balance_change, prepare_input_accounts},
+};
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 struct MintToLayout {
@@ -53,6 +56,12 @@ pub fn enrich_with_inner_instructions_data(
     });
 }
 
+fn enrich_with_ix_data(trade_data: &mut TradeData, idx: u32) {
+    trade_data.is_inner_instruction = false;
+    trade_data.instruction_index = idx;
+    trade_data.outer_program = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy".to_string();
+}
+
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
@@ -62,6 +71,7 @@ pub fn parse_trade_instruction(
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
     inner_instructions: &Vec<InnerInstructions>,
+    idx: usize,
 ) -> Option<TradeData> {
     let (disc_bytes, rest) = bytes_stream.split_at(1);
     let discriminator: u8 = u8::from(disc_bytes[0]);
@@ -88,6 +98,7 @@ pub fn parse_trade_instruction(
                 post_balances,
             );
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
+            enrich_with_ix_data(&mut trade_data, idx as u32);
 
             result = Some(trade_data);
         }
@@ -110,6 +121,13 @@ pub fn parse_trade_instruction(
                     post_balances,
                 );
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
+            trade_data.fee_amount = get_token_balance_change(
+                &trade_data.fee_account,
+                pre_token_balances,
+                post_token_balances,
+                accounts,
+            );
+            enrich_with_ix_data(&mut trade_data, idx as u32);
 
             result = Some(trade_data);
         }
@@ -131,6 +149,7 @@ pub fn parse_trade_instruction(
                 post_balances,
             );
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
+            enrich_with_ix_data(&mut trade_data, idx as u32);
 
             result = Some(trade_data);
         }
@@ -153,6 +172,13 @@ pub fn parse_trade_instruction(
                     post_balances,
                 );
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
+            trade_data.fee_amount = get_token_balance_change(
+                &trade_data.fee_account,
+                pre_token_balances,
+                post_token_balances,
+                accounts,
+            );
+            enrich_with_ix_data(&mut trade_data, idx as u32);
 
             result = Some(trade_data);
         }

@@ -49,6 +49,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                     &pre_token_balances,
                     &post_token_balances,
                     &inner_instructions,
+                    idx,
                 );
                 if trade_data.is_some() {
                     let mut td = trade_data.unwrap();
@@ -58,6 +59,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                     td.block_slot = slot;
                     td.tx_id = bs58::encode(&transaction.signatures[0]).into_string();
                     td.signer = accounts.get(0).unwrap().to_string();
+                    td.txn_fee = meta.fee;
 
                     data.push(td);
                 }
@@ -79,6 +81,7 @@ fn get_trade_data(
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
     inner_instructions: &Vec<InnerInstructions>,
+    idx: usize,
 ) -> Option<TradeData> {
     let input_accounts = prepare_input_accounts(account_indices, accounts);
 
@@ -95,6 +98,7 @@ fn get_trade_data(
                     pre_token_balances,
                     post_token_balances,
                     inner_instructions,
+                    idx,
                 );
         }
         _ => {}
