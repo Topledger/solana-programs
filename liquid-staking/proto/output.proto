@@ -30,5 +30,5 @@ message TradeData {
   required string outer_program = 21;
   required string inner_program = 22;
   required uint64 txn_fee = 23;
-  required uint64 staking_reward = 24;
+  required double staking_reward = 24;
 }

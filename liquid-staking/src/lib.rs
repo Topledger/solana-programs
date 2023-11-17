@@ -44,6 +44,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                     inst.data,
                     &inst.accounts,
                     &accounts,
+                    &meta.log_messages,
                     &pre_balances,
                     &post_balances,
                     &pre_token_balances,
@@ -76,6 +77,7 @@ fn get_trade_data(
     instruction_data: Vec<u8>,
     account_indices: &Vec<u8>,
     accounts: &Vec<String>,
+    log_messages: &Vec<String>,
     pre_balances: &Vec<u64>,
     post_balances: &Vec<u64>,
     pre_token_balances: &Vec<TokenBalance>,
@@ -101,7 +103,54 @@ fn get_trade_data(
                     idx,
                 );
         }
+        "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD" => {
+            result =
+                dapps::dapp_MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    log_messages,
+                    pre_balances,
+                    post_balances,
+                    pre_token_balances,
+                    post_token_balances,
+                    inner_instructions,
+                    &"MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD".to_string(),
+                    idx,
+                    0,
+                    false,
+                );
+        }
         _ => {}
+    }
+
+    if result.is_none() {
+        inner_instructions.iter().for_each(|inner_instruction| {
+            inner_instruction.instructions.iter().enumerate().for_each(
+                |(inner_idx, inner_inst)| {
+                    let inner_program = &accounts[inner_inst.program_id_index as usize];
+                    if inner_program.eq("MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD") {
+                        let inner_input_accounts =
+                            prepare_input_accounts(&inner_inst.accounts, accounts);
+                        result = dapps::dapp_MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD::parse_trade_instruction(
+                            inner_inst.data.clone(),
+                            inner_input_accounts,
+                            accounts,
+                            log_messages,
+                            pre_balances,
+                            post_balances,
+                            pre_token_balances,
+                            post_token_balances,
+                            inner_instructions,
+                            dapp_address,
+                            idx,
+                            inner_idx,
+                            true
+                        );
+                    }
+                },
+            );
+        });
     }
 
     return result;
