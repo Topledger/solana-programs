@@ -252,12 +252,7 @@ pub fn parse_trade_instruction(
 
             trade_data.staking_reward = 0.0;
             trade_data.mint_amount = 0.0;
-            trade_data.burn_amount = get_token_balance_change(
-                &input_accounts.get(2).unwrap().to_string(),
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-            );
+            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.fee_amount = 0.0;
             trade_data.amount = 0.0;
 
