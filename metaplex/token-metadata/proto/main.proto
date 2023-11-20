@@ -1,0 +1,312 @@
+syntax = "proto2";
+
+package sf.solana.block_meta.v1;
+
+message ApproveUseAuthorityArgsLayout {
+  required uint64 numberOfUses = 1;
+}
+
+message BurnArgsLayout {
+  required string name = 1;
+  required uint64 amount = 2;
+}
+
+message CreatorLayout {
+  required string address = 1;
+  required bool verified = 2;
+  required uint32 share = 3;
+}
+
+message TokenStandardLayout {
+  required string name = 1;
+}
+
+message CollectionLayout {
+  required bool verified = 1;
+  required string key = 2;
+}
+
+message UseMethodLayout {
+  required string name = 1;
+}
+
+message UsesLayout {
+  required UseMethodLayout useMethod = 1;
+  required uint64 remaining = 2;
+  required uint64 total = 3;
+}
+
+message CollectionDetailsLayout {
+  required string name = 1;
+  required uint64 size = 2;
+}
+
+message AssetDataLayout {
+  required string name = 1;
+  required string symbol = 2;
+  required string uri = 3;
+  required uint32 sellerFeeBasisPoints = 4;
+  repeated CreatorLayout creators = 5;
+  required bool primarySaleHappened = 6;
+  required bool isMutable = 7;
+  required TokenStandardLayout tokenStandard = 8;
+  optional CollectionLayout collection = 9;
+  optional UsesLayout uses = 10;
+  optional CollectionDetailsLayout collectionDetails = 11;
+  optional string ruleSet = 12;
+}
+
+message PrintSupplyLayout {
+  required string name = 1;
+  optional uint64 val = 2;
+}
+
+message CreateArgsLayout {
+  required string name = 1;
+  required AssetDataLayout asset_data = 2;
+  optional uint32 decimals = 3;
+  optional PrintSupplyLayout print_supply = 4;
+}
+
+message CreateMasterEditionArgsLayout {
+  optional uint64 maxSupply = 1;
+}
+
+message DataLayout {
+  required string name = 1;
+  required string symbol = 2;
+  required string uri = 3;
+  required uint32 sellerFeeBasisPoints = 4;
+  repeated CreatorLayout creators = 5;
+}
+
+message DataV2Layout {
+  required string name = 1;
+  required string symbol = 2;
+  required string uri = 3;
+  required uint32 sellerFeeBasisPoints = 4;
+  repeated CreatorLayout creators = 5;
+  optional CollectionLayout collection = 6;
+  optional UsesLayout uses = 7;
+}
+
+message CreateMetadataAccountArgsLayout {
+  required DataLayout data = 1;
+  required bool isMutable = 2;
+}
+
+message CreateMetadataAccountArgsV2Layout {
+  required DataV2Layout data = 1;
+  required bool isMutable = 2;
+}
+
+message CreateMetadataAccountArgsV3Layout {
+  required DataV2Layout data = 1;
+  required bool isMutable = 2;
+  optional CollectionDetailsLayout collectionDetails = 3;
+}
+
+message SeedsVecLayout {
+  repeated uint32 seeds = 1;
+}
+
+message LeafInfoLayout {
+  repeated uint32 leaf = 1;
+}
+
+message PayloadTypeLayout {
+  required string name = 1;
+  optional string valPubKey = 2;
+  optional SeedsVecLayout valSeedsVec = 3;
+  optional LeafInfoLayout valLeafInfo = 4;
+  optional uint64 valInt64 = 5; 
+}
+
+message MapItemLayout {
+  required string key = 1;
+  required PayloadTypeLayout val = 2;
+}
+
+message PayloadLayout {
+  repeated MapItemLayout map = 1;
+}
+
+message AuthorizationDataLayout {
+  required PayloadLayout payload = 1;
+}
+
+message DelegateArgsLayout {
+  required string name = 1;
+  optional AuthorizationDataLayout authorization_data = 2;
+  optional uint64 amount = 3;
+  optional string locked_address = 4;
+}
+
+message LockArgsLayout {
+  required string name = 1;
+  optional AuthorizationDataLayout authorization_data = 2;
+}
+
+message MigrationTypeLayout {
+  required string name = 1;
+}
+
+message MigrateArgsLayout {
+  required string name = 1;
+  optional MigrationTypeLayout migration_type = 2;
+  optional string rule_set = 3;
+}
+
+message MintArgsLayout {
+  required string name = 1;
+  optional uint64 amount = 2;
+  optional AuthorizationDataLayout authorization_data = 3;
+}
+
+message MintNewEditionFromMasterEditionViaTokenArgsLayout {
+  required uint64 edition = 1;
+}
+
+message MintPrintingTokensViaTokenArgsLayout {
+  required uint64 supply = 1;
+}
+
+message RevokeArgsLayout {
+  required string name = 1;
+}
+
+message SetCollectionSizeArgsLayout {
+  required uint64 size = 1;
+}
+
+message ReservationLayout {
+  required string address = 1;
+  required uint64 spotsRemaining = 2;
+  required uint64 totalSpots = 3;
+}
+
+message SetReservationListArgsLayout {
+  repeated ReservationLayout reservations = 1;
+  optional uint64 totalReservationSpots = 2;
+  required uint64 offset = 3;
+  required uint64 totalSpotOffset = 4;
+}
+
+message TransferArgsLayout {
+  required string name = 1;
+  optional uint64 amount = 2;
+  optional AuthorizationDataLayout authorization_data = 3;
+}
+
+message TransferOutOfEscrowArgsLayout {
+  required uint64 amount = 1;
+}
+
+message UnlockArgsLayout {
+  required string name = 1;
+  optional AuthorizationDataLayout authorization_data = 2;
+}
+
+message CollectionToggleLayout {
+  required string name = 1;
+  optional CollectionLayout val = 2;
+}
+
+message CollectionDetailsToggleLayout {
+  required string name = 1;
+  optional CollectionDetailsLayout val = 2;
+}
+
+message UsesToggleLayout {
+  required string name = 1;
+  optional UsesLayout val = 2;
+}
+
+message RuleSetToggleLayout {
+  required string name = 1;
+  optional string val = 2;
+}
+
+message UpdateArgsLayout {
+  required string name = 1;
+  optional string new_update_authority = 2;
+  optional DataLayout data = 3;
+  optional bool primary_sale_happened = 4;
+  optional bool is_mutable = 5;
+  optional CollectionToggleLayout collection = 6;
+  optional CollectionDetailsToggleLayout collection_details = 7;
+  optional UsesToggleLayout uses = 8;
+  optional RuleSetToggleLayout rule_set = 9;
+  optional AuthorizationDataLayout authorization_data = 10;
+}
+
+message UpdateMetadataAccountArgsLayout {
+  optional DataLayout data = 1;
+  optional string updateAuthority = 2;
+  optional bool primarySaleHappened = 3;
+}
+
+message UpdateMetadataAccountArgsV2Layout {
+  optional DataV2Layout data = 1;
+  optional string updateAuthority = 2;
+  optional bool primarySaleHappened = 3;
+  optional bool isMutable = 4;
+}
+
+message UseArgsLayout {
+  required string name = 1;
+  optional AuthorizationDataLayout authorization_data = 2;
+}
+
+message UtilizeArgsLayout {
+  required uint64 numberOfUses = 1;
+}
+
+message VerificationArgsLayout {
+  required string name = 1;
+}
+
+message Arg {
+  optional ApproveUseAuthorityArgsLayout approveUseAuthorityArgs = 1;
+  optional BurnArgsLayout burnArgs = 2;
+  optional CreateArgsLayout createArgs = 3;
+  optional CreateMasterEditionArgsLayout createMasterEditionArgs = 4;
+  optional CreateMetadataAccountArgsLayout createMetadataAccountArgs = 5;
+  optional CreateMetadataAccountArgsV2Layout createMetadataAccountArgsV2 = 6;
+  optional CreateMetadataAccountArgsV3Layout createMetadataAccountArgsV3 = 7;
+  optional DelegateArgsLayout delegateArgs = 8;
+  optional LockArgsLayout lockArgs = 9;
+  optional MigrateArgsLayout migrateArgs = 10;
+  optional MintArgsLayout mintArgs = 11;
+  optional MintNewEditionFromMasterEditionViaTokenArgsLayout mintNewEditionFromMasterEditionViaTokenArgs = 12;
+  optional MintPrintingTokensViaTokenArgsLayout mintPrintingTokensViaTokenArgs = 13;
+  optional RevokeArgsLayout revokeArgs = 14;
+  optional SetCollectionSizeArgsLayout setCollectionSizeArgs = 15;
+  optional SetReservationListArgsLayout setReservationListArgs = 16;
+  optional TransferArgsLayout transferArgs = 17;
+  optional TransferOutOfEscrowArgsLayout transferOutOfEscrowArgs = 18;
+  optional UnlockArgsLayout unlockArgs = 19;
+  optional UpdateArgsLayout updateArgs = 20;
+  optional UpdateMetadataAccountArgsLayout updateMetadataAccountArgs = 21;
+  optional UpdateMetadataAccountArgsV2Layout updateMetadataAccountArgsV2 = 22;
+  optional UseArgsLayout useArgs = 23;
+  optional UtilizeArgsLayout utilizeArgs = 24;
+  optional VerificationArgsLayout verificationArgs = 25;
+  required string instruction_type = 26;
+}
+
+message TokenMetadataMeta {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 7;
+  required bool is_inner_instruction = 8;
+  required uint32 inner_instruction_index = 9;
+  required Arg arg = 10;
+}
+
+message Output {
+  repeated TokenMetadataMeta data = 1;
+}
