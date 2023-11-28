@@ -19,16 +19,7 @@ use crate::pb::sf::solana::block_meta::v1::{
     PbUtilizeArgsLayout, PbVerificationArgsLayout,
 };
 
-#[derive(
-    BorshDeserialize,
-    BorshSerialize,
-    Debug,
-    Clone,
-    Default,
-    Copy,
-    serde::Serialize,
-    serde::Deserialize,
-)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
 pub struct PubKeyLayout {
     pub value: [u8; 32],
 }
@@ -1075,7 +1066,9 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "CollectionV1".to_string();
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
             DelegateArgsLayoutName::SaleV1 {
                 amount: amt,
@@ -1083,7 +1076,9 @@ impl DelegateArgsLayout {
             } => {
                 name = "SaleV1".to_string();
                 amount = Some(*amt);
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
             DelegateArgsLayoutName::TransferV1 {
                 amount: amt,
@@ -1091,13 +1086,17 @@ impl DelegateArgsLayout {
             } => {
                 name = "TransferV1".to_string();
                 amount = Some(*amt);
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
             DelegateArgsLayoutName::UpdateV1 {
                 authorization_data: auth_data,
             } => {
                 name = "UpdateV1".to_string();
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
             DelegateArgsLayoutName::UtilityV1 {
                 amount: amt,
@@ -1115,7 +1114,9 @@ impl DelegateArgsLayout {
             } => {
                 name = "StakingV1".to_string();
                 amount = Some(*amt);
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
             DelegateArgsLayoutName::StandardV1 { amount: amt } => {
                 name = "StandardV1".to_string();
@@ -1128,13 +1129,17 @@ impl DelegateArgsLayout {
             } => {
                 name = "LockedTransferV1".to_string();
                 locked_address = Some(locked_addr.to_proto_struct());
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
             DelegateArgsLayoutName::ProgrammableConfigV1 {
                 authorization_data: auth_data,
             } => {
                 name = "ProgrammableConfigV1".to_string();
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
         }
 
@@ -1280,7 +1285,9 @@ impl UnlockArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "V1".to_string();
-                authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
             }
         }
 
