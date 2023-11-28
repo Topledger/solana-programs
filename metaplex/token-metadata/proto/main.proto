@@ -2,297 +2,377 @@ syntax = "proto2";
 
 package sf.solana.block_meta.v1;
 
-message ApproveUseAuthorityArgsLayout {
+message PbApproveUseAuthorityArgsLayout {
   required uint64 numberOfUses = 1;
 }
 
-message BurnArgsLayout {
+message PbBurnArgsLayout {
   required string name = 1;
   required uint64 amount = 2;
 }
 
-message CreatorLayout {
+message PbCreatorLayout {
   required string address = 1;
   required bool verified = 2;
   required uint32 share = 3;
 }
 
-message TokenStandardLayout {
-  required string name = 1;
-}
-
-message CollectionLayout {
+message PbCollectionLayout {
   required bool verified = 1;
   required string key = 2;
 }
 
-message UseMethodLayout {
-  required string name = 1;
-}
-
-message UsesLayout {
-  required UseMethodLayout useMethod = 1;
+message PbUsesLayout {
+  required string useMethod = 1;
   required uint64 remaining = 2;
   required uint64 total = 3;
 }
 
-message CollectionDetailsLayout {
+message PbCollectionDetailsLayout {
   required string name = 1;
   required uint64 size = 2;
 }
 
-message AssetDataLayout {
+message PbAssetDataLayout {
   required string name = 1;
   required string symbol = 2;
   required string uri = 3;
   required uint32 sellerFeeBasisPoints = 4;
-  repeated CreatorLayout creators = 5;
+  repeated PbCreatorLayout creators = 5;
   required bool primarySaleHappened = 6;
   required bool isMutable = 7;
-  required TokenStandardLayout tokenStandard = 8;
-  optional CollectionLayout collection = 9;
-  optional UsesLayout uses = 10;
-  optional CollectionDetailsLayout collectionDetails = 11;
+  required string tokenStandard = 8;
+  optional PbCollectionLayout collection = 9;
+  optional PbUsesLayout uses = 10;
+  optional PbCollectionDetailsLayout collectionDetails = 11;
   optional string ruleSet = 12;
 }
 
-message PrintSupplyLayout {
+message PbPrintSupplyLayout {
   required string name = 1;
   optional uint64 val = 2;
 }
 
-message CreateArgsLayout {
+message PbCreateArgsLayout {
   required string name = 1;
-  required AssetDataLayout asset_data = 2;
+  required PbAssetDataLayout asset_data = 2;
   optional uint32 decimals = 3;
-  optional PrintSupplyLayout print_supply = 4;
+  optional PbPrintSupplyLayout print_supply = 4;
 }
 
-message CreateMasterEditionArgsLayout {
+message PbCreateMasterEditionArgsLayout {
   optional uint64 maxSupply = 1;
 }
 
-message DataLayout {
+message PbDataLayout {
   required string name = 1;
   required string symbol = 2;
   required string uri = 3;
   required uint32 sellerFeeBasisPoints = 4;
-  repeated CreatorLayout creators = 5;
+  repeated PbCreatorLayout creators = 5;
 }
 
-message DataV2Layout {
+message PbDataV2Layout {
   required string name = 1;
   required string symbol = 2;
   required string uri = 3;
   required uint32 sellerFeeBasisPoints = 4;
-  repeated CreatorLayout creators = 5;
-  optional CollectionLayout collection = 6;
-  optional UsesLayout uses = 7;
+  repeated PbCreatorLayout creators = 5;
+  optional PbCollectionLayout collection = 6;
+  optional PbUsesLayout uses = 7;
 }
 
-message CreateMetadataAccountArgsLayout {
-  required DataLayout data = 1;
+message PbCreateMetadataAccountArgsLayout {
+  required PbDataLayout data = 1;
   required bool isMutable = 2;
 }
 
-message CreateMetadataAccountArgsV2Layout {
-  required DataV2Layout data = 1;
+message PbCreateMetadataAccountArgsV2Layout {
+  required PbDataV2Layout data = 1;
   required bool isMutable = 2;
 }
 
-message CreateMetadataAccountArgsV3Layout {
-  required DataV2Layout data = 1;
+message PbCreateMetadataAccountArgsV3Layout {
+  required PbDataV2Layout data = 1;
   required bool isMutable = 2;
-  optional CollectionDetailsLayout collectionDetails = 3;
+  optional PbCollectionDetailsLayout collectionDetails = 3;
 }
 
-message SeedsVecLayout {
+message PbSeedsVecLayout {
   repeated uint32 seeds = 1;
 }
 
-message LeafInfoLayout {
+message PbLeafInfoLayout {
   repeated uint32 leaf = 1;
 }
 
-message PayloadTypeLayout {
+message PbPayloadTypeLayout {
   required string name = 1;
   optional string valPubKey = 2;
-  optional SeedsVecLayout valSeedsVec = 3;
-  optional LeafInfoLayout valLeafInfo = 4;
+  optional PbSeedsVecLayout valSeedsVec = 3;
+  optional PbLeafInfoLayout valLeafInfo = 4;
   optional uint64 valInt64 = 5; 
 }
 
-message MapItemLayout {
+message PbMapItemLayout {
   required string key = 1;
-  required PayloadTypeLayout val = 2;
+  required PbPayloadTypeLayout val = 2;
 }
 
-message PayloadLayout {
-  repeated MapItemLayout map = 1;
+message PbPayloadLayout {
+  repeated PbMapItemLayout map = 1;
 }
 
-message AuthorizationDataLayout {
-  required PayloadLayout payload = 1;
+message PbAuthorizationDataLayout {
+  required PbPayloadLayout payload = 1;
 }
 
-message DelegateArgsLayout {
+message PbDelegateArgsLayout {
   required string name = 1;
-  optional AuthorizationDataLayout authorization_data = 2;
+  optional PbAuthorizationDataLayout authorization_data = 2;
   optional uint64 amount = 3;
   optional string locked_address = 4;
 }
 
-message LockArgsLayout {
+message PbLockArgsLayout {
   required string name = 1;
-  optional AuthorizationDataLayout authorization_data = 2;
+  optional PbAuthorizationDataLayout authorization_data = 2;
 }
 
-message MigrationTypeLayout {
+message PbMigrationTypeLayout {
   required string name = 1;
 }
 
-message MigrateArgsLayout {
+message PbMigrateArgsLayout {
   required string name = 1;
-  optional MigrationTypeLayout migration_type = 2;
+  optional PbMigrationTypeLayout migration_type = 2;
   optional string rule_set = 3;
 }
 
-message MintArgsLayout {
+message PbMintArgsLayout {
   required string name = 1;
   optional uint64 amount = 2;
-  optional AuthorizationDataLayout authorization_data = 3;
+  optional PbAuthorizationDataLayout authorization_data = 3;
 }
 
-message MintNewEditionFromMasterEditionViaTokenArgsLayout {
+message PbMintNewEditionFromMasterEditionViaTokenArgsLayout {
   required uint64 edition = 1;
 }
 
-message MintPrintingTokensViaTokenArgsLayout {
+message PbMintPrintingTokensViaTokenArgsLayout {
   required uint64 supply = 1;
 }
 
-message RevokeArgsLayout {
+message PbRevokeArgsLayout {
   required string name = 1;
 }
 
-message SetCollectionSizeArgsLayout {
+message PbSetCollectionSizeArgsLayout {
   required uint64 size = 1;
 }
 
-message ReservationLayout {
+message PbReservationLayout {
   required string address = 1;
   required uint64 spotsRemaining = 2;
   required uint64 totalSpots = 3;
 }
 
-message SetReservationListArgsLayout {
-  repeated ReservationLayout reservations = 1;
+message PbSetReservationListArgsLayout {
+  repeated PbReservationLayout reservations = 1;
   optional uint64 totalReservationSpots = 2;
   required uint64 offset = 3;
   required uint64 totalSpotOffset = 4;
 }
 
-message TransferArgsLayout {
+message PbTransferArgsLayout {
   required string name = 1;
   optional uint64 amount = 2;
-  optional AuthorizationDataLayout authorization_data = 3;
+  optional PbAuthorizationDataLayout authorization_data = 3;
 }
 
-message TransferOutOfEscrowArgsLayout {
+message PbTransferOutOfEscrowArgsLayout {
   required uint64 amount = 1;
 }
 
-message UnlockArgsLayout {
+message PbUnlockArgsLayout {
   required string name = 1;
-  optional AuthorizationDataLayout authorization_data = 2;
+  optional PbAuthorizationDataLayout authorization_data = 2;
 }
 
-message CollectionToggleLayout {
+message PbCollectionToggleLayout {
   required string name = 1;
-  optional CollectionLayout val = 2;
+  optional PbCollectionLayout val = 2;
 }
 
-message CollectionDetailsToggleLayout {
+message PbCollectionDetailsToggleLayout {
   required string name = 1;
-  optional CollectionDetailsLayout val = 2;
+  optional PbCollectionDetailsLayout val = 2;
 }
 
-message UsesToggleLayout {
+message PbUsesToggleLayout {
   required string name = 1;
-  optional UsesLayout val = 2;
+  optional PbUsesLayout val = 2;
 }
 
-message RuleSetToggleLayout {
+message PbRuleSetToggleLayout {
   required string name = 1;
   optional string val = 2;
 }
 
-message UpdateArgsLayout {
+message PbUpdateArgsLayout {
   required string name = 1;
   optional string new_update_authority = 2;
-  optional DataLayout data = 3;
+  optional PbDataLayout data = 3;
   optional bool primary_sale_happened = 4;
   optional bool is_mutable = 5;
-  optional CollectionToggleLayout collection = 6;
-  optional CollectionDetailsToggleLayout collection_details = 7;
-  optional UsesToggleLayout uses = 8;
-  optional RuleSetToggleLayout rule_set = 9;
-  optional AuthorizationDataLayout authorization_data = 10;
+  optional PbCollectionToggleLayout collection = 6;
+  optional PbCollectionDetailsToggleLayout collection_details = 7;
+  optional PbUsesToggleLayout uses = 8;
+  optional PbRuleSetToggleLayout rule_set = 9;
+  optional PbAuthorizationDataLayout authorization_data = 10;
+  optional string token_standard = 11;
 }
 
-message UpdateMetadataAccountArgsLayout {
-  optional DataLayout data = 1;
+message PbUpdateMetadataAccountArgsLayout {
+  optional PbDataLayout data = 1;
   optional string updateAuthority = 2;
   optional bool primarySaleHappened = 3;
 }
 
-message UpdateMetadataAccountArgsV2Layout {
-  optional DataV2Layout data = 1;
+message PbUpdateMetadataAccountArgsV2Layout {
+  optional PbDataV2Layout data = 1;
   optional string updateAuthority = 2;
   optional bool primarySaleHappened = 3;
   optional bool isMutable = 4;
 }
 
-message UseArgsLayout {
+message PbUseArgsLayout {
   required string name = 1;
-  optional AuthorizationDataLayout authorization_data = 2;
+  optional PbAuthorizationDataLayout authorization_data = 2;
 }
 
-message UtilizeArgsLayout {
+message PbUtilizeArgsLayout {
   required uint64 numberOfUses = 1;
 }
 
-message VerificationArgsLayout {
+message PbVerificationArgsLayout {
   required string name = 1;
 }
 
 message Arg {
-  optional ApproveUseAuthorityArgsLayout approveUseAuthorityArgs = 1;
-  optional BurnArgsLayout burnArgs = 2;
-  optional CreateArgsLayout createArgs = 3;
-  optional CreateMasterEditionArgsLayout createMasterEditionArgs = 4;
-  optional CreateMetadataAccountArgsLayout createMetadataAccountArgs = 5;
-  optional CreateMetadataAccountArgsV2Layout createMetadataAccountArgsV2 = 6;
-  optional CreateMetadataAccountArgsV3Layout createMetadataAccountArgsV3 = 7;
-  optional DelegateArgsLayout delegateArgs = 8;
-  optional LockArgsLayout lockArgs = 9;
-  optional MigrateArgsLayout migrateArgs = 10;
-  optional MintArgsLayout mintArgs = 11;
-  optional MintNewEditionFromMasterEditionViaTokenArgsLayout mintNewEditionFromMasterEditionViaTokenArgs = 12;
-  optional MintPrintingTokensViaTokenArgsLayout mintPrintingTokensViaTokenArgs = 13;
-  optional RevokeArgsLayout revokeArgs = 14;
-  optional SetCollectionSizeArgsLayout setCollectionSizeArgs = 15;
-  optional SetReservationListArgsLayout setReservationListArgs = 16;
-  optional TransferArgsLayout transferArgs = 17;
-  optional TransferOutOfEscrowArgsLayout transferOutOfEscrowArgs = 18;
-  optional UnlockArgsLayout unlockArgs = 19;
-  optional UpdateArgsLayout updateArgs = 20;
-  optional UpdateMetadataAccountArgsLayout updateMetadataAccountArgs = 21;
-  optional UpdateMetadataAccountArgsV2Layout updateMetadataAccountArgsV2 = 22;
-  optional UseArgsLayout useArgs = 23;
-  optional UtilizeArgsLayout utilizeArgs = 24;
-  optional VerificationArgsLayout verificationArgs = 25;
+  optional PbApproveUseAuthorityArgsLayout approveUseAuthorityArgs = 1;
+  optional PbBurnArgsLayout burnArgs = 2;
+  optional PbCreateArgsLayout createArgs = 3;
+  optional PbCreateMasterEditionArgsLayout createMasterEditionArgs = 4;
+  optional PbCreateMetadataAccountArgsLayout createMetadataAccountArgs = 5;
+  optional PbCreateMetadataAccountArgsV2Layout createMetadataAccountArgsV2 = 6;
+  optional PbCreateMetadataAccountArgsV3Layout createMetadataAccountArgsV3 = 7;
+  optional PbDelegateArgsLayout delegateArgs = 8;
+  optional PbLockArgsLayout lockArgs = 9;
+  optional PbMigrateArgsLayout migrateArgs = 10;
+  optional PbMintArgsLayout mintArgs = 11;
+  optional PbMintNewEditionFromMasterEditionViaTokenArgsLayout mintNewEditionFromMasterEditionViaTokenArgs = 12;
+  optional PbMintPrintingTokensViaTokenArgsLayout mintPrintingTokensViaTokenArgs = 13;
+  optional PbRevokeArgsLayout revokeArgs = 14;
+  optional PbSetCollectionSizeArgsLayout setCollectionSizeArgs = 15;
+  optional PbSetReservationListArgsLayout setReservationListArgs = 16;
+  optional PbTransferArgsLayout transferArgs = 17;
+  optional PbTransferOutOfEscrowArgsLayout transferOutOfEscrowArgs = 18;
+  optional PbUnlockArgsLayout unlockArgs = 19;
+  optional PbUpdateArgsLayout updateArgs = 20;
+  optional PbUpdateMetadataAccountArgsLayout updateMetadataAccountArgs = 21;
+  optional PbUpdateMetadataAccountArgsV2Layout updateMetadataAccountArgsV2 = 22;
+  optional PbUseArgsLayout useArgs = 23;
+  optional PbUtilizeArgsLayout utilizeArgs = 24;
+  optional PbVerificationArgsLayout verificationArgs = 25;
   required string instruction_type = 26;
+}
+
+message InputAccounts {
+  optional string ataProgram = 1;
+  optional string attributeDst = 2;
+  optional string attributeMint = 3;
+  optional string attributeSrc = 4;
+  optional string authority = 5;
+  optional string authorizationRules = 6;
+  optional string authorizationRulesProgram = 7;
+  optional string bubblegumSigner = 8;
+  optional string burnAuthority = 9;
+  optional string burner = 10;
+  optional string collection = 11;
+  optional string collectionAuthority = 12;
+  optional string collectionAuthorityRecord = 13;
+  optional string collectionMasterEdition = 14;
+  optional string collectionMasterEditionAccount = 15;
+  optional string collectionMetadata = 16;
+  optional string collectionMint = 17;
+  optional string creator = 18;
+  optional string delegate = 19;
+  optional string delegateAuthority = 20;
+  optional string delegateRecord = 21;
+  optional string destination = 22;
+  optional string destinationOwner = 23;
+  optional string destinationTokenRecord = 24;
+  optional string edition = 25;
+  optional string editionMarkPda = 26;
+  optional string editionMarker = 27;
+  optional string editionMarkerAccount = 28;
+  optional string escrow = 29;
+  optional string escrowAccount = 30;
+  optional string escrowMint = 31;
+  optional string masterEdition = 32;
+  optional string masterEditionAccount = 33;
+  optional string masterEditionMint = 34;
+  optional string masterEditionToken = 35;
+  optional string masterEditionTokenAccount = 36;
+  optional string masterMetadata = 37;
+  optional string masterTokenAccount = 38;
+  optional string masterUpdateAuthority = 39;
+  optional string metadata = 40;
+  optional string mint = 41;
+  optional string mintAuthority = 42;
+  optional string newCollectionAuthority = 43;
+  optional string newEdition = 44;
+  optional string newMetadata = 45;
+  optional string newMetadataUpdateAuthority = 46;
+  optional string newMint = 47;
+  optional string newMintAuthority = 48;
+  optional string oneTimeAuth = 49;
+  optional string oneTimePrintingAuthorizationMint = 50;
+  optional string oneTimePrintingAuthorizationMintAuthority = 51;
+  optional string owner = 52;
+  optional string ownerTokenAccount = 53;
+  optional string ownerTokenRecord = 54;
+  optional string payer = 55;
+  optional string pdaAccount = 56;
+  optional string printEditionAccount = 57;
+  optional string printEditionMint = 58;
+  optional string printEditionTokenAccount = 59;
+  optional string printingMint = 60;
+  optional string printingMintAuthority = 61;
+  optional string rent = 62;
+  optional string reservationList = 63;
+  optional string resource = 64;
+  optional string revokeAuthority = 65;
+  optional string safetyDepositBox = 66;
+  optional string safetyDepositStore = 67;
+  optional string splAtaProgram = 68;
+  optional string splTokenProgram = 69;
+  optional string systemProgram = 70;
+  optional string sysvarInstructions = 71;
+  optional string token = 72;
+  optional string tokenAccount = 73;
+  optional string tokenAccountOwner = 74;
+  optional string tokenOwner = 75;
+  optional string tokenProgram = 76;
+  optional string tokenRecord = 77;
+  optional string tokenVaultProgram = 78;
+  optional string updateAuthority = 79;
+  optional string useAuthority = 80;
+  optional string useAuthorityRecord = 81;
+  optional string user = 82;
+  optional string vault = 83;
+  optional string vaultAuthority = 84;
 }
 
 message TokenMetadataMeta {
@@ -305,6 +385,7 @@ message TokenMetadataMeta {
   required bool is_inner_instruction = 8;
   required uint32 inner_instruction_index = 9;
   required Arg arg = 10;
+  required InputAccounts input_accounts = 11;
 }
 
 message Output {
