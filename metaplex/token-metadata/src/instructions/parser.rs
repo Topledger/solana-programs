@@ -54,18 +54,24 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     match discriminator {
         0 => {
             result.instructionType = "CreateMetadataAccount".to_string();
-            result.createMetadataAccountArgs =
-                CreateMetadataAccountArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createMetadataAccountArgs =
+                    CreateMetadataAccountArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         1 => {
             result.instructionType = "UpdateMetadataAccount".to_string();
-            result.updateMetadataAccountArgs =
-                UpdateMetadataAccountArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.updateMetadataAccountArgs =
+                    UpdateMetadataAccountArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         2 => {
             result.instructionType = "DeprecatedCreateMasterEdition".to_string();
-            result.createMasterEditionArgs =
-                CreateMasterEditionArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createMasterEditionArgs =
+                    CreateMasterEditionArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         3 => {
             result.instructionType =
@@ -85,61 +91,83 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         8 => {
             result.instructionType = "DeprecatedMintPrintingTokensViaToken".to_string();
-            result.mintPrintingTokensViaTokenArgs =
-                MintPrintingTokensViaTokenArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.mintPrintingTokensViaTokenArgs =
+                    MintPrintingTokensViaTokenArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         9 => {
             result.instructionType = "DeprecatedMintPrintingTokens".to_string();
-            result.mintPrintingTokensViaTokenArgs =
-                MintPrintingTokensViaTokenArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.mintPrintingTokensViaTokenArgs =
+                    MintPrintingTokensViaTokenArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         10 => {
             result.instructionType = "CreateMasterEdition".to_string();
-            result.createMasterEditionArgs =
-                CreateMasterEditionArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createMasterEditionArgs =
+                    CreateMasterEditionArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         11 => {
             result.instructionType = "MintNewEditionFromMasterEditionViaToken".to_string();
-            result.mintNewEditionFromMasterEditionViaTokenArgs =
-                MintNewEditionFromMasterEditionViaTokenArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.mintNewEditionFromMasterEditionViaTokenArgs =
+                    MintNewEditionFromMasterEditionViaTokenArgsLayout::deserialize(rest_bytes)
+                        .unwrap();
+            }
         }
         12 => {
             result.instructionType = "ConvertMasterEditionV1ToV2".to_string();
         }
         13 => {
             result.instructionType = "MintNewEditionFromMasterEditionViaVaultProxy".to_string();
-            result.mintNewEditionFromMasterEditionViaTokenArgs =
-                MintNewEditionFromMasterEditionViaTokenArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.mintNewEditionFromMasterEditionViaTokenArgs =
+                    MintNewEditionFromMasterEditionViaTokenArgsLayout::deserialize(rest_bytes)
+                        .unwrap();
+            }
         }
         14 => {
             result.instructionType = "PuffMetadata".to_string();
         }
         15 => {
             result.instructionType = "UpdateMetadataAccountV2".to_string();
-            result.updateMetadataAccountArgsV2 =
-                UpdateMetadataAccountArgsV2Layout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.updateMetadataAccountArgsV2 =
+                    UpdateMetadataAccountArgsV2Layout::deserialize(rest_bytes).unwrap();
+            }
         }
         16 => {
             result.instructionType = "CreateMetadataAccountV2".to_string();
-            result.createMetadataAccountArgsV2 =
-                CreateMetadataAccountArgsV2Layout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createMetadataAccountArgsV2 =
+                    CreateMetadataAccountArgsV2Layout::deserialize(rest_bytes).unwrap();
+            }
         }
         17 => {
             result.instructionType = "CreateMasterEditionV3".to_string();
-            result.createMasterEditionArgs =
-                CreateMasterEditionArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createMasterEditionArgs =
+                    CreateMasterEditionArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         18 => {
             result.instructionType = "VerifyCollection".to_string();
         }
         19 => {
             result.instructionType = "Utilize".to_string();
-            result.utilizeArgs = UtilizeArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.utilizeArgs = UtilizeArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         20 => {
             result.instructionType = "ApproveUseAuthority".to_string();
-            result.approveUseAuthorityArgs =
-                ApproveUseAuthorityArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.approveUseAuthorityArgs =
+                    ApproveUseAuthorityArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         21 => {
             result.instructionType = "RevokeUseAuthority".to_string();
@@ -179,21 +207,27 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         33 => {
             result.instructionType = "CreateMetadataAccountV3".to_string();
-            result.createMetadataAccountArgsV3 =
-                CreateMetadataAccountArgsV3Layout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createMetadataAccountArgsV3 =
+                    CreateMetadataAccountArgsV3Layout::deserialize(rest_bytes).unwrap();
+            }
         }
         34 => {
             result.instructionType = "SetCollectionSize".to_string();
-            result.setCollectionSizeArgs =
-                SetCollectionSizeArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.setCollectionSizeArgs =
+                    SetCollectionSizeArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         35 => {
             result.instructionType = "SetTokenStandard".to_string();
         }
         36 => {
             result.instructionType = "BubblegumSetCollectionSize".to_string();
-            result.setCollectionSizeArgs =
-                SetCollectionSizeArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.setCollectionSizeArgs =
+                    SetCollectionSizeArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         37 => {
             result.instructionType = "BurnEditionNft".to_string();
@@ -206,60 +240,88 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         40 => {
             result.instructionType = "TransferOutOfEscrow".to_string();
-            result.transferOutOfEscrowArgs =
-                TransferOutOfEscrowArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.transferOutOfEscrowArgs =
+                    TransferOutOfEscrowArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         41 => {
             result.instructionType = "Burn".to_string();
-            result.burnArgs = BurnArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.burnArgs = BurnArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         42 => {
             result.instructionType = "Create".to_string();
-            result.createArgs = CreateArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.createArgs = CreateArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         43 => {
             result.instructionType = "Mint".to_string();
-            result.mintArgs = MintArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.mintArgs = MintArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         44 => {
             result.instructionType = "Delegate".to_string();
-            result.delegateArgs = DelegateArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.delegateArgs = DelegateArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         45 => {
             result.instructionType = "Revoke".to_string();
-            result.revokeArgs = RevokeArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.revokeArgs = RevokeArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         46 => {
             result.instructionType = "Lock".to_string();
-            result.lockArgs = LockArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.lockArgs = LockArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         47 => {
             result.instructionType = "Unlock".to_string();
-            result.unlockArgs = UnlockArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.unlockArgs = UnlockArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         48 => {
             result.instructionType = "Migrate".to_string();
-            result.migrateArgs = MigrateArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.migrateArgs = MigrateArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         49 => {
             result.instructionType = "Transfer".to_string();
-            result.transferArgs = TransferArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.transferArgs = TransferArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         50 => {
             result.instructionType = "Update".to_string();
-            result.updateArgs = UpdateArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.updateArgs = UpdateArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         51 => {
             result.instructionType = "Use".to_string();
-            result.useArgs = UseArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.useArgs = UseArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         52 => {
             result.instructionType = "Verify".to_string();
-            result.verificationArgs = VerificationArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.verificationArgs = VerificationArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         53 => {
             result.instructionType = "Unverify".to_string();
-            result.verificationArgs = VerificationArgsLayout::deserialize(rest_bytes).unwrap();
+            if rest_bytes.len() > 0 {
+                result.verificationArgs = VerificationArgsLayout::deserialize(rest_bytes).unwrap();
+            }
         }
         54 => {
             result.instructionType = "Collect".to_string();
