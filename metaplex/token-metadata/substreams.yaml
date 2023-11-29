@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_programs_metaplex_token_metadata_1_0_0'
-  version: v1.0.0
+  name: 'tl_solana_programs_metaplex_token_metadata_1_0_2'
+  version: v1.0.2
 
 protobuf:
   files:

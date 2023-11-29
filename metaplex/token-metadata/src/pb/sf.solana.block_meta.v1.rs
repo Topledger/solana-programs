@@ -671,7 +671,7 @@ pub struct TokenMetadataMeta {
     #[prost(uint32, required, tag="9")]
     pub inner_instruction_index: u32,
     #[prost(message, required, tag="10")]
-    pub arg: Arg,
+    pub args: Arg,
     #[prost(message, required, tag="11")]
     pub input_accounts: InputAccounts,
 }

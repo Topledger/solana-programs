@@ -76,8 +76,6 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         5 => {
             result.instructionType = "DeprecatedSetReservationList".to_string();
-            result.setReservationListArgs =
-                SetReservationListArgsLayout::deserialize(rest_bytes).unwrap();
         }
         6 => {
             result.instructionType = "DeprecatedCreateReservationList".to_string();

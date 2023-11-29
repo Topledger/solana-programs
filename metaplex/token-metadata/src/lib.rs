@@ -32,12 +32,13 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
-                let parsed_arg_data = get_arg(program, inst.data);
+                let tx_id = bs58::encode(&transaction.signatures[0]).into_string();
+                let parsed_arg_data = get_arg(program, inst.data, tx_id.clone());
                 if parsed_arg_data.is_some() {
                     let mut tokenMetadataMeta: TokenMetadataMeta = TokenMetadataMeta::default();
-                    tokenMetadataMeta.arg = parsed_arg_data.unwrap();
+                    tokenMetadataMeta.args = parsed_arg_data.unwrap();
                     tokenMetadataMeta.input_accounts = prepare_input_accounts(
-                        tokenMetadataMeta.arg.instruction_type.clone(),
+                        tokenMetadataMeta.args.instruction_type.clone(),
                         &inst.accounts,
                         &accounts,
                     );
@@ -45,8 +46,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                     tokenMetadataMeta.block_date = convert_to_date(timestamp);
                     tokenMetadataMeta.block_time = timestamp;
                     tokenMetadataMeta.block_slot = slot;
-                    tokenMetadataMeta.tx_id =
-                        bs58::encode(&transaction.signatures[0]).into_string();
+                    tokenMetadataMeta.tx_id = tx_id.clone();
                     tokenMetadataMeta.dapp = constants::TOKEN_METADATA_PROGRAM_ADDRESS.to_string();
                     tokenMetadataMeta.instruction_index = idx as u32;
                     tokenMetadataMeta.is_inner_instruction = false;
@@ -61,13 +61,14 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         inner_instruction.instructions.iter().enumerate().for_each(
                             |(inner_idx, inner_inst)| {
                                 let program = &accounts[inner_inst.program_id_index as usize];
-                                let parsed_arg_data = get_arg(program, inner_inst.data.clone());
+                                let parsed_arg_data =
+                                    get_arg(program, inner_inst.data.clone(), tx_id.clone());
                                 if parsed_arg_data.is_some() {
                                     let mut tokenMetadataMeta: TokenMetadataMeta =
                                         TokenMetadataMeta::default();
-                                    tokenMetadataMeta.arg = parsed_arg_data.unwrap();
+                                    tokenMetadataMeta.args = parsed_arg_data.unwrap();
                                     tokenMetadataMeta.input_accounts = prepare_input_accounts(
-                                        tokenMetadataMeta.arg.instruction_type.clone(),
+                                        tokenMetadataMeta.args.instruction_type.clone(),
                                         &inner_inst.accounts,
                                         &accounts,
                                     );
@@ -75,8 +76,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     tokenMetadataMeta.block_date = convert_to_date(timestamp);
                                     tokenMetadataMeta.block_time = timestamp;
                                     tokenMetadataMeta.block_slot = slot;
-                                    tokenMetadataMeta.tx_id =
-                                        bs58::encode(&transaction.signatures[0]).into_string();
+                                    tokenMetadataMeta.tx_id = tx_id.clone();
                                     tokenMetadataMeta.dapp =
                                         constants::TOKEN_METADATA_PROGRAM_ADDRESS.to_string();
                                     tokenMetadataMeta.instruction_index = idx as u32;
@@ -95,7 +95,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     Ok(Output { data })
 }
 
-fn get_arg(program: &String, instruction_data: Vec<u8>) -> Option<Arg> {
+fn get_arg(program: &String, instruction_data: Vec<u8>, tx_id: String) -> Option<Arg> {
     let mut result = None;
 
     if program
@@ -104,7 +104,7 @@ fn get_arg(program: &String, instruction_data: Vec<u8>) -> Option<Arg> {
     {
         return result;
     } else {
-        result = Some(prepare_arg(instruction_data));
+        result = Some(prepare_arg(instruction_data, tx_id));
         return result;
     }
 }

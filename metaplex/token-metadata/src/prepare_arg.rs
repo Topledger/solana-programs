@@ -4,7 +4,7 @@ use crate::{
 };
 use instructions::parser::parse_instruction;
 
-pub fn prepare_arg(instruction_data: Vec<u8>) -> Arg {
+pub fn prepare_arg(instruction_data: Vec<u8>, tx_id: String) -> Arg {
     let mut arg: Arg = Arg::default();
     let mut instruction: Instruction = parse_instruction(instruction_data);
 
@@ -25,10 +25,7 @@ pub fn prepare_arg(instruction_data: Vec<u8>) -> Arg {
         }
         "DeprecatedMintNewEditionFromMasterEditionViaPrintingToken" => {}
         "UpdatePrimarySaleHappenedViaToken" => {}
-        "DeprecatedSetReservationList" => {
-            arg.set_reservation_list_args =
-                Some(instruction.setReservationListArgs.to_proto_struct());
-        }
+        "DeprecatedSetReservationList" => {}
         "DeprecatedCreateReservationList" => {}
         "SignMetadata" => {}
         "DeprecatedMintPrintingTokensViaToken" => {
