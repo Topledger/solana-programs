@@ -1,6 +1,5 @@
 extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
-use substreams::log;
 use core::fmt;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
@@ -13,7 +12,7 @@ pub struct InitializeMintLayout {
     pub decimals: u8,
     pub mint_authority: PubkeyLayout,
     pub freeze_authority_option: u8,
-    pub freeze_authority: Option<PubkeyLayout>,
+    pub freeze_authority: PubkeyLayout,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
@@ -70,7 +69,7 @@ impl fmt::Display for AuthorityTypeLayout {
 pub struct SetAuthorityLayout {
     pub authority_type: AuthorityTypeLayout,
     pub new_authority_option: u8,
-    pub new_authority: Option<PubkeyLayout>,
+    pub new_authority: PubkeyLayout,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
@@ -138,7 +137,7 @@ pub struct InitializeMultisig2Layout {
 pub struct InitializeMint2Layout {
     pub decimals: u8,
     pub mint_authority: PubkeyLayout,
-    pub freeze_authority: Option<PubkeyLayout>,
+    pub freeze_authority: PubkeyLayout,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
@@ -544,7 +543,6 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                     GetAccountDataSizeLayout::try_from_slice(rest_split).unwrap();
             } else if rest.len() == 0 {
                 getAccountDataSizeArgs = GetAccountDataSizeLayout::default();
-
             } else {
                 getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
             }

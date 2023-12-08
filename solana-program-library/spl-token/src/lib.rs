@@ -36,7 +36,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             let msg = transaction.message.unwrap();
             let pre_token_balances = meta.pre_token_balances;
 
-
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
 
@@ -159,13 +158,8 @@ fn get_outer_arg(
             arg.freeze_authority_option = Some(i32::from(
                 instruction.initializeMintArgs.freeze_authority_option,
             ));
-            arg.freeze_authority = get_b58_string(
-                instruction
-                    .initializeMintArgs
-                    .freeze_authority
-                    .unwrap_or_default()
-                    .value,
-            );
+            arg.freeze_authority =
+                get_b58_string(instruction.initializeMintArgs.freeze_authority.value);
         }
         "InitializeAccount" => {
             outerArg.instruction_type = String::from("InitializeAccount");
@@ -190,10 +184,7 @@ fn get_outer_arg(
             arg.authority_type = Some(instruction.setAuthorityArgs.authority_type.to_string());
             arg.new_authority_option =
                 Some(i32::from(instruction.setAuthorityArgs.new_authority_option));
-            if instruction.setAuthorityArgs.new_authority.is_some() {
-                arg.new_authority =
-                    get_b58_string(instruction.setAuthorityArgs.new_authority.unwrap().value);
-            }
+            arg.new_authority = get_b58_string(instruction.setAuthorityArgs.new_authority.value);
         }
         "MintTo" => {
             outerArg.instruction_type = String::from("MintTo");
@@ -252,15 +243,8 @@ fn get_outer_arg(
             arg.decimals = Some(i32::from(instruction.initializeMint2Args.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMint2Args.mint_authority.value);
-            if instruction.initializeMint2Args.freeze_authority.is_some() {
-                arg.freeze_authority = get_b58_string(
-                    instruction
-                        .initializeMint2Args
-                        .freeze_authority
-                        .unwrap()
-                        .value,
-                );
-            }
+            arg.freeze_authority =
+                get_b58_string(instruction.initializeMint2Args.freeze_authority.value);
         }
         "GetAccountDataSize" => {
             outerArg.instruction_type = String::from("GetAccountDataSize");
