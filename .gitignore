@@ -1,6 +1,15 @@
-.vscode
-.idea
+# Editor specific files
+.vscode/
+.idea/
+
+# System files
 .DS_Store
+
+# Project specific files
 buf.gen.yaml
-*target
+
+# Ignore 'target' directory in any subdirectory
+target/
+
+# Ignore '.spkg' files in any subdirectory
 *.spkg
