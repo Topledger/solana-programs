@@ -35,9 +35,11 @@ message TransactionStats {
   required uint64 compute_units_allocated = 29;
   required uint32 byte_size = 30;
   required uint32 trx_accounts_size = 31;
-  required uint32 writeable_alt_accounts_size = 32;
+  required uint32 writable_alt_accounts_size = 32;
   required uint32 readable_alt_accounts_size = 33;
-
+  required bool logs_truncated = 34;
+  required string block_hash = 35;
+  required string recent_block_hash = 36;
 
 }
 
@@ -45,6 +47,7 @@ message TransactionStats {
 message Error {
   required string program = 1;
   required string message = 2;
+  required string message_decoded = 3;
 }
 
 message Instruction {
@@ -57,6 +60,7 @@ message Instruction {
   required uint32 account_bytes = 6;
   required uint32 data_bytes = 7;
   repeated string program_logs = 8;
+  repeated string program_data = 9;
 
 }
 
@@ -65,6 +69,7 @@ message InnerInstruction {
   repeated string account_arguments = 2;
   required string data = 3;
   repeated string program_logs = 4;
+  repeated string program_data = 5;
    
 }
 
@@ -73,7 +78,7 @@ message TokenBalance {
   required double amount = 2;
   required string mint = 3;
   required string owner = 4;
-  required string program_id = 5;
+  required string program = 5;
 
 }
 

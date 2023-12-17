@@ -28,6 +28,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     };
     let block_slot = block.slot;
     let mut data = Vec::new();
+    let block_hash = block.blockhash;
 
     let decoded_vote_account = bs58::decode(VOTE_ACCOUNT)
         .into_vec()
@@ -56,6 +57,10 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         let parsed_logs = parse_logs(&meta.log_messages);
 
         let mut transaction_stats = TransactionStats::default();
+            transaction_stats.block_slot = block_slot;
+            transaction_stats.block_date = block_date.to_string();
+            transaction_stats.block_time = block.block_time.as_ref().unwrap().timestamp;
+            transaction_stats.block_hash = block_hash.to_string();
 
         populate_transaction_stats(
             &mut transaction_stats,
@@ -63,9 +68,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             &accounts,
             &meta,
             &parsed_logs,
-            block_slot,
-            &block_date,
-            block.block_time.as_ref().unwrap().timestamp,
             index,
             meta.fee,
             header,
@@ -84,9 +86,6 @@ fn populate_transaction_stats(
     accounts: &Vec<String>,
     meta: &TransactionStatusMeta,
     parsed_logs: &Vec<LogContext>,
-    block_slot: u64,
-    block_date: &String,
-    block_time: i64,
     index: usize,
     fees: u64,
     header: &MessageHeader,
@@ -98,11 +97,9 @@ fn populate_transaction_stats(
     transaction_stats.readonly_signed_accounts = header.num_readonly_signed_accounts;
     transaction_stats.readonly_unsigned_accounts = header.num_readonly_unsigned_accounts;
 
-    transaction_stats.block_slot = block_slot;
-    transaction_stats.block_date = block_date.to_string();
-    transaction_stats.block_time = block_time;
+  
     transaction_stats.index = index as u32;
-    transaction_stats.error = find_error(parsed_logs);
+    transaction_stats.error = find_error(parsed_logs, meta);
     transaction_stats.id = bs58::encode(&transaction.signatures[0]).into_string();
     transaction_stats.success = meta.err.is_none();
     transaction_stats.account_keys = accounts.clone();
@@ -120,49 +117,60 @@ fn populate_transaction_stats(
     } else {
         "legacy".into()
     };
-    transaction_stats.executing_accounts = Vec::from_iter(get_unique_program_ids(parsed_logs));
     transaction_stats.fee = fees;
     transaction_stats.base_fee = 5000 * num_required_signatures as u32;
     transaction_stats.priority_fee = fees.saturating_sub(transaction_stats.base_fee.into()) as u32;
     transaction_stats.byte_size = calculate_byte_size(transaction) as u32;
     transaction_stats.trx_accounts_size = message.account_keys.len() as u32;
     transaction_stats.readable_alt_accounts_size = meta.loaded_readonly_addresses.len() as u32;
-    transaction_stats.writeable_alt_accounts_size = meta.loaded_writable_addresses.len() as u32;
-    update_transaction_stats_compute_units(transaction_stats, parsed_logs);
+    transaction_stats.writable_alt_accounts_size = meta.loaded_writable_addresses.len() as u32;
+    transaction_stats.logs_truncated = contains_substring(&meta.log_messages, "Log truncated");
+    transaction_stats.recent_block_hash = bs58::encode(&message.recent_blockhash).into_string();
+
+    update_transaction_stats_compute_units(transaction_stats, parsed_logs, meta);
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
     update_transaction_stats_token_balances(transaction_stats, meta, accounts);
+    update_transaction_stats_executing_accounts(transaction_stats);
 }
 
-fn get_unique_program_ids(log_contexts: &[LogContext]) -> HashSet<String> {
+fn get_unique_program_ids(instructions: &Vec<transactions::v1::Instruction>) -> HashSet<String> {
     let mut unique_ids = HashSet::new();
-    for log_context in log_contexts {
+    for instruction in instructions.iter() {
         // Insert the program_id of the current LogContext
-        unique_ids.insert(log_context.program_id.clone());
+        unique_ids.insert(instruction.executing_account.clone());
 
-        // Recursively process child nodes
-        let child_ids = get_unique_program_ids(&log_context.children_nodes);
-        unique_ids.extend(child_ids);
+        for inner_instruction in instruction.inner_instructions.iter() {
+            unique_ids.insert(inner_instruction.executing_account.clone());
+        }
+     
     }
 
     unique_ids
 }
 
-fn find_error(log_contexts: &[LogContext]) -> Option<Error> {
+fn find_error(log_contexts: &[LogContext], meta: &TransactionStatusMeta) -> Option<Error> {
+    let mut error = Error::default();
+
+    if let Some(err) = &meta.err {
+        error.message = bs58::encode(&err.err).into_string();
+    }
+
     for log_context in log_contexts {
         if let Some(ref message) = log_context.failure_message {
-            return Some(Error {
-                program: log_context.program_id.clone(),
-                message: message.clone(),
-            });
+            error.program = log_context.program_id.clone();
+            error.message_decoded = message.clone();
+            return Some(error);
         }
 
         // Recursively check child nodes
-        if let Some(found) = find_error(&log_context.children_nodes) {
+        if let Some(found) = find_error(&log_context.children_nodes, meta) {
             return Some(found);
         }
     }
+
     None
 }
+
 
 fn process_instruction(
     instruction: &CompiledInstruction,
@@ -263,12 +271,17 @@ fn process_inner_instruction(
 fn update_transaction_stats_compute_units(
     transaction_stats: &mut TransactionStats,
     parsed_logs: &Vec<LogContext>,
+    meta: &TransactionStatusMeta
 ) {
     for log_context in parsed_logs {
         if log_context.depth == 1 {
             transaction_stats.compute_units_allocated += log_context.compute_units as u64;
             transaction_stats.compute_units_consumed += log_context.consumed_units as u64;
         }
+    }
+
+    if let Some(compute_units) = meta.compute_units_consumed {
+        transaction_stats.compute_units_consumed = compute_units;
     }
 }
 
@@ -282,12 +295,14 @@ fn assign_logs_to_instructions(
         if let Some(log_context) = iterator.next() {
             if log_context.program_id == instruction.executing_account {
                 instruction.program_logs = log_context.program_logs.clone();
+                instruction.program_data = log_context.program_data.clone();
             }
 
             for inner_instruction in instruction.inner_instructions.iter_mut() {
                 if let Some(inner_log_context) = iterator.next() {
                     if inner_log_context.program_id == inner_instruction.executing_account {
                         inner_instruction.program_logs = inner_log_context.program_logs.clone();
+                        inner_instruction.program_data = inner_log_context.program_data.clone();
                     }
                 }
             }
@@ -334,6 +349,18 @@ fn process_token_balance(
         amount,
         mint: token_balance.mint.to_string(),
         owner: token_balance.owner.to_string(),
-        program_id: token_balance.program_id.to_string(),
+        program: token_balance.program_id.to_string(),
     })
 }
+
+fn update_transaction_stats_executing_accounts(transaction_stats: &mut TransactionStats){
+    transaction_stats.executing_accounts = Vec::from_iter(get_unique_program_ids(&transaction_stats.instructions));
+
+}
+
+fn contains_substring(log_messages: &Vec<String>, sub_str: &str) -> bool {
+    let sub_str_lower = sub_str.to_lowercase();
+    log_messages.iter().any(|message| message.to_lowercase().contains(&sub_str_lower))
+}
+
+

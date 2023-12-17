@@ -18,7 +18,7 @@ pub struct LogContext {
     pub children: Vec<usize>, // Indices of child nodes in temp_nodes
     pub children_nodes: Vec<LogContext>, // Actual child nodes
     pub program_logs: Vec<String>,
-    pub program_data: Option<String>,
+    pub program_data: Vec<String>,
     pub failure_message: Option<String>,
 }
 
@@ -130,7 +130,7 @@ fn create_log_context(program_id: &str, depth: usize, temp_nodes: &mut Vec<LogCo
         children: Vec::new(),
         children_nodes: Vec::new(),
         program_logs: Vec::new(),
-        program_data: None,
+        program_data: Vec::new(),
         failure_message: None,
     };
 
@@ -174,7 +174,7 @@ fn update_existing_log_context(
             context.program_logs.push(log_capture.as_str().to_string());
         }
         if let Some(data_capture) = captures.name("data") {
-            context.program_data = Some(data_capture.as_str().to_string());
+            context.program_data.push(data_capture.as_str().to_string());
         }
         if let Some(failed_message_capture) = captures.name("failed_message") {
             context.failure_message = Some(failed_message_capture.as_str().to_string());

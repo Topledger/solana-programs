@@ -65,9 +65,15 @@ pub struct TransactionStats {
     #[prost(uint32, required, tag="31")]
     pub trx_accounts_size: u32,
     #[prost(uint32, required, tag="32")]
-    pub writeable_alt_accounts_size: u32,
+    pub writable_alt_accounts_size: u32,
     #[prost(uint32, required, tag="33")]
     pub readable_alt_accounts_size: u32,
+    #[prost(bool, required, tag="34")]
+    pub logs_truncated: bool,
+    #[prost(string, required, tag="35")]
+    pub block_hash: ::prost::alloc::string::String,
+    #[prost(string, required, tag="36")]
+    pub recent_block_hash: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -76,6 +82,8 @@ pub struct Error {
     pub program: ::prost::alloc::string::String,
     #[prost(string, required, tag="2")]
     pub message: ::prost::alloc::string::String,
+    #[prost(string, required, tag="3")]
+    pub message_decoded: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -96,6 +104,8 @@ pub struct Instruction {
     pub data_bytes: u32,
     #[prost(string, repeated, tag="8")]
     pub program_logs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, repeated, tag="9")]
+    pub program_data: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -108,6 +118,8 @@ pub struct InnerInstruction {
     pub data: ::prost::alloc::string::String,
     #[prost(string, repeated, tag="4")]
     pub program_logs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(string, repeated, tag="5")]
+    pub program_data: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -121,6 +133,6 @@ pub struct TokenBalance {
     #[prost(string, required, tag="4")]
     pub owner: ::prost::alloc::string::String,
     #[prost(string, required, tag="5")]
-    pub program_id: ::prost::alloc::string::String,
+    pub program: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)
