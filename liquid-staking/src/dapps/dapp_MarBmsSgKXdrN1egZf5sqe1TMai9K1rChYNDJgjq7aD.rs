@@ -156,8 +156,8 @@ pub fn parse_trade_instruction(
             trade_data.fee_account = "".to_string();
 
             trade_data.staking_reward = 0.0;
-            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.burn_amount = 0.0;
+            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.fee_amount = 0.0;
             trade_data.amount = get_sol_balance_change(
                 &trade_data.reserve_stake,
@@ -189,8 +189,8 @@ pub fn parse_trade_instruction(
             trade_data.fee_account = "".to_string();
 
             trade_data.staking_reward = 0.0;
-            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.burn_amount = 0.0;
+            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.fee_amount = 0.0;
             trade_data.amount = 0.0;
 

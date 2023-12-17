@@ -95,12 +95,17 @@ fn get_trade_data(
                     instruction_data,
                     input_accounts,
                     accounts,
+                    log_messages,
                     pre_balances,
                     post_balances,
                     pre_token_balances,
                     post_token_balances,
                     inner_instructions,
+                    &"SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy".to_string(),
+                    &"".to_string(),
                     idx,
+                    0,
+                    false,
                 );
         }
         "MarBmsSgKXdrN1egZf5sqe1TMai9K1rChYNDJgjq7aD" => {
@@ -143,6 +148,26 @@ fn get_trade_data(
                             post_token_balances,
                             inner_instructions,
                             dapp_address,
+                            idx,
+                            inner_idx,
+                            true
+                        );
+                    }
+                    else if inner_program.eq("SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy") {
+                        let inner_input_accounts =
+                            prepare_input_accounts(&inner_inst.accounts, accounts);
+                        result = dapps::dapp_SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy::parse_trade_instruction(
+                            inner_inst.data.clone(),
+                            inner_input_accounts,
+                            accounts,
+                            log_messages,
+                            pre_balances,
+                            post_balances,
+                            pre_token_balances,
+                            post_token_balances,
+                            inner_instructions,
+                            dapp_address,
+                            &"SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy".to_string(),
                             idx,
                             inner_idx,
                             true

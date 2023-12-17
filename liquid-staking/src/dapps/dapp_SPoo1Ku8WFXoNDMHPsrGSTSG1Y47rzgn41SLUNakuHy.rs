@@ -21,6 +21,9 @@ pub fn enrich_with_inner_instructions_data(
     accounts: &Vec<String>,
     inner_instructions: &Vec<InnerInstructions>,
 ) -> () {
+    let mut total_mint_amount: f64 = 0.0;
+    let mut total_burn_amount: f64 = 0.0;
+
     inner_instructions.iter().for_each(|inner_instruction| {
         inner_instruction
             .instructions
@@ -39,39 +42,74 @@ pub fn enrich_with_inner_instructions_data(
                         7 => {
                             let input_accounts =
                                 prepare_input_accounts(&inner_inst.accounts, accounts);
-                            let mint_to_data =
-                                MintToLayout::deserialize(&mut rest.clone()).unwrap();
-                            trade_data.mint_amount = mint_to_data.amount as f64;
+
+                            let _pool_mint = input_accounts.get(0).unwrap().to_string();
+                            let _withdraw_authority = input_accounts.get(2).unwrap().to_string();
+
+                            if _pool_mint.as_str().eq(trade_data.pool_mint.as_str())
+                                & _withdraw_authority
+                                    .as_str()
+                                    .eq(trade_data.withdraw_authority.as_str())
+                            {
+                                let mint_to_data =
+                                    MintToLayout::deserialize(&mut rest.clone()).unwrap();
+                                total_mint_amount += mint_to_data.amount as f64;
+                            }
                         }
                         8 => {
                             let input_accounts =
                                 prepare_input_accounts(&inner_inst.accounts, accounts);
-                            let burn_data = BurnLayout::deserialize(&mut rest.clone()).unwrap();
-                            trade_data.burn_amount = burn_data.amount as f64;
+                            let _pool_mint = input_accounts.get(1).unwrap().to_string();
+                            let _withdraw_authority = input_accounts.get(2).unwrap().to_string();
+
+                            if _pool_mint.as_str().eq(trade_data.pool_mint.as_str())
+                                & _withdraw_authority
+                                    .as_str()
+                                    .eq(trade_data.withdraw_authority.as_str())
+                            {
+                                let burn_data = BurnLayout::deserialize(&mut rest.clone()).unwrap();
+                                total_burn_amount += burn_data.amount as f64;
+                            }
                         }
                         _ => {}
                     }
                 }
             })
     });
+    trade_data.mint_amount = total_mint_amount;
+    trade_data.burn_amount = total_burn_amount;
 }
 
-fn enrich_with_ix_data(trade_data: &mut TradeData, idx: u32) {
-    trade_data.is_inner_instruction = false;
-    trade_data.instruction_index = idx;
-    trade_data.outer_program = "SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy".to_string();
+fn enrich_with_ix_data(
+    trade_data: &mut TradeData,
+    outer_idx: u32,
+    inner_idx: u32,
+    is_inner_instruction: bool,
+    outer_program: &String,
+    inner_program: &String,
+) {
+    trade_data.is_inner_instruction = is_inner_instruction;
+    trade_data.instruction_index = outer_idx;
+    trade_data.outer_program = outer_program.to_string();
+    trade_data.inner_instruction_index = inner_idx;
+    trade_data.inner_program = inner_program.to_string();
 }
 
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
     accounts: &Vec<String>,
+    log_messages: &Vec<String>,
     pre_balances: &Vec<u64>,
     post_balances: &Vec<u64>,
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
     inner_instructions: &Vec<InnerInstructions>,
-    idx: usize,
+    outer_program: &String,
+    inner_program: &String,
+    outer_idx: usize,
+    inner_idx: usize,
+    is_inner_instruction: bool,
 ) -> Option<TradeData> {
     let (disc_bytes, rest) = bytes_stream.split_at(1);
     let discriminator: u8 = u8::from(disc_bytes[0]);
@@ -92,13 +130,21 @@ pub fn parse_trade_instruction(
             trade_data.fee_account = input_accounts.get(8).unwrap().to_string();
 
             trade_data.amount = get_sol_balance_change(
-                &trade_data.validator_stake,
+                &trade_data.reserve_stake,
                 accounts,
                 pre_balances,
                 post_balances,
             );
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
-            enrich_with_ix_data(&mut trade_data, idx as u32);
+
+            enrich_with_ix_data(
+                &mut trade_data,
+                outer_idx as u32,
+                inner_idx as u32,
+                is_inner_instruction,
+                outer_program,
+                inner_program,
+            );
 
             result = Some(trade_data);
         }
@@ -127,7 +173,15 @@ pub fn parse_trade_instruction(
                 post_token_balances,
                 accounts,
             );
-            enrich_with_ix_data(&mut trade_data, idx as u32);
+
+            enrich_with_ix_data(
+                &mut trade_data,
+                outer_idx as u32,
+                inner_idx as u32,
+                is_inner_instruction,
+                outer_program,
+                inner_program,
+            );
 
             result = Some(trade_data);
         }
@@ -149,7 +203,15 @@ pub fn parse_trade_instruction(
                 post_balances,
             );
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
-            enrich_with_ix_data(&mut trade_data, idx as u32);
+
+            enrich_with_ix_data(
+                &mut trade_data,
+                outer_idx as u32,
+                inner_idx as u32,
+                is_inner_instruction,
+                outer_program,
+                inner_program,
+            );
 
             result = Some(trade_data);
         }
@@ -178,7 +240,15 @@ pub fn parse_trade_instruction(
                 post_token_balances,
                 accounts,
             );
-            enrich_with_ix_data(&mut trade_data, idx as u32);
+
+            enrich_with_ix_data(
+                &mut trade_data,
+                outer_idx as u32,
+                inner_idx as u32,
+                is_inner_instruction,
+                outer_program,
+                inner_program,
+            );
 
             result = Some(trade_data);
         }
