@@ -17,11 +17,11 @@ pub struct LogContext {
     pub failure_message: Option<String>,
 }
 
-pub fn convert_to_date(ts: i64) -> String {
-    let nt = NaiveDateTime::from_timestamp_opt(ts, 0);
-    let dt: DateTime<Utc> = DateTime::from_utc(nt.unwrap(), Utc);
-    let res = dt.format("%Y-%m-%d");
-    return res.to_string();
+pub fn convert_to_date(ts: i64) -> Result<String, &'static str> {
+    let nt = NaiveDateTime::from_timestamp_opt(ts, 0).ok_or("Invalid timestamp")?;
+
+    let dt: DateTime<Utc> = Utc.from_utc_datetime(&nt);
+    Ok(dt.format("%Y-%m-%d").to_string())
 }
 
 pub fn parse_logs(logs: &[String]) -> Vec<LogContext> {
@@ -158,9 +158,7 @@ fn build_hierarchy(parent: &mut LogContext, temp_nodes: &[LogContext]) {
     parent.children.clear();
 }
 
-
 // testing functions ( not used in substreams )
-
 
 fn _print_nested_tree(node: &LogContext, depth: usize) {
     let indent = "    ".repeat(depth);

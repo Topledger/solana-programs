@@ -14,6 +14,8 @@ use utils::convert_to_date;
 use utils::parse_logs;
 use utils::LogContext;
 
+const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
+
 #[derive(Debug, Clone)]
 struct ProgramData {
     signers: HashSet<String>,
@@ -50,15 +52,9 @@ impl ProgramData {
         }
     }
 
-    fn update_with_log(&mut self, log: &LogContext, depth: usize) {
+    fn update_with_log(&mut self, log: &LogContext) {
         self.compute_units_consumed += log.consumed_units as u32;
         self.compute_units_allocated += log.compute_units as u32;
-
-        if depth == 1 {
-            self.outer_invocation_count += 1;
-        } else {
-            self.inner_invocation_count += 1;
-        }
 
         if let Some(ref error) = log.failure_message {
             self.failed_invocation_count += 1;
@@ -66,14 +62,11 @@ impl ProgramData {
         }
     }
 
-    fn new_from_log(log: &LogContext, depth: usize) -> Self {
+    fn new_from_log(log: &LogContext) -> Self {
         let mut new_data = ProgramData::new();
 
         new_data.compute_units_consumed = log.consumed_units as u32;
         new_data.compute_units_allocated = log.compute_units as u32;
-
-        new_data.outer_invocation_count = if depth == 1 { 1 } else { 0 };
-        new_data.inner_invocation_count = if depth != 1 { 1 } else { 0 };
 
         new_data.failed_invocation_count = if log.failure_message.is_some() { 1 } else { 0 };
 
@@ -99,7 +92,8 @@ impl ProgramData {
 
         self.fee_lamports = fees as u32;
         self.base_fee_lamports = 5000 * num_required_signatures;
-        self.priority_fee_lamports = fees.saturating_sub(5000 * num_required_signatures as u64) as u32;
+        self.priority_fee_lamports =
+            fees.saturating_sub(5000 * num_required_signatures as u64) as u32;
         self.successful_txns_count = if meta.err.is_none() { 1 } else { 0 };
         self.failed_txns_count = if meta.err.is_some() { 1 } else { 0 };
     }
@@ -107,25 +101,89 @@ impl ProgramData {
 
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
-    let timestamp = block.block_time.as_ref().unwrap().timestamp;
-    let block_date = convert_to_date(timestamp);
+    let block_date = match block.block_time.as_ref() {
+        Some(block_time) => match convert_to_date(block_time.timestamp) {
+            Ok(date) => date,
+            Err(_) => "Error converting block time to date".to_string(),
+        },
+        None => "Block time is not available".to_string(),
+    };
+
+    let decoded_vote_account = bs58::decode(VOTE_ACCOUNT)
+        .into_vec()
+        .expect("Failed to decode vote account");
+
     let mut program_data_map: Vec<HashMap<String, ProgramData>> = vec![];
 
     for trx in block.transactions {
-        let (accounts, num_required_signatures, fees, meta) = extract_transaction_info(&trx);
-        
-        if accounts.contains(&"Vote111111111111111111111111111111111111111".to_string()) {
+        let meta = match trx.meta.as_ref() {
+            Some(meta) => meta,
+            None => continue,
+        };
+
+        let transaction = match trx.transaction.as_ref() {
+            Some(transaction) => transaction,
+            None => continue,
+        };
+
+        let message = transaction.message.as_ref().expect("Message is missing");
+
+        // Skip Vote Transactions
+        if message.account_keys.contains(&decoded_vote_account) {
             continue;
         }
 
+        let (accounts, num_required_signatures) = extract_transaction_info(&trx);
+
         let mut trx_programs: HashMap<String, ProgramData> = HashMap::new();
 
+
+        // update invocation counts only for successful transactions
+        if meta.err.is_none() {
+            let update_invocation_count = |program_data: &mut ProgramData, is_outer: bool| {
+                if is_outer {
+                    program_data.outer_invocation_count += 1;
+                } else {
+                    program_data.inner_invocation_count += 1;
+                }
+            };
+
+            for instruction in &message.instructions {
+                if let Some(program) = accounts.get(instruction.program_id_index as usize) {
+                    trx_programs
+                        .entry(program.to_string())
+                        .and_modify(|data| update_invocation_count(data, true))
+                        .or_insert_with(|| {
+                            let mut data = ProgramData::new();
+                            update_invocation_count(&mut data, true);
+                            data
+                        });
+                }
+            }
+
+            for inner_instruction in &meta.inner_instructions {
+                for inner_inst in &inner_instruction.instructions {
+                    if let Some(inner_program) = accounts.get(inner_inst.program_id_index as usize)
+                    {
+                        trx_programs
+                            .entry(inner_program.to_string())
+                            .and_modify(|data| update_invocation_count(data, false))
+                            .or_insert_with(|| {
+                                let mut data = ProgramData::new();
+                                update_invocation_count(&mut data, false);
+                                data
+                            });
+                    }
+                }
+            }
+        }
+
         for log in &parse_logs(&meta.log_messages) {
-            process_log(log, &mut trx_programs, 1);
+            process_log(log, &mut trx_programs);
         }
 
         for data in trx_programs.values_mut() {
-            data.update_fees_and_counts(&accounts, num_required_signatures, fees, &meta);
+            data.update_fees_and_counts(&accounts, num_required_signatures, meta.fee, &meta);
         }
 
         program_data_map.push(trx_programs);
@@ -136,11 +194,8 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     Ok(Output { data })
 }
 
-fn extract_transaction_info(
-    trx: &ConfirmedTransaction,
-) -> (Vec<String>, u32, u64, TransactionStatusMeta) {
+fn extract_transaction_info(trx: &ConfirmedTransaction) -> (Vec<String>, u32) {
     let accounts = trx.resolved_accounts_as_strings();
-    let meta = trx.meta.clone().unwrap();
     let num_required_signatures = trx
         .transaction
         .clone()
@@ -150,23 +205,18 @@ fn extract_transaction_info(
         .header
         .unwrap()
         .num_required_signatures;
-    let fees = meta.fee;
-    (accounts, num_required_signatures, fees, meta)
+    (accounts, num_required_signatures)
 }
 
-fn process_log(
-    log: &LogContext,
-    program_data_map: &mut HashMap<String, ProgramData>,
-    depth: usize,
-) {
+fn process_log(log: &LogContext, program_data_map: &mut HashMap<String, ProgramData>) {
     let program_id = &log.program_id;
     program_data_map
         .entry(program_id.clone())
-        .and_modify(|data| data.update_with_log(log, depth))
-        .or_insert_with(|| ProgramData::new_from_log(log, depth));
+        .and_modify(|data| data.update_with_log(log))
+        .or_insert_with(|| ProgramData::new_from_log(log));
 
     for child in &log.children_nodes {
-        process_log(child, program_data_map, depth + 1);
+        process_log(child, program_data_map);
     }
 }
 
@@ -202,8 +252,10 @@ fn convert_to_output(
                     existing_stats.successful_txns_count += program_data.successful_txns_count;
                     existing_stats.failed_invocation_count += program_data.failed_invocation_count;
                     existing_stats.failed_txns_count += program_data.failed_txns_count;
-                    existing_stats.total_outer_invocation_count += program_data.outer_invocation_count;
-                    existing_stats.total_inner_invocation_count += program_data.inner_invocation_count;
+                    existing_stats.total_outer_invocation_count +=
+                        program_data.outer_invocation_count;
+                    existing_stats.total_inner_invocation_count +=
+                        program_data.inner_invocation_count;
 
                     // Merge error counts
                     for (error, count) in &program_data.errors {
@@ -239,27 +291,4 @@ fn convert_to_output(
         .into_iter()
         .map(|(_id, stats)| stats)
         .collect()
-}
-
-fn print_program_data_map(program_data_map: &HashMap<String, ProgramData>) {
-    for (program_id, data) in program_data_map {
-        log::info!("Program ID: {}", program_id);
-        log::info!("  Compute Units Consumed: {}", data.compute_units_consumed);
-        log::info!(
-            "  Compute Units Allocated: {}",
-            data.compute_units_allocated
-        );
-        log::info!("  Outer Invocation Count: {}", data.outer_invocation_count);
-        log::info!("  Inner Invocation Count: {}", data.inner_invocation_count);
-        log::info!(
-            "  Failed Invocation Count: {}",
-            data.failed_invocation_count
-        );
-        log::info!("  Errors:");
-        for (error, count) in &data.errors {
-            log::info!("    {}: {}", error, count);
-        }
-
-        log::info!("-----------------------------");
-    }
 }
