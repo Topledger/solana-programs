@@ -3,9 +3,9 @@ mod utils;
 
 use pb::sf::solana::transactions;
 use pb::sf::solana::transactions::v1::{Error, Output, TransactionStats};
-use serde_json;
+
 use std::collections::HashSet;
-use substreams::log;
+
 use substreams_solana::pb::sf::solana::r#type::v1::{
     Block, CompiledInstruction, InnerInstruction, Message, Transaction,
     TransactionStatusMeta,
@@ -192,7 +192,7 @@ fn update_transaction_stats_instructions(
     .map(|(index, compiled)| process_instruction(compiled, accounts, meta, index))
     .collect();
 
-    assign_logs_to_instructions_dfs(&mut instructions, parsed_logs);
+    assign_logs_to_instructions(&mut instructions, parsed_logs);
     transaction_stats.instructions = instructions;
 }
 
@@ -263,7 +263,7 @@ fn update_transaction_stats_compute_units(
 }
 
 
-fn assign_logs_to_instructions_dfs(
+fn assign_logs_to_instructions(
     instructions: &mut Vec<transactions::v1::Instruction>,
     log_contexts: &Vec<LogContext>,
 ) {
