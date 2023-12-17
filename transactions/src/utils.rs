@@ -1,10 +1,16 @@
 use regex::{Captures, Regex};
+extern crate serde;
+extern crate serde_json;
+
+use serde::{Deserialize, Serialize};
 
 extern crate chrono;
 use chrono::prelude::*;
-use substreams_solana::pb::sf::solana::r#type::v1::{CompiledInstruction, ConfirmedTransaction, Transaction};
+use substreams_solana::pb::sf::solana::r#type::v1::{
+    CompiledInstruction, Transaction,
+};
 
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct LogContext {
     pub program_id: String,
     pub depth: usize,
@@ -16,6 +22,49 @@ pub struct LogContext {
     pub program_logs: Vec<String>,
     pub program_data: Option<String>,
     pub failure_message: Option<String>,
+}
+
+pub struct LogContextIterator<'a> {
+    root_nodes: &'a [LogContext],
+    current_root_index: usize,
+    current_child_iterator: Option<Box<LogContextIterator<'a>>>,
+}
+
+impl<'a> LogContextIterator<'a> {
+    pub fn new(nodes: &'a [LogContext]) -> Self {
+        LogContextIterator {
+            root_nodes: nodes,
+            current_root_index: 0,
+            current_child_iterator: None,
+        }
+    }
+}
+
+impl<'a> Iterator for LogContextIterator<'a> {
+    type Item = &'a LogContext;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(ref mut child_iter) = self.current_child_iterator {
+            if let Some(child) = child_iter.next() {
+                return Some(child);
+            }
+            // Current child iterator is exhausted.
+            self.current_child_iterator = None;
+        }
+
+        if self.current_root_index < self.root_nodes.len() {
+            let node = &self.root_nodes[self.current_root_index];
+            self.current_root_index += 1;
+
+            if !node.children_nodes.is_empty() {
+                self.current_child_iterator = Some(Box::new(LogContextIterator::new(&node.children_nodes)));
+            }
+
+            Some(node)
+        } else {
+            None
+        }
+    }
 }
 
 pub fn convert_to_date(ts: i64) -> String {
@@ -159,33 +208,31 @@ fn build_hierarchy(parent: &mut LogContext, temp_nodes: &[LogContext]) {
     parent.children.clear();
 }
 
-
-pub fn calculate_size(transaction: &ConfirmedTransaction) -> usize {
-    let trx = transaction.transaction.as_ref().unwrap();
+pub fn calculate_byte_size(trx: &Transaction) -> usize {
     let version = trx.message.as_ref().unwrap().versioned;
 
     if version {
-        calculate_versioned_transaction_size(trx, transaction)
+        calculate_versioned_transaction_size(trx)
     } else {
-        calculate_legacy_transaction_size(trx, transaction)
+        calculate_legacy_transaction_size(trx)
     }
 }
 
-fn calculate_legacy_transaction_size(trx: &Transaction, transaction: &ConfirmedTransaction) -> usize {
+fn calculate_legacy_transaction_size(trx: &Transaction) -> usize {
     let instructions = &trx.message.as_ref().unwrap().instructions;
-    let ixs_size = calculate_instructions_size(instructions);
+    let ixs_size = calculate_total_instructions_size(instructions);
 
     compact_array_size(trx.signatures.len(), 64) // signatures
         + 3 // header
-        + compact_array_size(transaction.resolved_accounts().len(), 32) // accounts
+        + compact_array_size(trx.message.as_ref().unwrap().account_keys.len(), 32) // accounts
         + 32 // blockhash
         + compact_header(instructions.len()) // instructions len
         + ixs_size // Instructions
 }
 
-fn calculate_versioned_transaction_size(trx: &Transaction, transaction: &ConfirmedTransaction) -> usize {
+pub fn calculate_versioned_transaction_size(trx: &Transaction) -> usize {
     let instructions = &trx.message.as_ref().unwrap().instructions;
-    let ixs_size = calculate_instructions_size(instructions);
+    let ixs_size = calculate_total_instructions_size(instructions);
 
     let account_lookup_tables = &trx.message.as_ref().unwrap().address_table_lookups;
     let alt_size = account_lookup_tables.iter().fold(0, |acc, table| {
@@ -196,7 +243,7 @@ fn calculate_versioned_transaction_size(trx: &Transaction, transaction: &Confirm
 
     compact_array_size(trx.signatures.len(), 64) // signatures
         + 3 // header
-        + compact_array_size(transaction.resolved_accounts().len(), 32) // accounts
+        + compact_array_size(trx.message.as_ref().unwrap().account_keys.len(), 32) // accounts
         + 32 // blockhash
         + compact_header(instructions.len()) // instructions
         + ixs_size
@@ -205,17 +252,22 @@ fn calculate_versioned_transaction_size(trx: &Transaction, transaction: &Confirm
         + 1 // version
 }
 
-fn calculate_instructions_size(instructions: &[CompiledInstruction]) -> usize {
-    instructions.iter().fold(0, |acc, ix| {
-        let n_indexes = ix.accounts.len();
-        let opaque_data = ix.data.len();
+pub fn calculate_instruction_size(ix: &CompiledInstruction) -> usize {
+    let n_indexes = ix.accounts.len();
+    let opaque_data = ix.data.len();
 
-        acc + 1 // PID index
-            + compact_array_size(n_indexes, 1)
-            + compact_array_size(opaque_data, 1)
-    })
+    1 // PID index
+    + compact_array_size(n_indexes, 1)
+    + compact_array_size(opaque_data, 1)
 }
 
+// Function to calculate the total size of all instructions
+pub fn calculate_total_instructions_size(instructions: &[CompiledInstruction]) -> usize {
+    instructions
+        .iter()
+        .map(|ix| calculate_instruction_size(ix))
+        .sum()
+}
 
 // Compact array and compact-u16 functions
 
@@ -232,6 +284,6 @@ fn compact_header(n: usize) -> usize {
     }
 }
 
-fn compact_array_size(n: usize, size: usize) -> usize {
+pub fn compact_array_size(n: usize, size: usize) -> usize {
     compact_header(n) + n * size
 }
