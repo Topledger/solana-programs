@@ -6,9 +6,7 @@ use serde::{Deserialize, Serialize};
 
 extern crate chrono;
 use chrono::prelude::*;
-use substreams_solana::pb::sf::solana::r#type::v1::{
-    CompiledInstruction, Transaction,
-};
+use substreams_solana::pb::sf::solana::r#type::v1::{CompiledInstruction, Transaction};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LogContext {
@@ -57,7 +55,8 @@ impl<'a> Iterator for LogContextIterator<'a> {
             self.current_root_index += 1;
 
             if !node.children_nodes.is_empty() {
-                self.current_child_iterator = Some(Box::new(LogContextIterator::new(&node.children_nodes)));
+                self.current_child_iterator =
+                    Some(Box::new(LogContextIterator::new(&node.children_nodes)));
             }
 
             Some(node)
@@ -68,8 +67,7 @@ impl<'a> Iterator for LogContextIterator<'a> {
 }
 
 pub fn convert_to_date(ts: i64) -> Result<String, &'static str> {
-    let nt = NaiveDateTime::from_timestamp_opt(ts, 0)
-        .ok_or("Invalid timestamp")?;
+    let nt = NaiveDateTime::from_timestamp_opt(ts, 0).ok_or("Invalid timestamp")?;
 
     let dt: DateTime<Utc> = Utc.from_utc_datetime(&nt);
     Ok(dt.format("%Y-%m-%d").to_string())

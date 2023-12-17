@@ -7,8 +7,8 @@ use pb::sf::solana::transactions::v1::{Error, Output, TransactionStats};
 use std::collections::HashSet;
 
 use substreams_solana::pb::sf::solana::r#type::v1::{
-    Block, CompiledInstruction, InnerInstruction, Message, Transaction,
-    TransactionStatusMeta, TokenBalance,
+    Block, CompiledInstruction, InnerInstruction, Message, MessageHeader, TokenBalance,
+    Transaction, TransactionStatusMeta,
 };
 use utils::{
     calculate_byte_size, calculate_instruction_size, compact_array_size, convert_to_date,
@@ -34,7 +34,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         .expect("Failed to decode vote account");
 
     for (index, trx) in block.transactions.iter().enumerate() {
-
         let meta = match trx.meta.as_ref() {
             Some(meta) => meta,
             None => continue,
@@ -46,14 +45,13 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         };
 
         let message = transaction.message.as_ref().expect("Message is missing");
-        
+
         // Skip Vote Transactions
         if message.account_keys.contains(&decoded_vote_account) {
             continue;
         }
 
         let header = message.header.as_ref().expect("Header is missing");
-        let num_required_signatures = header.num_required_signatures;
         let accounts = trx.resolved_accounts_as_strings();
         let parsed_logs = parse_logs(&meta.log_messages);
 
@@ -70,7 +68,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             block.block_time.as_ref().unwrap().timestamp,
             index,
             meta.fee,
-            num_required_signatures,
+            header,
             &message,
         );
 
@@ -91,9 +89,15 @@ fn populate_transaction_stats(
     block_time: i64,
     index: usize,
     fees: u64,
-    num_required_signatures: u32,
+    header: &MessageHeader,
     message: &Message,
 ) {
+    let num_required_signatures = header.num_required_signatures;
+
+    transaction_stats.required_signatures = num_required_signatures;
+    transaction_stats.readonly_signed_accounts = header.num_readonly_signed_accounts;
+    transaction_stats.readonly_unsigned_accounts = header.num_readonly_unsigned_accounts;
+
     transaction_stats.block_slot = block_slot;
     transaction_stats.block_date = block_date.to_string();
     transaction_stats.block_time = block_time;
@@ -189,15 +193,14 @@ fn update_transaction_stats_instructions(
     accounts: &Vec<String>,
     meta: &TransactionStatusMeta,
     message: &Message,
-    parsed_logs: &Vec<LogContext>
+    parsed_logs: &Vec<LogContext>,
 ) {
-
     let mut instructions = message
-    .instructions
-    .iter()
-    .enumerate()
-    .map(|(index, compiled)| process_instruction(compiled, accounts, meta, index))
-    .collect();
+        .instructions
+        .iter()
+        .enumerate()
+        .map(|(index, compiled)| process_instruction(compiled, accounts, meta, index))
+        .collect();
 
     assign_logs_to_instructions(&mut instructions, parsed_logs);
     transaction_stats.instructions = instructions;
@@ -269,23 +272,20 @@ fn update_transaction_stats_compute_units(
     }
 }
 
-
 fn assign_logs_to_instructions(
     instructions: &mut Vec<transactions::v1::Instruction>,
     log_contexts: &Vec<LogContext>,
 ) {
     let mut iterator = LogContextIterator::new(log_contexts);
-    
+
     for instruction in instructions.iter_mut() {
         if let Some(log_context) = iterator.next() {
-          
             if log_context.program_id == instruction.executing_account {
                 instruction.program_logs = log_context.program_logs.clone();
             }
 
             for inner_instruction in instruction.inner_instructions.iter_mut() {
                 if let Some(inner_log_context) = iterator.next() {
-                   
                     if inner_log_context.program_id == inner_instruction.executing_account {
                         inner_instruction.program_logs = inner_log_context.program_logs.clone();
                     }
@@ -298,7 +298,7 @@ fn assign_logs_to_instructions(
 fn update_transaction_stats_token_balances(
     transaction_stats: &mut TransactionStats,
     meta: &TransactionStatusMeta,
-    accounts: &[String]
+    accounts: &[String],
 ) {
     for pre_token_balance in &meta.pre_token_balances {
         match process_token_balance(pre_token_balance, accounts) {
@@ -315,8 +315,10 @@ fn update_transaction_stats_token_balances(
     }
 }
 
-
-fn process_token_balance(token_balance: &TokenBalance, accounts: &[String]) -> Result<transactions::v1::TokenBalance, &'static str> {
+fn process_token_balance(
+    token_balance: &TokenBalance,
+    accounts: &[String],
+) -> Result<transactions::v1::TokenBalance, &'static str> {
     let account = match accounts.get(token_balance.account_index as usize) {
         Some(account) => account,
         None => return Err("Account index out of bounds"),
