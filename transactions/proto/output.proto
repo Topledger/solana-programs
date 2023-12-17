@@ -7,12 +7,9 @@ message Output {
 }
 
 message TransactionStats {
-
-
   required uint64 block_slot = 1;
   required string block_date = 2;
   required int64 block_time = 3;
-
   required uint32 index = 4;
   required uint64 fee = 5;
   optional Error error = 6;
@@ -26,7 +23,6 @@ message TransactionStats {
   repeated string log_messages = 16;
   repeated uint64 pre_balances = 18;
   repeated uint64 post_balances = 19;
-
   repeated TokenBalance pre_token_balances = 20;
   repeated TokenBalance post_token_balances = 21;
   repeated string signatures = 22;
@@ -74,7 +70,7 @@ message InnerInstruction {
 
 message TokenBalance {
   required string account = 1;
-  required int64 amount = 2;
+  required double amount = 2;
   required string mint = 3;
   required string owner = 4;
   required string program_id = 5;

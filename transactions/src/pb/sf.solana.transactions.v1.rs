@@ -114,8 +114,8 @@ pub struct InnerInstruction {
 pub struct TokenBalance {
     #[prost(string, required, tag="1")]
     pub account: ::prost::alloc::string::String,
-    #[prost(int64, required, tag="2")]
-    pub amount: i64,
+    #[prost(double, required, tag="2")]
+    pub amount: f64,
     #[prost(string, required, tag="3")]
     pub mint: ::prost::alloc::string::String,
     #[prost(string, required, tag="4")]

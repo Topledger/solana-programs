@@ -8,7 +8,7 @@ use std::collections::HashSet;
 
 use substreams_solana::pb::sf::solana::r#type::v1::{
     Block, CompiledInstruction, InnerInstruction, Message, Transaction,
-    TransactionStatusMeta,
+    TransactionStatusMeta, TokenBalance,
 };
 use utils::{
     calculate_byte_size, calculate_instruction_size, compact_array_size, convert_to_date,
@@ -19,7 +19,13 @@ const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
 
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
-    let block_date = convert_to_date(block.block_time.as_ref().unwrap().timestamp);
+    let block_date = match block.block_time.as_ref() {
+        Some(block_time) => match convert_to_date(block_time.timestamp) {
+            Ok(date) => date,
+            Err(_) => "Error converting block time to date".to_string(),
+        },
+        None => "Block time is not available".to_string(),
+    };
     let block_slot = block.slot;
     let mut data = Vec::new();
 
@@ -120,6 +126,7 @@ fn populate_transaction_stats(
     transaction_stats.writeable_alt_accounts_size = meta.loaded_writable_addresses.len() as u32;
     update_transaction_stats_compute_units(transaction_stats, parsed_logs);
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
+    update_transaction_stats_token_balances(transaction_stats, meta, accounts);
 }
 
 fn get_unique_program_ids(log_contexts: &[LogContext]) -> HashSet<String> {
@@ -286,4 +293,45 @@ fn assign_logs_to_instructions(
             }
         }
     }
+}
+
+fn update_transaction_stats_token_balances(
+    transaction_stats: &mut TransactionStats,
+    meta: &TransactionStatusMeta,
+    accounts: &[String]
+) {
+    for pre_token_balance in &meta.pre_token_balances {
+        match process_token_balance(pre_token_balance, accounts) {
+            Ok(balance) => transaction_stats.pre_token_balances.push(balance),
+            Err(e) => eprintln!("Error processing pre-token balance: {}", e), // Error handling
+        }
+    }
+
+    for post_token_balance in &meta.post_token_balances {
+        match process_token_balance(post_token_balance, accounts) {
+            Ok(balance) => transaction_stats.post_token_balances.push(balance),
+            Err(e) => eprintln!("Error processing post-token balance: {}", e), // Error handling
+        }
+    }
+}
+
+
+fn process_token_balance(token_balance: &TokenBalance, accounts: &[String]) -> Result<transactions::v1::TokenBalance, &'static str> {
+    let account = match accounts.get(token_balance.account_index as usize) {
+        Some(account) => account,
+        None => return Err("Account index out of bounds"),
+    };
+
+    let amount = token_balance
+        .ui_token_amount
+        .as_ref()
+        .map_or(0.0, |amount| amount.ui_amount as f64);
+
+    Ok(transactions::v1::TokenBalance {
+        account: account.to_string(),
+        amount,
+        mint: token_balance.mint.to_string(),
+        owner: token_balance.owner.to_string(),
+        program_id: token_balance.program_id.to_string(),
+    })
 }
