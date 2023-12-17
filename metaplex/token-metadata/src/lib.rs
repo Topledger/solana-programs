@@ -37,6 +37,8 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                 if parsed_arg_data.is_some() {
                     let mut tokenMetadataMeta: TokenMetadataMeta = TokenMetadataMeta::default();
                     tokenMetadataMeta.args = parsed_arg_data.unwrap();
+                    tokenMetadataMeta.instruction_type =
+                        tokenMetadataMeta.args.instruction_type.clone();
                     tokenMetadataMeta.input_accounts = prepare_input_accounts(
                         tokenMetadataMeta.args.instruction_type.clone(),
                         &inst.accounts,
@@ -67,6 +69,8 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     let mut tokenMetadataMeta: TokenMetadataMeta =
                                         TokenMetadataMeta::default();
                                     tokenMetadataMeta.args = parsed_arg_data.unwrap();
+                                    tokenMetadataMeta.instruction_type =
+                                        tokenMetadataMeta.args.instruction_type.clone();
                                     tokenMetadataMeta.input_accounts = prepare_input_accounts(
                                         tokenMetadataMeta.args.instruction_type.clone(),
                                         &inner_inst.accounts,

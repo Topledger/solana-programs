@@ -670,9 +670,11 @@ pub struct TokenMetadataMeta {
     pub is_inner_instruction: bool,
     #[prost(uint32, required, tag="9")]
     pub inner_instruction_index: u32,
-    #[prost(message, required, tag="10")]
-    pub args: Arg,
+    #[prost(string, required, tag="10")]
+    pub instruction_type: ::prost::alloc::string::String,
     #[prost(message, required, tag="11")]
+    pub args: Arg,
+    #[prost(message, required, tag="12")]
     pub input_accounts: InputAccounts,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
