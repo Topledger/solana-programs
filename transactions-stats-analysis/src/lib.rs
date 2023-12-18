@@ -96,9 +96,9 @@ fn populate_transaction_stats(
     } else {
         "legacy".into()
     };
-    transaction_stats.fee = fees as u32;
+    transaction_stats.fee = fees as u64;
     transaction_stats.base_fee = 5000 * num_required_signatures as u32;
-    transaction_stats.priority_fee = fees.saturating_sub(transaction_stats.base_fee.into()) as u32;
+    transaction_stats.priority_fee = fees.saturating_sub(transaction_stats.base_fee.into()) as u64;
     transaction_stats.byte_size = calculate_byte_size(transaction) as u32;
     transaction_stats.trx_accounts_size = message.account_keys.len() as u32;
     transaction_stats.readable_alt_accounts_size = meta.loaded_readonly_addresses.len() as u32;
@@ -151,13 +151,13 @@ fn update_transaction_stats_compute_units(
 ) {
     for log_context in parsed_logs {
         if log_context.depth == 1 {
-            transaction_stats.compute_units_allocated += log_context.compute_units as u32;
-            transaction_stats.compute_units_consumed += log_context.consumed_units as u32;
+            transaction_stats.compute_units_allocated += log_context.compute_units as u64;
+            transaction_stats.compute_units_consumed += log_context.consumed_units as u64;
         }
     }
 
     if let Some(compute_units) = meta.compute_units_consumed {
-        transaction_stats.compute_units_consumed = compute_units as u32;
+        transaction_stats.compute_units_consumed = compute_units;
     }
 }
 
