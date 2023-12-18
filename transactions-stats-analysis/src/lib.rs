@@ -56,7 +56,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         let _num_required_signatures = header.num_required_signatures;
 
         let mut transaction_stats = TransactionStats::default();
-        transaction_stats.block_slot = block_slot;
+        transaction_stats.block_slot = block_slot as u32;
         transaction_stats.block_date = block_date.to_string();
 
         populate_transaction_stats(
@@ -96,7 +96,7 @@ fn populate_transaction_stats(
     } else {
         "legacy".into()
     };
-    transaction_stats.fee = fees;
+    transaction_stats.fee = fees as u32;
     transaction_stats.base_fee = 5000 * num_required_signatures as u32;
     transaction_stats.priority_fee = fees.saturating_sub(transaction_stats.base_fee.into()) as u32;
     transaction_stats.byte_size = calculate_byte_size(transaction) as u32;
@@ -151,13 +151,13 @@ fn update_transaction_stats_compute_units(
 ) {
     for log_context in parsed_logs {
         if log_context.depth == 1 {
-            transaction_stats.compute_units_allocated += log_context.compute_units as u64;
-            transaction_stats.compute_units_consumed += log_context.consumed_units as u64;
+            transaction_stats.compute_units_allocated += log_context.compute_units as u32;
+            transaction_stats.compute_units_consumed += log_context.consumed_units as u32;
         }
     }
 
     if let Some(compute_units) = meta.compute_units_consumed {
-        transaction_stats.compute_units_consumed = compute_units;
+        transaction_stats.compute_units_consumed = compute_units as u32;
     }
 }
 

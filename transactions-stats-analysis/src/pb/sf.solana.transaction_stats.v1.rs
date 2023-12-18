@@ -8,12 +8,12 @@ pub struct Output {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct TransactionStats {
-    #[prost(uint64, required, tag="1")]
-    pub block_slot: u64,
+    #[prost(uint32, required, tag="1")]
+    pub block_slot: u32,
     #[prost(string, required, tag="2")]
     pub block_date: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag="3")]
-    pub fee: u64,
+    #[prost(uint32, required, tag="3")]
+    pub fee: u32,
     #[prost(string, required, tag="4")]
     pub id: ::prost::alloc::string::String,
     #[prost(bool, required, tag="5")]
@@ -26,10 +26,10 @@ pub struct TransactionStats {
     pub base_fee: u32,
     #[prost(uint32, required, tag="9")]
     pub priority_fee: u32,
-    #[prost(uint64, required, tag="10")]
-    pub compute_units_consumed: u64,
-    #[prost(uint64, required, tag="11")]
-    pub compute_units_allocated: u64,
+    #[prost(uint32, required, tag="10")]
+    pub compute_units_consumed: u32,
+    #[prost(uint32, required, tag="11")]
+    pub compute_units_allocated: u32,
     #[prost(uint32, required, tag="12")]
     pub byte_size: u32,
     #[prost(uint32, required, tag="13")]

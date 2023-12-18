@@ -7,17 +7,17 @@ message Output {
 }
 
 message TransactionStats {
-  required uint64 block_slot = 1;
+  required uint32 block_slot = 1;
   required string block_date = 2;
-  required uint64 fee = 3;
+  required uint32 fee = 3;
   required string id = 4;
   required bool success = 5;
   repeated Instruction instructions = 6;
   required string version = 7;
   required uint32 base_fee = 8;
   required uint32 priority_fee = 9;
-  required uint64 compute_units_consumed = 10;
-  required uint64 compute_units_allocated = 11;
+  required uint32 compute_units_consumed = 10;
+  required uint32 compute_units_allocated = 11;
   required uint32 byte_size = 12;
   required uint32 trx_accounts_size = 13;
   required uint32 writable_alt_accounts_size = 14;
