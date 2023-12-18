@@ -1,0 +1,61 @@
+syntax = "proto2";
+
+package sf.solana.transactions.v1;
+
+message Output {
+  repeated TransactionStats data = 1;
+}
+
+message TransactionStats {
+  required uint32 block_slot = 1;
+  required string block_date = 2;
+  required uint32 index = 3;
+  required uint32 required_signatures = 4;
+  required uint32 readonly_signed_accounts = 5;
+  required uint32 readonly_unsigned_accounts = 6;
+  required string id = 7;
+  required bool success = 8;
+  repeated Instruction instructions = 9;
+  repeated uint64 pre_balances = 10;
+  repeated uint64 post_balances = 11;
+  repeated TokenBalance pre_token_balances = 12;
+  repeated TokenBalance post_token_balances = 13;
+  repeated string signatures = 14;
+  required string signer = 15;
+  required string version = 16;
+  repeated string executing_accounts = 17;
+  required bool logs_truncated = 18;
+  required string program = 19;
+
+}
+
+
+message Instruction {
+  required string executing_account = 1;
+  repeated string account_arguments = 2;
+  required string data = 3;
+  repeated InnerInstruction inner_instructions = 4;
+  repeated string program_logs = 8;
+  repeated string program_data = 9;
+
+}
+
+message InnerInstruction {
+  required string executing_account = 1;
+  repeated string account_arguments = 2;
+  required string data = 3;
+  repeated string program_logs = 4;
+  repeated string program_data = 5;
+   
+}
+
+message TokenBalance {
+  required string account = 1;
+  required double amount = 2;
+  required string mint = 3;
+  required string owner = 4;
+  required string program = 5;
+
+}
+
+
