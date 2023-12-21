@@ -18,7 +18,8 @@ const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
 
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
-    let block_date = match block.block_time.as_ref() {
+    let block_time = block.block_time.as_ref();
+    let block_date = match block_time {
         Some(block_time) => match convert_to_date(block_time.timestamp) {
             Ok(date) => date,
             Err(_) => "Error converting block time to date".to_string(),
@@ -71,6 +72,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         let mut transaction_stats = TransactionStats::default();
         transaction_stats.block_slot = block_slot as u32;
         transaction_stats.block_date = block_date.to_string();
+        transaction_stats.block_time = block_time.unwrap().timestamp as u64;
 
         populate_transaction_stats(
             &mut transaction_stats,

@@ -28,6 +28,7 @@ message TransactionStats {
   repeated string executing_accounts = 19;
   repeated string log_messages = 29;
   required bool logs_truncated = 30;
+  required uint64 block_time = 31;
 }
 
 

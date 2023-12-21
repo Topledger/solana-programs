@@ -50,6 +50,8 @@ pub struct TransactionStats {
     pub log_messages: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(bool, required, tag="30")]
     pub logs_truncated: bool,
+    #[prost(uint64, required, tag="31")]
+    pub block_time: u64,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
