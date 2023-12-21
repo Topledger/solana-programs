@@ -1,13 +1,13 @@
 mod pb;
 mod utils;
 
-use pb::sf::solana::transaction_stats::v1::{Output, TransactionStats, Instruction};
+use std::collections::HashSet;
 
-
+use pb::sf::solana::transaction_stats::v1::{Instruction, Output, TransactionStats};
 
 use substreams_solana::pb::sf::solana::r#type::v1::{
-    Block, CompiledInstruction, Message, MessageHeader,
-    Transaction, TransactionStatusMeta,
+    Block, CompiledInstruction, InnerInstructions, Message, MessageHeader, Transaction,
+    TransactionStatusMeta,
 };
 use utils::{
     calculate_byte_size, calculate_instruction_size, compact_array_size, convert_to_date,
@@ -18,7 +18,8 @@ const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
 
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
-    let block_date = match block.block_time.as_ref() {
+    let block_time = block.block_time.as_ref();
+    let block_date = match block_time {
         Some(block_time) => match convert_to_date(block_time.timestamp) {
             Ok(date) => date,
             Err(_) => "Error converting block time to date".to_string(),
@@ -58,6 +59,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         let mut transaction_stats = TransactionStats::default();
         transaction_stats.block_slot = block_slot as u32;
         transaction_stats.block_date = block_date.to_string();
+        transaction_stats.block_time = block_time.unwrap().timestamp as u64;
 
         populate_transaction_stats(
             &mut transaction_stats,
@@ -104,11 +106,14 @@ fn populate_transaction_stats(
     transaction_stats.readable_alt_accounts_size = meta.loaded_readonly_addresses.len() as u32;
     transaction_stats.writable_alt_accounts_size = meta.loaded_writable_addresses.len() as u32;
     transaction_stats.logs_truncated = contains_substring(&meta.log_messages, "Log truncated");
+    transaction_stats.executing_accounts = Vec::from_iter(get_unique_program_ids(
+        &message.instructions,
+        &meta.inner_instructions,
+        accounts,
+    ));
     update_transaction_stats_compute_units(transaction_stats, parsed_logs, meta);
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
 }
-
-
 
 fn process_instruction(
     instruction: &CompiledInstruction,
@@ -143,7 +148,6 @@ fn update_transaction_stats_instructions(
     transaction_stats.instructions = instructions;
 }
 
-
 fn update_transaction_stats_compute_units(
     transaction_stats: &mut TransactionStats,
     parsed_logs: &Vec<LogContext>,
@@ -166,4 +170,24 @@ fn contains_substring(log_messages: &Vec<String>, sub_str: &str) -> bool {
     log_messages
         .iter()
         .any(|message| message.to_lowercase().contains(&sub_str_lower))
+}
+
+fn get_unique_program_ids(
+    instructions: &Vec<CompiledInstruction>,
+    inner_instructions: &Vec<InnerInstructions>,
+    accounts: &Vec<String>,
+) -> HashSet<String> {
+    let mut unique_ids = HashSet::new();
+    for instruction in instructions.iter() {
+        let executing_account = &accounts[instruction.program_id_index as usize];
+        unique_ids.insert(executing_account.to_string());
+    }
+    for inner_instruction in inner_instructions.iter() {
+        for inner_inst in inner_instruction.instructions.iter() {
+            let executing_account = &accounts[inner_inst.program_id_index as usize];
+            unique_ids.insert(executing_account.to_string());
+        }
+    }
+
+    unique_ids
 }
