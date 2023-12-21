@@ -130,7 +130,7 @@ pub fn parse_trade_instruction(
             trade_data.fee_account = input_accounts.get(8).unwrap().to_string();
 
             trade_data.amount = get_sol_balance_change(
-                &trade_data.reserve_stake,
+                &trade_data.validator_stake,
                 accounts,
                 pre_balances,
                 post_balances,
