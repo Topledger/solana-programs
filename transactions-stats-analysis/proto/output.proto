@@ -1,0 +1,41 @@
+syntax = "proto2";
+
+package sf.solana.transaction_stats.v1;
+
+message Output {
+  repeated TransactionStats data = 1;
+}
+
+message TransactionStats {
+  required uint32 block_slot = 1;
+  required uint64 block_time = 2;
+  required string block_date = 3;
+  required uint64 fee = 4;
+  required string id = 5;
+  required bool success = 6;
+  repeated string executing_accounts = 7;
+  repeated Instruction instructions = 8;
+  required string version = 9;
+  required uint32 base_fee = 10;
+  required uint64 priority_fee = 11;
+  required uint64 compute_units_consumed = 12;
+  required uint64 compute_units_allocated = 13;
+  required uint32 byte_size = 14;
+  required uint32 trx_accounts_size = 15;
+  required uint32 writable_alt_accounts_size = 16;
+  required uint32 readable_alt_accounts_size = 17;
+  required bool logs_truncated = 18;
+  required uint32 signatures_size = 19;
+
+}
+
+
+message Instruction {
+  required string executing_account = 1;
+  required uint32 bytes = 2;
+  required uint32 account_bytes = 3;
+  required uint32 data_bytes = 4;
+
+}
+
+
