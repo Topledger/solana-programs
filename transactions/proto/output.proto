@@ -1,0 +1,85 @@
+syntax = "proto2";
+
+package sf.solana.transactions.v1;
+
+message Output {
+  repeated TransactionStats data = 1;
+}
+
+message TransactionStats {
+  required uint64 block_slot = 1;
+  required string block_date = 2;
+  required int64 block_time = 3;
+  required uint32 index = 4;
+  required uint64 fee = 5;
+  optional Error error = 6;
+  required uint32 required_signatures = 7;
+  required uint32 readonly_signed_accounts = 8;
+  required uint32 readonly_unsigned_accounts = 9;
+  required string id = 10;
+  required bool success = 11;
+  repeated Instruction instructions = 14;
+  repeated string account_keys = 15;
+  repeated string log_messages = 16;
+  repeated uint64 pre_balances = 18;
+  repeated uint64 post_balances = 19;
+  repeated TokenBalance pre_token_balances = 20;
+  repeated TokenBalance post_token_balances = 21;
+  repeated string signatures = 22;
+  required string signer = 23;
+  required string version = 24;
+  repeated string executing_accounts = 25;
+  required uint32 base_fee = 26;
+  required uint32 priority_fee = 27;
+  required uint64 compute_units_consumed = 28;
+  required uint64 compute_units_allocated = 29;
+  required uint32 byte_size = 30;
+  required uint32 trx_accounts_size = 31;
+  required uint32 writable_alt_accounts_size = 32;
+  required uint32 readable_alt_accounts_size = 33;
+  required bool logs_truncated = 34;
+  required string block_hash = 35;
+  required string recent_block_hash = 36;
+
+}
+
+
+message Error {
+  required string program = 1;
+  required string message = 2;
+  required string message_decoded = 3;
+}
+
+message Instruction {
+  required string executing_account = 1;
+  repeated string account_arguments = 2;
+  required string data = 3;
+  
+  repeated InnerInstruction inner_instructions = 4;
+  required uint32 bytes = 5;
+  required uint32 account_bytes = 6;
+  required uint32 data_bytes = 7;
+  repeated string program_logs = 8;
+  repeated string program_data = 9;
+
+}
+
+message InnerInstruction {
+  required string executing_account = 1;
+  repeated string account_arguments = 2;
+  required string data = 3;
+  repeated string program_logs = 4;
+  repeated string program_data = 5;
+   
+}
+
+message TokenBalance {
+  required string account = 1;
+  required double amount = 2;
+  required string mint = 3;
+  required string owner = 4;
+  required string program = 5;
+
+}
+
+
