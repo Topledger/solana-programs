@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+package sf.solana.program_analysis.v1;
+
+message Output {
+  repeated ProgramStats data = 1;
+}
+
+message ProgramStats {
+  required string block_date = 1;
+  required string program_id = 2;
+  repeated string signers = 3;
+  repeated string fee_payers = 4;
+  required uint32 fee_lamports = 5;
+  required uint32 base_fee_lamports = 6;
+  required uint32 priority_fee_lamports = 7;
+  required uint32 compute_units_consumed = 8;
+  required uint32 compute_units_allocated = 9;
+  required uint32 successful_txns_count = 10;
+  required uint32 failed_txns_count = 11;
+  required uint32 total_outer_invocation_count = 12;
+  required uint32 total_inner_invocation_count = 13;
+  required uint32 failed_invocation_count = 14;
+  map<string, uint32> errors = 15;
+}											
+ 
