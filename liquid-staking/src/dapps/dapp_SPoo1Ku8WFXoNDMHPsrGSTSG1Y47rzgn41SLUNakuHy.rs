@@ -172,6 +172,7 @@ pub fn parse_trade_instruction(
                 pre_token_balances,
                 post_token_balances,
                 accounts,
+                Some(&trade_data.pool_mint),
             );
 
             enrich_with_ix_data(
@@ -239,6 +240,7 @@ pub fn parse_trade_instruction(
                 pre_token_balances,
                 post_token_balances,
                 accounts,
+                Some(&trade_data.pool_mint),
             );
 
             enrich_with_ix_data(

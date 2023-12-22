@@ -22,6 +22,7 @@ pub fn get_token_balance_change(
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
     accounts: &Vec<String>,
+    pool_mint: Option<&String>,
 ) -> f64 {
     let index = accounts.iter().position(|r| r == address).unwrap();
 
@@ -32,14 +33,18 @@ pub fn get_token_balance_change(
         .iter()
         .filter(|token_balance| token_balance.account_index == index as u32)
         .for_each(|token_balance: &TokenBalance| {
-            pre_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
+            if pool_mint.is_some() & token_balance.mint.to_string().eq(pool_mint.unwrap()) {
+                pre_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
+            }
         });
 
     post_token_balances
         .iter()
         .filter(|token_balance| token_balance.account_index == index as u32)
         .for_each(|token_balance: &TokenBalance| {
-            post_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
+            if pool_mint.is_some() & token_balance.mint.to_string().eq(pool_mint.unwrap()) {
+                post_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
+            }
         });
 
     return post_balance - pre_balance;

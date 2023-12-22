@@ -35,26 +35,26 @@ pub struct TradeData {
     #[prost(string, required, tag="13")]
     pub fee_account: ::prost::alloc::string::String,
     #[prost(double, required, tag="14")]
-    pub withdraw_fee: f64,
-    #[prost(double, required, tag="15")]
     pub mint_amount: f64,
-    #[prost(double, required, tag="16")]
+    #[prost(double, required, tag="15")]
     pub burn_amount: f64,
-    #[prost(double, required, tag="17")]
+    #[prost(double, required, tag="16")]
     pub fee_amount: f64,
-    #[prost(bool, required, tag="18")]
+    #[prost(bool, required, tag="17")]
     pub is_inner_instruction: bool,
-    #[prost(uint32, required, tag="19")]
+    #[prost(uint32, required, tag="18")]
     pub instruction_index: u32,
-    #[prost(uint32, required, tag="20")]
+    #[prost(uint32, required, tag="19")]
     pub inner_instruction_index: u32,
-    #[prost(string, required, tag="21")]
+    #[prost(string, required, tag="20")]
     pub outer_program: ::prost::alloc::string::String,
-    #[prost(string, required, tag="22")]
+    #[prost(string, required, tag="21")]
     pub inner_program: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag="23")]
+    #[prost(uint64, required, tag="22")]
     pub txn_fee: u64,
-    #[prost(double, required, tag="24")]
+    #[prost(double, required, tag="23")]
     pub staking_reward: f64,
+    #[prost(string, required, tag="24")]
+    pub liq_pool_sol_leg: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)

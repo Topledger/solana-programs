@@ -20,15 +20,15 @@ message TradeData {
   required string validator_stake = 11;
   required string pool_mint = 12;
   required string fee_account = 13;
-  required double withdraw_fee = 14;
-  required double mint_amount = 15;
-  required double burn_amount = 16;
-  required double fee_amount = 17;
-  required bool is_inner_instruction = 18;
-  required uint32 instruction_index = 19;
-  required uint32 inner_instruction_index = 20;
-  required string outer_program = 21;
-  required string inner_program = 22;
-  required uint64 txn_fee = 23;
-  required double staking_reward = 24;
+  required double mint_amount = 14;
+  required double burn_amount = 15;
+  required double fee_amount = 16;
+  required bool is_inner_instruction = 17;
+  required uint32 instruction_index = 18;
+  required uint32 inner_instruction_index = 19;
+  required string outer_program = 20;
+  required string inner_program = 21;
+  required uint64 txn_fee = 22;
+  required double staking_reward = 23;
+  required string liq_pool_sol_leg = 24;
 }
