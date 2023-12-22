@@ -12,11 +12,11 @@ use crate::pb::sf::solana::block_meta::v1::{
     PbMapItemLayout, PbMigrateArgsLayout, PbMigrationTypeLayout, PbMintArgsLayout,
     PbMintNewEditionFromMasterEditionViaTokenArgsLayout, PbMintPrintingTokensViaTokenArgsLayout,
     PbPayloadLayout, PbPayloadTypeLayout, PbPrintSupplyLayout, PbReservationLayout,
-    PbRevokeArgsLayout, PbRuleSetToggleLayout, PbSeedsVecLayout, PbSetCollectionSizeArgsLayout,
-    PbSetReservationListArgsLayout, PbTransferArgsLayout, PbTransferOutOfEscrowArgsLayout,
-    PbUnlockArgsLayout, PbUpdateArgsLayout, PbUpdateMetadataAccountArgsLayout,
-    PbUpdateMetadataAccountArgsV2Layout, PbUseArgsLayout, PbUsesLayout, PbUsesToggleLayout,
-    PbUtilizeArgsLayout, PbVerificationArgsLayout,
+    PbRevokeArgsLayout, PbRuleSetToggleLayout, PbSeedsVecLayout, PbSeedsVecLayoutInner,
+    PbSetCollectionSizeArgsLayout, PbSetReservationListArgsLayout, PbTransferArgsLayout,
+    PbTransferOutOfEscrowArgsLayout, PbUnlockArgsLayout, PbUpdateArgsLayout,
+    PbUpdateMetadataAccountArgsLayout, PbUpdateMetadataAccountArgsV2Layout, PbUseArgsLayout,
+    PbUsesLayout, PbUsesToggleLayout, PbUtilizeArgsLayout, PbVerificationArgsLayout,
 };
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
@@ -238,15 +238,31 @@ impl AssetDataLayout {
 }
 
 #[derive(BorshDeserialize, Debug, Default)]
+pub struct SeedsVecLayoutInner {
+    pub values: Vec<u8>,
+}
+
+impl SeedsVecLayoutInner {
+    fn to_proto_struct(&self) -> PbSeedsVecLayoutInner {
+        let mut values: Vec<u32> = vec![];
+        for x in self.values.as_slice().iter() {
+            values.push(*x as u32);
+        }
+
+        PbSeedsVecLayoutInner { values: values }
+    }
+}
+
+#[derive(BorshDeserialize, Debug, Default)]
 pub struct SeedsVecLayout {
-    pub seeds: Vec<u8>,
+    pub seeds: Vec<SeedsVecLayoutInner>,
 }
 
 impl SeedsVecLayout {
     pub fn to_proto_struct(&self) -> PbSeedsVecLayout {
-        let mut seeds: Vec<u32> = vec![];
+        let mut seeds: Vec<PbSeedsVecLayoutInner> = vec![];
         for x in self.seeds.as_slice().iter() {
-            seeds.push(x.clone() as u32);
+            seeds.push(x.to_proto_struct());
         }
 
         PbSeedsVecLayout { seeds: seeds }

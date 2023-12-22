@@ -163,9 +163,15 @@ pub struct PbCreateMetadataAccountArgsV3Layout {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct PbSeedsVecLayout {
+pub struct PbSeedsVecLayoutInner {
     #[prost(uint32, repeated, packed="false", tag="1")]
-    pub seeds: ::prost::alloc::vec::Vec<u32>,
+    pub values: ::prost::alloc::vec::Vec<u32>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSeedsVecLayout {
+    #[prost(message, repeated, tag="1")]
+    pub seeds: ::prost::alloc::vec::Vec<PbSeedsVecLayoutInner>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

@@ -98,8 +98,12 @@ message PbCreateMetadataAccountArgsV3Layout {
   optional PbCollectionDetailsLayout collectionDetails = 3;
 }
 
+message PbSeedsVecLayoutInner {
+  repeated uint32 values = 1;
+}
+
 message PbSeedsVecLayout {
-  repeated uint32 seeds = 1;
+  repeated PbSeedsVecLayoutInner seeds = 1;
 }
 
 message PbLeafInfoLayout {
