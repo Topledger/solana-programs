@@ -1,4 +1,6 @@
 use borsh::{BorshDeserialize, BorshSerialize};
+use serde::de::IntoDeserializer;
+use substreams::pb::substreams::module::input;
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
 use crate::{
@@ -12,6 +14,7 @@ const CLAIM_DISCRIMINATOR: u64 = 15162669785878545982;
 const ORDER_UNSTAKE_DISCRIMINATOR: u64 = 2630311593909462881;
 const UPDATE_DEACTIVATED_DISCRIMINATOR: u64 = 3670262844445943824;
 const UPDATE_ACTIVE_DISCRIMINATOR: u64 = 10979201432142562052;
+const LIQUID_UNSTAKE_DISCRIMINATOR: u64 = 1156549617839971870;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 struct MintToLayout {
@@ -154,17 +157,28 @@ pub fn parse_trade_instruction(
             trade_data.validator_stake = "".to_string();
             trade_data.pool_mint = input_accounts.get(1).unwrap().to_string();
             trade_data.fee_account = "".to_string();
+            trade_data.liq_pool_sol_leg = input_accounts.get(2).unwrap().to_string();
 
             trade_data.staking_reward = 0.0;
             trade_data.burn_amount = 0.0;
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.fee_amount = 0.0;
-            trade_data.amount = get_sol_balance_change(
+
+            let reserve_stake_sol_balance_change = get_sol_balance_change(
                 &trade_data.reserve_stake,
                 accounts,
                 pre_balances,
                 post_balances,
             );
+            let liq_pool_sol_leg_sol_balance_change = get_sol_balance_change(
+                &trade_data.liq_pool_sol_leg,
+                accounts,
+                pre_balances,
+                post_balances,
+            );
+
+            trade_data.amount =
+                reserve_stake_sol_balance_change + liq_pool_sol_leg_sol_balance_change;
 
             enrich_with_ix_details(
                 &mut trade_data,
@@ -276,12 +290,19 @@ pub fn parse_trade_instruction(
             trade_data.reserve_stake = input_accounts.get(4).unwrap().to_string();
             trade_data.validator_stake = "".to_string();
             trade_data.pool_mint = input_accounts.get(5).unwrap().to_string();
-            trade_data.fee_account = "".to_string();
+            trade_data.fee_account = input_accounts.get(7).unwrap().to_string();
 
             enrich_with_logs_data(&mut trade_data, log_messages);
             trade_data.mint_amount = 0.0;
+            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.burn_amount = 0.0;
-            trade_data.fee_amount = 0.0;
+            trade_data.fee_amount = get_token_balance_change(
+                &trade_data.fee_account,
+                pre_token_balances,
+                post_token_balances,
+                accounts,
+                Some(&trade_data.pool_mint),
+            );
             trade_data.amount = 0.0;
 
             enrich_with_ix_details(
@@ -304,13 +325,61 @@ pub fn parse_trade_instruction(
             trade_data.reserve_stake = input_accounts.get(4).unwrap().to_string();
             trade_data.validator_stake = "".to_string();
             trade_data.pool_mint = input_accounts.get(5).unwrap().to_string();
-            trade_data.fee_account = "".to_string();
+            trade_data.fee_account = input_accounts.get(7).unwrap().to_string();
 
             enrich_with_logs_data(&mut trade_data, log_messages);
             trade_data.mint_amount = 0.0;
+            enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.burn_amount = 0.0;
-            trade_data.fee_amount = 0.0;
+            trade_data.fee_amount = get_token_balance_change(
+                &trade_data.fee_account,
+                pre_token_balances,
+                post_token_balances,
+                accounts,
+                Some(&trade_data.pool_mint),
+            );
             trade_data.amount = 0.0;
+
+            enrich_with_ix_details(
+                &mut trade_data,
+                is_inner_instruction,
+                outer_idx,
+                inner_idx,
+                outer_program,
+                &inner_program,
+            );
+
+            result = Some(trade_data);
+        }
+        LIQUID_UNSTAKE_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "LiquidUnstake".to_string();
+
+            trade_data.stake_pool = input_accounts.get(0).unwrap().to_string();
+            trade_data.withdraw_authority = "".to_string();
+            trade_data.liq_pool_sol_leg = input_accounts.get(2).unwrap().to_string();
+            trade_data.reserve_stake = "".to_string();
+            trade_data.validator_stake = "".to_string();
+            trade_data.pool_mint = input_accounts.get(1).unwrap().to_string();
+            trade_data.fee_account = input_accounts.get(4).unwrap().to_string();
+
+            trade_data.staking_reward = 0.0;
+            trade_data.mint_amount = 0.0;
+            trade_data.burn_amount = 0.0;
+            trade_data.fee_amount = get_token_balance_change(
+                &trade_data.fee_account,
+                pre_token_balances,
+                post_token_balances,
+                accounts,
+                Some(&trade_data.pool_mint),
+            );
+            trade_data.amount = -1.0
+                * get_sol_balance_change(
+                    &trade_data.liq_pool_sol_leg,
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                );
 
             enrich_with_ix_details(
                 &mut trade_data,
