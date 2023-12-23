@@ -46,6 +46,10 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             None => continue,
         };
 
+        if meta.err.is_some() {
+            continue;
+        }
+
         let message = transaction.message.as_ref().expect("Message is missing");
 
         // Skip Vote Transactions
@@ -101,7 +105,7 @@ fn populate_transaction_stats(
     meta: &TransactionStatusMeta,
     parsed_logs: &Vec<LogContext>,
     index: usize,
-    _fees: u64,
+    fees: u64,
     header: &MessageHeader,
     message: &Message,
 ) {
@@ -113,7 +117,7 @@ fn populate_transaction_stats(
 
     transaction_stats.index = index as u32;
     transaction_stats.id = bs58::encode(&transaction.signatures[0]).into_string();
-    transaction_stats.success = meta.err.is_none();
+    transaction_stats.fees = fees;
     transaction_stats.pre_balances = meta.pre_balances.clone();
     transaction_stats.post_balances = meta.post_balances.clone();
     transaction_stats.signatures = transaction
@@ -128,6 +132,8 @@ fn populate_transaction_stats(
         "legacy".into()
     };
     transaction_stats.logs_truncated = contains_substring(&meta.log_messages, "Log truncated");
+    transaction_stats.log_messages = meta.log_messages.clone();
+    transaction_stats.log_messages = accounts.clone();
 
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
     update_transaction_stats_token_balances(transaction_stats, meta, accounts);
