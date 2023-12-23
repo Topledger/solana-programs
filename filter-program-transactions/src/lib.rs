@@ -41,14 +41,14 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             None => continue,
         };
 
-        if meta.err.is_some() {
-            continue;
-        }
-
         let transaction = match trx.transaction.as_ref() {
             Some(transaction) => transaction,
             None => continue,
         };
+
+        if meta.err.is_some() {
+            continue;
+        }
 
         let message = transaction.message.as_ref().expect("Message is missing");
 
@@ -105,7 +105,7 @@ fn populate_transaction_stats(
     meta: &TransactionStatusMeta,
     parsed_logs: &Vec<LogContext>,
     index: usize,
-    _fees: u64,
+    fees: u64,
     header: &MessageHeader,
     message: &Message,
 ) {
@@ -114,49 +114,41 @@ fn populate_transaction_stats(
     transaction_stats.required_signatures = num_required_signatures;
     transaction_stats.readonly_signed_accounts = header.num_readonly_signed_accounts;
     transaction_stats.readonly_unsigned_accounts = header.num_readonly_unsigned_accounts;
-    transaction_stats.account_keys = accounts.to_vec();
 
     transaction_stats.index = index as u32;
     transaction_stats.id = bs58::encode(&transaction.signatures[0]).into_string();
+    transaction_stats.fees = fees;
     transaction_stats.pre_balances = meta.pre_balances.clone();
     transaction_stats.post_balances = meta.post_balances.clone();
+    transaction_stats.signatures = transaction
+        .signatures
+        .iter()
+        .map(|sig| bs58::encode(sig).into_string())
+        .collect();
     transaction_stats.signer = accounts[0].clone();
     transaction_stats.version = if message.versioned {
         "0".into()
     } else {
         "legacy".into()
     };
-    transaction_stats.log_messages = meta.log_messages.clone();
     transaction_stats.logs_truncated = contains_substring(&meta.log_messages, "Log truncated");
-    transaction_stats.instructions = process_instructions(accounts, message);
-    transaction_stats.inner_instructions = process_inner_instructions(meta, accounts);
+    transaction_stats.log_messages = meta.log_messages.clone();
+    transaction_stats.account_keys = accounts.clone();
 
-    transaction_stats.signatures = transaction
-        .signatures
-        .iter()
-        .map(|sig| bs58::encode(sig).into_string())
-        .collect();
-
+    update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
     update_transaction_stats_token_balances(transaction_stats, meta, accounts);
     update_transaction_stats_executing_accounts(transaction_stats);
-    assign_logs_to_inst_and_inner_inst(
-        &mut transaction_stats.instructions,
-        &mut transaction_stats.inner_instructions,
-        &parsed_logs,
-    );
 }
 
-fn get_unique_program_ids(
-    instructions: &Vec<transactions::v1::Instruction>,
-    inner_instructions: &Vec<transactions::v1::InnerInstruction>,
-) -> HashSet<String> {
+fn get_unique_program_ids(instructions: &Vec<transactions::v1::Instruction>) -> HashSet<String> {
     let mut unique_ids = HashSet::new();
     for instruction in instructions.iter() {
         // Insert the program_id of the current LogContext
         unique_ids.insert(instruction.executing_account.clone());
-    }
-    for inner_instruction in inner_instructions.iter() {
-        unique_ids.insert(inner_instruction.executing_account.clone());
+
+        for inner_instruction in instruction.inner_instructions.iter() {
+            unique_ids.insert(inner_instruction.executing_account.clone());
+        }
     }
 
     unique_ids
@@ -165,6 +157,8 @@ fn get_unique_program_ids(
 fn process_instruction(
     instruction: &CompiledInstruction,
     accounts: &Vec<String>,
+    meta: &TransactionStatusMeta,
+    index: usize,
 ) -> transactions::v1::Instruction {
     let executing_account = &accounts[instruction.program_id_index as usize];
     let indices = byte_vector_to_indices(&instruction.accounts);
@@ -175,39 +169,28 @@ fn process_instruction(
         account_arguments,
         data,
         executing_account: executing_account.to_string(),
+        inner_instructions: process_inner_instructions(index, meta, accounts),
         ..Default::default()
     }
 }
 
 // Function to update TransactionStats.instructions
-fn process_instructions(
+fn update_transaction_stats_instructions(
+    transaction_stats: &mut TransactionStats,
     accounts: &Vec<String>,
+    meta: &TransactionStatusMeta,
     message: &Message,
-) -> Vec<transactions::v1::Instruction> {
-    message
+    parsed_logs: &Vec<LogContext>,
+) {
+    let mut instructions = message
         .instructions
         .iter()
-        .map(|compiled| process_instruction(compiled, accounts))
-        .collect()
-}
+        .enumerate()
+        .map(|(index, compiled)| process_instruction(compiled, accounts, meta, index))
+        .collect();
 
-// Function to update TransactionStats.inner_instructions
-fn process_inner_instructions(
-    meta: &TransactionStatusMeta,
-    accounts: &Vec<String>,
-) -> Vec<transactions::v1::InnerInstruction> {
-    meta.inner_instructions
-        .iter()
-        .filter_map(|inner_inst| {
-            Some(
-                inner_inst
-                    .instructions
-                    .iter()
-                    .map(|inst| process_inner_instruction(inst, accounts, inner_inst.index)),
-            )
-        })
-        .flatten()
-        .collect()
+    assign_logs_to_instructions(&mut instructions, parsed_logs);
+    transaction_stats.instructions = instructions;
 }
 
 // Function to convert a byte vector representing account indices to a Vec<usize>
@@ -224,10 +207,32 @@ fn filter_accounts_by_indices(accounts: &[String], indices: Vec<usize>) -> Vec<S
         .collect()
 }
 
+fn process_inner_instructions(
+    program_index: usize,
+    meta: &TransactionStatusMeta,
+    accounts: &Vec<String>,
+) -> Vec<transactions::v1::InnerInstruction> {
+    meta.inner_instructions
+        .iter()
+        .filter_map(|inner_inst| {
+            if inner_inst.index as usize == program_index {
+                Some(
+                    inner_inst
+                        .instructions
+                        .iter()
+                        .map(|inst| process_inner_instruction(inst, accounts)),
+                )
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect()
+}
+
 fn process_inner_instruction(
     inner_inst: &InnerInstruction,
     accounts: &Vec<String>,
-    outer_program_index: u32,
 ) -> transactions::v1::InnerInstruction {
     let executing_account = &accounts[inner_inst.program_id_index as usize];
     let data = bs58::encode(inner_inst.data.clone()).into_string();
@@ -238,29 +243,24 @@ fn process_inner_instruction(
         account_arguments,
         data,
         executing_account: executing_account.to_string(),
-        outer_program_index: outer_program_index,
         ..Default::default()
     };
 }
 
-fn assign_logs_to_inst_and_inner_inst(
+fn assign_logs_to_instructions(
     instructions: &mut Vec<transactions::v1::Instruction>,
-    inner_instructions: &mut Vec<transactions::v1::InnerInstruction>,
     log_contexts: &Vec<LogContext>,
 ) {
     let mut iterator = LogContextIterator::new(log_contexts);
 
-    for (idx, instruction) in instructions.iter_mut().enumerate() {
+    for instruction in instructions.iter_mut() {
         if let Some(log_context) = iterator.next() {
             if log_context.program_id == instruction.executing_account {
                 instruction.program_logs = log_context.program_logs.clone();
                 instruction.program_data = log_context.program_data.clone();
             }
 
-            for inner_instruction in inner_instructions
-                .iter_mut()
-                .filter(|x| x.outer_program_index == idx as u32)
-            {
+            for inner_instruction in instruction.inner_instructions.iter_mut() {
                 if let Some(inner_log_context) = iterator.next() {
                     if inner_log_context.program_id == inner_instruction.executing_account {
                         inner_instruction.program_logs = inner_log_context.program_logs.clone();
@@ -316,10 +316,8 @@ fn process_token_balance(
 }
 
 fn update_transaction_stats_executing_accounts(transaction_stats: &mut TransactionStats) {
-    transaction_stats.executing_accounts = Vec::from_iter(get_unique_program_ids(
-        &transaction_stats.instructions,
-        &transaction_stats.inner_instructions,
-    ));
+    transaction_stats.executing_accounts =
+        Vec::from_iter(get_unique_program_ids(&transaction_stats.instructions));
 }
 
 fn contains_substring(log_messages: &Vec<String>, sub_str: &str) -> bool {

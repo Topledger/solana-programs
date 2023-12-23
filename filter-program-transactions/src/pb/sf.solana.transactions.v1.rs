@@ -11,9 +11,9 @@ pub struct TransactionStats {
     #[prost(uint32, required, tag="1")]
     pub block_slot: u32,
     #[prost(string, required, tag="2")]
-    pub program: ::prost::alloc::string::String,
-    #[prost(string, required, tag="3")]
     pub block_date: ::prost::alloc::string::String,
+    #[prost(uint64, required, tag="3")]
+    pub block_time: u64,
     #[prost(uint32, required, tag="4")]
     pub index: u32,
     #[prost(uint32, required, tag="5")]
@@ -24,12 +24,12 @@ pub struct TransactionStats {
     pub readonly_unsigned_accounts: u32,
     #[prost(string, required, tag="8")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="9")]
+    #[prost(uint64, required, tag="9")]
+    pub fees: u64,
+    #[prost(string, repeated, tag="10")]
     pub account_keys: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(message, repeated, tag="10")]
-    pub instructions: ::prost::alloc::vec::Vec<Instruction>,
     #[prost(message, repeated, tag="11")]
-    pub inner_instructions: ::prost::alloc::vec::Vec<InnerInstruction>,
+    pub instructions: ::prost::alloc::vec::Vec<Instruction>,
     #[prost(uint64, repeated, packed="false", tag="12")]
     pub pre_balances: ::prost::alloc::vec::Vec<u64>,
     #[prost(uint64, repeated, packed="false", tag="13")]
@@ -46,12 +46,12 @@ pub struct TransactionStats {
     pub version: ::prost::alloc::string::String,
     #[prost(string, repeated, tag="19")]
     pub executing_accounts: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, repeated, tag="29")]
-    pub log_messages: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(bool, required, tag="30")]
+    #[prost(bool, required, tag="20")]
     pub logs_truncated: bool,
-    #[prost(uint64, required, tag="31")]
-    pub block_time: u64,
+    #[prost(string, required, tag="21")]
+    pub program: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag="22")]
+    pub log_messages: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -62,9 +62,11 @@ pub struct Instruction {
     pub account_arguments: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, required, tag="3")]
     pub data: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="4")]
+    #[prost(message, repeated, tag="4")]
+    pub inner_instructions: ::prost::alloc::vec::Vec<InnerInstruction>,
+    #[prost(string, repeated, tag="8")]
     pub program_logs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, repeated, tag="5")]
+    #[prost(string, repeated, tag="9")]
     pub program_data: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
@@ -80,8 +82,6 @@ pub struct InnerInstruction {
     pub program_logs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, repeated, tag="5")]
     pub program_data: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(uint32, required, tag="6")]
-    pub outer_program_index: u32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

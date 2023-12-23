@@ -8,16 +8,16 @@ message Output {
 
 message TransactionStats {
   required uint32 block_slot = 1;
-  required string program = 2;
-  required string block_date = 3;
+  required string block_date = 2;
+  required uint64 block_time = 3;
   required uint32 index = 4;
   required uint32 required_signatures = 5;
   required uint32 readonly_signed_accounts = 6;
   required uint32 readonly_unsigned_accounts = 7;
   required string id = 8;
-  repeated string account_keys = 9;
-  repeated Instruction instructions = 10;
-  repeated InnerInstruction inner_instructions = 11;
+  required uint64 fees = 9;
+  repeated string account_keys= 10;
+  repeated Instruction instructions = 11;
   repeated uint64 pre_balances = 12;
   repeated uint64 post_balances = 13;
   repeated TokenBalance pre_token_balances = 14;
@@ -26,9 +26,10 @@ message TransactionStats {
   required string signer = 17;
   required string version = 18;
   repeated string executing_accounts = 19;
-  repeated string log_messages = 29;
-  required bool logs_truncated = 30;
-  required uint64 block_time = 31;
+  required bool logs_truncated = 20;
+  required string program = 21;
+  repeated string log_messages = 22;
+
 }
 
 
@@ -36,8 +37,9 @@ message Instruction {
   required string executing_account = 1;
   repeated string account_arguments = 2;
   required string data = 3;
-  repeated string program_logs = 4;
-  repeated string program_data = 5;
+  repeated InnerInstruction inner_instructions = 4;
+  repeated string program_logs = 8;
+  repeated string program_data = 9;
 
 }
 
@@ -47,7 +49,6 @@ message InnerInstruction {
   required string data = 3;
   repeated string program_logs = 4;
   repeated string program_data = 5;
-  required uint32 outer_program_index = 6;
    
 }
 
@@ -57,6 +58,7 @@ message TokenBalance {
   required string mint = 3;
   required string owner = 4;
   required string program = 5;
+
 }
 
 
