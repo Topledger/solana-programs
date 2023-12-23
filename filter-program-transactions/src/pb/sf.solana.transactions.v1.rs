@@ -12,8 +12,8 @@ pub struct TransactionStats {
     pub block_slot: u32,
     #[prost(string, required, tag="2")]
     pub block_date: ::prost::alloc::string::String,
-    #[prost(uint32, required, tag="3")]
-    pub block_time: u32,
+    #[prost(uint64, required, tag="3")]
+    pub block_time: u64,
     #[prost(uint32, required, tag="4")]
     pub index: u32,
     #[prost(uint32, required, tag="5")]

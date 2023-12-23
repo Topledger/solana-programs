@@ -133,7 +133,7 @@ fn populate_transaction_stats(
     };
     transaction_stats.logs_truncated = contains_substring(&meta.log_messages, "Log truncated");
     transaction_stats.log_messages = meta.log_messages.clone();
-    transaction_stats.log_messages = accounts.clone();
+    transaction_stats.account_keys = accounts.clone();
 
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
     update_transaction_stats_token_balances(transaction_stats, meta, accounts);

@@ -9,7 +9,7 @@ message Output {
 message TransactionStats {
   required uint32 block_slot = 1;
   required string block_date = 2;
-  required uint32 block_time = 3;
+  required uint64 block_time = 3;
   required uint32 index = 4;
   required uint32 required_signatures = 5;
   required uint32 readonly_signed_accounts = 6;

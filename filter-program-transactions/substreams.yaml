@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_program_transactions_1_0_5'
-  version: v1.0.5
+  name: 'tl_solana_program_transactions_1_0_6'
+  version: v1.0.6
 
 protobuf:
   files:
