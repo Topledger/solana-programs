@@ -16,7 +16,7 @@ const SOL_MINT: &str = "So11111111111111111111111111111111111111111";
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let block_slot = block.slot;
-    
+
     let block_date = match block.block_time.as_ref() {
         Some(block_time) => match convert_to_date(block_time.timestamp) {
             Ok(date) => date,
@@ -114,8 +114,8 @@ fn update_balance_changes(
                     block_date,
                     account,
                     &token_balance.mint,
-                    0.0,
-                    ui_amount,
+                    if !is_post { ui_amount } else { 0.0 },
+                    if is_post { ui_amount } else { 0.0 },
                 )
             });
     }
