@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_account_balances_1_0_0'
-  version: v1.0.0
+  name: 'tl_account_balances_1_0_1'
+  version: v1.0.1
 
 protobuf:
   files:
