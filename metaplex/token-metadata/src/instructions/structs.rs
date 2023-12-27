@@ -1375,7 +1375,9 @@ impl MigrateArgsLayout {
             } => {
                 name = "V1".to_string();
                 migration_type = Some(mig_type.to_proto_struct());
-                rule_set = Some(r_set.unwrap().to_proto_struct());
+                if r_set.is_some() {
+                    rule_set = Some(r_set.unwrap().to_proto_struct());
+                }
             }
         }
 
