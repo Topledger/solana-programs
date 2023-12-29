@@ -368,27 +368,6 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
-        "4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn" => {
-            result =
-                dapps::dapp_4ckmDgGdxQoPDLUkDT3vHgSAkzA3QRdNq5ywwY4sUSJn::parse_trade_instruction(
-                    instruction_data,
-                    input_accounts,
-                );
-        }
-        "BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg" => {
-            result =
-                dapps::dapp_BJ3jrUzddfuSrZHXSCxMUUQsjKEyLmuuyZebkcaFp2fg::parse_trade_instruction(
-                    instruction_data,
-                    input_accounts,
-                );
-        }
-        "EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o" => {
-            result =
-                dapps::dapp_EUqojwWA2rd19FZrzeBncJsm38Jm1hEhE3zsmX3bRc2o::parse_trade_instruction(
-                    instruction_data,
-                    input_accounts,
-                );
-        }
         "CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh" => {
             result =
                 dapps::dapp_CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh::parse_trade_instruction(
