@@ -8,6 +8,7 @@ mod utils;
 
 use pb::sf::solana::dex::trades::v1::{Output, TradeData};
 use substreams::log;
+use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
 use utils::convert_to_date;
 use utils::get_mint;
@@ -37,6 +38,9 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                 let msg = transaction.message.unwrap();
 
                 for (idx, inst) in msg.instructions.into_iter().enumerate() {
+                    let inner_instructions: Vec<InnerInstructions> =
+                        filter_inner_instructions(&meta.inner_instructions, idx as u32);
+
                     let program = &accounts[inst.program_id_index as usize];
                     let trade_data = get_trade_instruction(
                         program,
@@ -45,6 +49,9 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         &accounts,
                         &pre_token_balances,
                         &post_token_balances,
+                        &"".to_string(),
+                        false,
+                        &inner_instructions,
                     );
                     if trade_data.is_some() {
                         let td = trade_data.unwrap();
@@ -101,6 +108,9 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         &accounts,
                                         &pre_token_balances,
                                         &post_token_balances,
+                                        &program.to_string(),
+                                        true,
+                                        &inner_instructions,
                                     );
 
                                     if trade_data.is_some() {
@@ -170,6 +180,9 @@ fn get_trade_instruction(
     accounts: &Vec<String>,
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
+    outer_program: &String,
+    is_inner: bool,
+    inner_instructions: &Vec<InnerInstructions>,
 ) -> Option<trade_instruction::TradeInstruction> {
     let input_accounts = prepare_input_accounts(account_indices, accounts);
 
@@ -211,11 +224,23 @@ fn get_trade_instruction(
                 );
         }
         "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX" => {
-            result =
+            let jupiter_dapps = vec![
+                "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
+                "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB".to_string(),
+                "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph".to_string(),
+                "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4".to_string(),
+                "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk".to_string(),
+                "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow".to_string(),
+                "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8".to_string(),
+            ];
+
+            if is_inner & jupiter_dapps.contains(outer_program) {
+                result =
                 dapps::dapp_srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );
+            }
         }
         "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
             result =
@@ -295,17 +320,31 @@ fn get_trade_instruction(
                 );
         }
         "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin" => {
-            result =
+            let jupiter_dapps = vec![
+                "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
+                "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB".to_string(),
+                "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph".to_string(),
+                "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4".to_string(),
+                "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk".to_string(),
+                "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow".to_string(),
+                "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8".to_string(),
+            ];
+
+            if is_inner & jupiter_dapps.contains(outer_program) {
+                result =
                 dapps::dapp_9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );
+            }
         }
         "GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn" => {
             result =
                 dapps::dapp_GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
+                    inner_instructions,
+                    accounts,
                 );
         }
         "SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1" => {
@@ -485,4 +524,18 @@ fn get_amt(
 
 fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
     return (post_balances[0] - pre_balances[0]) as i64;
+}
+
+fn filter_inner_instructions(
+    meta_inner_instructions: &Vec<InnerInstructions>,
+    idx: u32,
+) -> Vec<InnerInstructions> {
+    let mut inner_instructions: Vec<InnerInstructions> = vec![];
+    let mut iterator = meta_inner_instructions.iter();
+    while let Some(inner_inst) = iterator.next() {
+        if inner_inst.index == idx as u32 {
+            inner_instructions.push(inner_inst.clone());
+        }
+    }
+    return inner_instructions;
 }
