@@ -1055,6 +1055,18 @@ pub enum DelegateArgsLayoutName {
     ProgrammableConfigV1 {
         authorization_data: Option<AuthorizationDataLayout>,
     },
+    AuthorityItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
+    DataItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
+    CollectionItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
+    ProgrammableConfigItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
 }
 
 impl Default for DelegateArgsLayoutName {
@@ -1153,6 +1165,38 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "ProgrammableConfigV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::AuthorityItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "AuthorityItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::DataItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "DataItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::CollectionItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "CollectionItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::ProgrammableConfigItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "ProgrammableConfigItemV1".to_string();
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
