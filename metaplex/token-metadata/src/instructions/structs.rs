@@ -1218,13 +1218,17 @@ pub enum RevokeArgsLayoutName {
     CollectionV1,
     SaleV1,
     TransferV1,
-    UpdateV1,
+    DataV1,
     UtilityV1,
     StakingV1,
     StandardV1,
     LockedTransferV1,
     ProgrammableConfigV1,
     MigrationV1,
+    AuthorityItemV1,
+    DataItemV1,
+    CollectionItemV1,
+    ProgrammableConfigItemV1,
 }
 
 #[derive(BorshDeserialize, Debug, Default)]
@@ -1245,8 +1249,8 @@ impl RevokeArgsLayout {
             RevokeArgsLayoutName::TransferV1 => {
                 result = "TransferV1".to_string();
             }
-            RevokeArgsLayoutName::UpdateV1 => {
-                result = "UpdateV1".to_string();
+            RevokeArgsLayoutName::DataV1 => {
+                result = "DataV1".to_string();
             }
             RevokeArgsLayoutName::UtilityV1 => {
                 result = "UtilityV1".to_string();
@@ -1265,6 +1269,18 @@ impl RevokeArgsLayout {
             }
             RevokeArgsLayoutName::MigrationV1 => {
                 result = "MigrationV1".to_string();
+            }
+            RevokeArgsLayoutName::AuthorityItemV1 => {
+                result = "AuthorityItemV1".to_string();
+            }
+            RevokeArgsLayoutName::DataItemV1 => {
+                result = "DataItemV1".to_string();
+            }
+            RevokeArgsLayoutName::CollectionItemV1 => {
+                result = "CollectionItemV1".to_string();
+            }
+            RevokeArgsLayoutName::ProgrammableConfigItemV1 => {
+                result = "ProgrammableConfigItemV1".to_string();
             }
         }
 
