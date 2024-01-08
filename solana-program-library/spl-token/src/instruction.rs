@@ -447,7 +447,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(4).1.to_vec();
             }
 
-            transferCheckedArgs = TransferCheckedLayout::try_from_slice(rest).unwrap();
+            transferCheckedArgs = TransferCheckedLayout::deserialize(&mut rest.clone()).unwrap();
         }
         13 => {
             instruction_name = String::from("ApproveChecked");
