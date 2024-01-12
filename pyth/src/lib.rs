@@ -9,7 +9,6 @@ mod prepare_arg;
 mod prepare_input_accounts;
 mod utils;
 
-use constants::PYTH_ORACLE_PROGRAM_ADDRESS;
 use pb::sf::solana::block_meta::v1::{Arg, Output, PythOracleMeta};
 use prepare_arg::prepare_arg;
 use prepare_input_accounts::prepare_input_accounts;
@@ -108,7 +107,10 @@ fn get_arg(program: &String, instruction_data: Vec<u8>, tx_id: String) -> Option
         .to_string()
         .eq(constants::PYTH_ORACLE_PROGRAM_ADDRESS)
     {
-        result = Some(prepare_arg(instruction_data, tx_id));
+        let _arg = prepare_arg(instruction_data, tx_id);
+        if _arg.instruction_type.ne("") {
+            result = Some(_arg);
+        }
     }
     return result;
 }
