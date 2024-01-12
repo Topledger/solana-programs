@@ -9,6 +9,20 @@ pub fn prepare_input_accounts(
 
     let mut result = InputAccounts::default();
     match instruction_type.as_str() {
+        "InitMapping" => {
+            result.funding = get_account_with(&input_accounts, 0);
+            result.mapping = get_account_with(&input_accounts, 1);
+        }
+        "AddMapping" => {
+            result.funding = get_account_with(&input_accounts, 0);
+            result.mapping = get_account_with(&input_accounts, 1);
+            result.next_mapping = get_account_with(&input_accounts, 2);
+        }
+        "AddProduct" => {
+            result.funding = get_account_with(&input_accounts, 0);
+            result.mapping = get_account_with(&input_accounts, 1);
+            result.product = get_account_with(&input_accounts, 2);
+        }
         "AddPrice" => {
             result.funding = get_account_with(&input_accounts, 0);
             result.product = get_account_with(&input_accounts, 1);

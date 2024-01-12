@@ -72,6 +72,10 @@ pub struct InputAccounts {
     pub signer: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag="5")]
     pub product: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag="6")]
+    pub mapping: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag="7")]
+    pub next_mapping: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

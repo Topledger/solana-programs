@@ -44,6 +44,8 @@ message InputAccounts {
   optional string funding = 3;
   optional string signer = 4;
   optional string product = 5;
+  optional string mapping = 6;
+  optional string nextMapping = 7;
 }
 
 message PythOracleMeta {

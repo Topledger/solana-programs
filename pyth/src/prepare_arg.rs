@@ -11,6 +11,9 @@ pub fn prepare_arg(instruction_data: Vec<u8>, tx_id: String) -> Arg {
     arg.instruction_type = instruction.instructionType;
 
     match arg.instruction_type.as_str() {
+        "InitMapping" => {}
+        "AddMapping" => {}
+        "AddProduct" => {}
         "AddPrice" => {
             arg.add_price_args = Some(instruction.addPriceArgs.to_proto_struct());
         }
