@@ -1,6 +1,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::pb::sf::solana::block_meta::v1::{
+    PbAddPriceArgsLayout, PbAddPublisherArgsLayout, PbDeletePublisherArgsLayout,
     PbSetMinPublishersArgsLayout, PbUpdatePriceNoFailOnErrorArgsLayout,
 };
 
@@ -85,6 +86,63 @@ impl SetMinPublishersArgsLayout {
         PbSetMinPublishersArgsLayout {
             min_publishers: self.minPublishers as u32,
             unused1: unused1.to_vec(),
+        }
+    }
+}
+
+#[derive(BorshDeserialize, Debug, Default)]
+pub struct DeletePublisherArgsLayout {
+    pub publisher: PubKeyLayout,
+}
+
+impl DeletePublisherArgsLayout {
+    pub fn to_proto_struct(&self) -> PbDeletePublisherArgsLayout {
+        PbDeletePublisherArgsLayout {
+            publisher: self.publisher.to_proto_struct(),
+        }
+    }
+}
+
+#[derive(BorshDeserialize, Debug, Default)]
+pub struct AddPublisherArgsLayout {
+    pub publisher: PubKeyLayout,
+}
+
+impl AddPublisherArgsLayout {
+    pub fn to_proto_struct(&self) -> PbAddPublisherArgsLayout {
+        PbAddPublisherArgsLayout {
+            publisher: self.publisher.to_proto_struct(),
+        }
+    }
+}
+
+#[derive(BorshDeserialize, Debug, Default)]
+pub struct PriceType {
+    pub val: u32,
+}
+
+impl PriceType {
+    pub fn to_proto_struct(&self) -> String {
+        let mut result = "Unknown".to_string();
+        if self.val == 1 {
+            result = "Price".to_string();
+        }
+
+        result
+    }
+}
+
+#[derive(BorshDeserialize, Debug, Default)]
+pub struct AddPriceArgsLayout {
+    pub exponent: i32,
+    pub priceType: PriceType,
+}
+
+impl AddPriceArgsLayout {
+    pub fn to_proto_struct(&self) -> PbAddPriceArgsLayout {
+        PbAddPriceArgsLayout {
+            exponent: self.exponent,
+            price_type: self.priceType.to_proto_struct(),
         }
     }
 }

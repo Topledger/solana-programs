@@ -9,6 +9,19 @@ pub fn prepare_input_accounts(
 
     let mut result = InputAccounts::default();
     match instruction_type.as_str() {
+        "AddPrice" => {
+            result.funding = get_account_with(&input_accounts, 0);
+            result.product = get_account_with(&input_accounts, 1);
+            result.price = get_account_with(&input_accounts, 2);
+        }
+        "AddPublisher" => {
+            result.signer = get_account_with(&input_accounts, 0);
+            result.price = get_account_with(&input_accounts, 1);
+        }
+        "DeletePublisher" => {
+            result.signer = get_account_with(&input_accounts, 0);
+            result.price = get_account_with(&input_accounts, 1);
+        }
         "UpdatePrice" => {
             result.publisher = get_account_with(&input_accounts, 0);
             result.price = get_account_with(&input_accounts, 1);

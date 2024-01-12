@@ -15,17 +15,35 @@ message PbSetMinPublishersArgsLayout {
   repeated uint32 unused1 = 2;
 }
 
+message PbDeletePublisherArgsLayout {
+  required string publisher = 1;
+}
+
+message PbAddPublisherArgsLayout {
+  required string publisher = 1;
+}
+
+message PbAddPriceArgsLayout {
+  required int32 exponent = 1;
+  required string priceType = 2;
+}
+
 message Arg {
   required string instruction_type = 1;
   optional PbUpdatePriceNoFailOnErrorArgsLayout updatePriceArgs = 2;
   optional PbUpdatePriceNoFailOnErrorArgsLayout updatePriceNoFailOnErrorArgs = 3;
   optional PbSetMinPublishersArgsLayout setMinPublishersArgs = 4;
+  optional PbDeletePublisherArgsLayout deletePublisherArgs = 5;
+  optional PbAddPublisherArgsLayout addPublisherArgs = 6;
+  optional PbAddPriceArgsLayout addPriceArgs = 7;
 }
 
 message InputAccounts {
   optional string publisher = 1;
   optional string price = 2;
   optional string funding = 3;
+  optional string signer = 4;
+  optional string product = 5;
 }
 
 message PythOracleMeta {

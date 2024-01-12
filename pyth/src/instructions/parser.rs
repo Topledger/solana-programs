@@ -3,7 +3,10 @@ extern crate bs58;
 use borsh::BorshDeserialize;
 use substreams::log;
 
-use super::structs::{SetMinPublishersArgsLayout, UpdatePriceNoFailOnErrorArgsLayout};
+use super::structs::{
+    AddPriceArgsLayout, AddPublisherArgsLayout, DeletePublisherArgsLayout,
+    SetMinPublishersArgsLayout, UpdatePriceNoFailOnErrorArgsLayout,
+};
 
 #[derive(Debug, Default)]
 pub struct Instruction {
@@ -11,6 +14,9 @@ pub struct Instruction {
     pub updatePriceNoFailOnErrorArgs: UpdatePriceNoFailOnErrorArgsLayout,
     pub updatePriceArgs: UpdatePriceNoFailOnErrorArgsLayout,
     pub setMinPublishersArgs: SetMinPublishersArgsLayout,
+    pub deletePublisherArgs: DeletePublisherArgsLayout,
+    pub addPublisherArgs: AddPublisherArgsLayout,
+    pub addPriceArgs: AddPriceArgsLayout,
 }
 
 pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
@@ -21,6 +27,25 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     let rest_bytes = &mut rest.clone();
 
     match discriminator {
+        4 => {
+            result.instructionType = "AddPrice".to_string();
+            if rest_bytes.len() > 0 {
+                result.addPriceArgs = AddPriceArgsLayout::deserialize(rest_bytes).unwrap();
+            }
+        }
+        5 => {
+            result.instructionType = "AddPublisher".to_string();
+            if rest_bytes.len() > 0 {
+                result.addPublisherArgs = AddPublisherArgsLayout::deserialize(rest_bytes).unwrap();
+            }
+        }
+        6 => {
+            result.instructionType = "DeletePublisher".to_string();
+            if rest_bytes.len() > 0 {
+                result.deletePublisherArgs =
+                    DeletePublisherArgsLayout::deserialize(rest_bytes).unwrap();
+            }
+        }
         7 => {
             result.instructionType = "UpdatePrice".to_string();
             if rest_bytes.len() > 0 {

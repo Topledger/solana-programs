@@ -23,6 +23,26 @@ pub struct PbSetMinPublishersArgsLayout {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbDeletePublisherArgsLayout {
+    #[prost(string, required, tag="1")]
+    pub publisher: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddPublisherArgsLayout {
+    #[prost(string, required, tag="1")]
+    pub publisher: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddPriceArgsLayout {
+    #[prost(int32, required, tag="1")]
+    pub exponent: i32,
+    #[prost(string, required, tag="2")]
+    pub price_type: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Arg {
     #[prost(string, required, tag="1")]
     pub instruction_type: ::prost::alloc::string::String,
@@ -32,6 +52,12 @@ pub struct Arg {
     pub update_price_no_fail_on_error_args: ::core::option::Option<PbUpdatePriceNoFailOnErrorArgsLayout>,
     #[prost(message, optional, tag="4")]
     pub set_min_publishers_args: ::core::option::Option<PbSetMinPublishersArgsLayout>,
+    #[prost(message, optional, tag="5")]
+    pub delete_publisher_args: ::core::option::Option<PbDeletePublisherArgsLayout>,
+    #[prost(message, optional, tag="6")]
+    pub add_publisher_args: ::core::option::Option<PbAddPublisherArgsLayout>,
+    #[prost(message, optional, tag="7")]
+    pub add_price_args: ::core::option::Option<PbAddPriceArgsLayout>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -42,6 +68,10 @@ pub struct InputAccounts {
     pub price: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag="3")]
     pub funding: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag="4")]
+    pub signer: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag="5")]
+    pub product: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
