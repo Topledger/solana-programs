@@ -12,7 +12,6 @@ message TransactionStats {
   required string block_date = 3;
   required uint64 fee = 4;
   required string id = 5;
-  required bool success = 6;
   repeated string executing_accounts = 7;
   repeated Instruction instructions = 8;
   required string version = 9;

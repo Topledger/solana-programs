@@ -51,6 +51,10 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             continue;
         }
 
+        if  meta.err.is_some() {
+            continue
+        }
+
         let header = message.header.as_ref().expect("Header is missing");
         let accounts = trx.resolved_accounts_as_strings();
         let parsed_logs = parse_logs(&meta.log_messages);
@@ -90,7 +94,6 @@ fn populate_transaction_stats(
 ) {
     let num_required_signatures = header.num_required_signatures;
     transaction_stats.id = bs58::encode(&transaction.signatures[0]).into_string();
-    transaction_stats.success = meta.err.is_none();
     transaction_stats.signatures_size = transaction.signatures.len() as u32;
 
     transaction_stats.version = if message.versioned {

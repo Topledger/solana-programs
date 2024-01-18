@@ -18,8 +18,6 @@ pub struct TransactionStats {
     pub fee: u64,
     #[prost(string, required, tag="5")]
     pub id: ::prost::alloc::string::String,
-    #[prost(bool, required, tag="6")]
-    pub success: bool,
     #[prost(string, repeated, tag="7")]
     pub executing_accounts: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, repeated, tag="8")]
