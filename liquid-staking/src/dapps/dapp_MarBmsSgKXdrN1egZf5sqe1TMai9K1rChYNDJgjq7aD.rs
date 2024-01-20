@@ -1,12 +1,7 @@
 use borsh::{BorshDeserialize, BorshSerialize};
-use serde::de::IntoDeserializer;
-use substreams::pb::substreams::module::input;
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
-use crate::{
-    pb::sf::solana::liquid::staking::v1::TradeData,
-    utils::{get_token_balance_change, prepare_input_accounts},
-};
+use crate::{pb::sf::solana::liquid::staking::v1::TradeData, utils::prepare_input_accounts};
 
 const DEPOSIT_DISCRIMINATOR: u64 = 13182846803881894898;
 const DEPOSIT_STAKE_ACCOUNT_DISCRIMINATOR: u64 = 4252073853447275118;
@@ -23,6 +18,16 @@ struct MintToLayout {
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 struct BurnLayout {
+    amount: u64,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct SystemProgramTransferLayout {
+    amount: u64,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct SPLTokenTransferLayout {
     amount: u64,
 }
 
@@ -122,6 +127,93 @@ pub fn enrich_with_ix_details(
     }
 }
 
+pub fn get_system_sol_transfer(
+    trade_data: &mut TradeData,
+    accounts: &Vec<String>,
+    inner_instructions: &Vec<InnerInstructions>,
+) -> f64 {
+    let mut result = 0 as f64;
+
+    inner_instructions.iter().for_each(|inner_instruction| {
+        inner_instruction
+            .instructions
+            .iter()
+            .enumerate()
+            .for_each(|(inner_idx, inner_inst)| {
+                let inner_program = &accounts[inner_inst.program_id_index as usize];
+
+                if inner_program
+                    .as_str()
+                    .eq("11111111111111111111111111111111")
+                {
+                    let (discriminator_bytes, rest) = inner_inst.data.split_at(4);
+                    let disc_bytes_arr: [u8; 4] = discriminator_bytes.to_vec().try_into().unwrap();
+                    let discriminator: u32 = u32::from_le_bytes(disc_bytes_arr);
+                    match discriminator {
+                        2 => {
+                            let input_accounts =
+                                prepare_input_accounts(&inner_inst.accounts, accounts);
+                            let destination = input_accounts.get(1).unwrap().to_string();
+                            if destination.eq(trade_data.reserve_stake.as_str())
+                                || destination.eq(trade_data.liq_pool_sol_leg.as_str())
+                            {
+                                let transfer_data =
+                                    SystemProgramTransferLayout::deserialize(&mut rest.clone())
+                                        .unwrap();
+                                result = transfer_data.amount as f64;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            })
+    });
+
+    result
+}
+
+pub fn get_spl_token_transfer(
+    trade_data: &mut TradeData,
+    accounts: &Vec<String>,
+    inner_instructions: &Vec<InnerInstructions>,
+) -> f64 {
+    let mut result = 0 as f64;
+
+    inner_instructions.iter().for_each(|inner_instruction| {
+        inner_instruction
+            .instructions
+            .iter()
+            .enumerate()
+            .for_each(|(inner_idx, inner_inst)| {
+                let inner_program = &accounts[inner_inst.program_id_index as usize];
+
+                if inner_program
+                    .as_str()
+                    .eq("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+                {
+                    let (discriminator_bytes, rest) = inner_inst.data.split_at(1);
+                    let disc_bytes_arr: [u8; 1] = discriminator_bytes.to_vec().try_into().unwrap();
+                    let discriminator: u8 = u8::from_le_bytes(disc_bytes_arr);
+                    match discriminator {
+                        3 => {
+                            let input_accounts =
+                                prepare_input_accounts(&inner_inst.accounts, accounts);
+                            let destination = input_accounts.get(1).unwrap().to_string();
+                            if destination.eq(trade_data.fee_account.as_str()) {
+                                let transfer_data =
+                                    SPLTokenTransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                result = transfer_data.amount as f64;
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            })
+    });
+
+    result
+}
+
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
@@ -164,21 +256,8 @@ pub fn parse_trade_instruction(
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.fee_amount = 0.0;
 
-            let reserve_stake_sol_balance_change = get_sol_balance_change(
-                &trade_data.reserve_stake,
-                accounts,
-                pre_balances,
-                post_balances,
-            );
-            let liq_pool_sol_leg_sol_balance_change = get_sol_balance_change(
-                &trade_data.liq_pool_sol_leg,
-                accounts,
-                pre_balances,
-                post_balances,
-            );
-
             trade_data.amount =
-                reserve_stake_sol_balance_change + liq_pool_sol_leg_sol_balance_change;
+                get_system_sol_transfer(&mut trade_data, accounts, inner_instructions);
 
             enrich_with_ix_details(
                 &mut trade_data,
@@ -296,13 +375,8 @@ pub fn parse_trade_instruction(
             trade_data.mint_amount = 0.0;
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.burn_amount = 0.0;
-            trade_data.fee_amount = get_token_balance_change(
-                &trade_data.fee_account,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-                Some(&trade_data.pool_mint),
-            );
+            trade_data.fee_amount =
+                get_spl_token_transfer(&mut trade_data, accounts, inner_instructions);
             trade_data.amount = 0.0;
 
             enrich_with_ix_details(
@@ -331,13 +405,8 @@ pub fn parse_trade_instruction(
             trade_data.mint_amount = 0.0;
             enrich_with_inner_instructions_data(&mut trade_data, accounts, inner_instructions);
             trade_data.burn_amount = 0.0;
-            trade_data.fee_amount = get_token_balance_change(
-                &trade_data.fee_account,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-                Some(&trade_data.pool_mint),
-            );
+            trade_data.fee_amount =
+                get_spl_token_transfer(&mut trade_data, accounts, inner_instructions);
             trade_data.amount = 0.0;
 
             enrich_with_ix_details(
@@ -366,13 +435,8 @@ pub fn parse_trade_instruction(
             trade_data.staking_reward = 0.0;
             trade_data.mint_amount = 0.0;
             trade_data.burn_amount = 0.0;
-            trade_data.fee_amount = get_token_balance_change(
-                &trade_data.fee_account,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-                Some(&trade_data.pool_mint),
-            );
+            trade_data.fee_amount =
+                get_spl_token_transfer(&mut trade_data, accounts, inner_instructions);
             trade_data.amount = -1.0
                 * get_sol_balance_change(
                     &trade_data.liq_pool_sol_leg,
