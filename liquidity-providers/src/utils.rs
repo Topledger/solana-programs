@@ -46,6 +46,8 @@ pub fn get_token_transfer(
     account_name_to_check: String,
 ) -> f64 {
     let mut result = 0.0;
+    let mut result_assigned = false;
+
     inner_instructions.iter().for_each(|inner_instruction| {
         inner_instruction
             .instructions
@@ -82,7 +84,10 @@ pub fn get_token_transfer(
 
                             if condition & address_to_be_checked.eq(address) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
-                                result = data.amount as f64;
+                                if !result_assigned {
+                                    result = data.amount as f64;
+                                    result_assigned = true;
+                                }
                             }
                         }
                         12 => {
@@ -105,7 +110,10 @@ pub fn get_token_transfer(
 
                             if condition & address_to_be_checked.eq(address) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
-                                result = data.amount as f64;
+                                if !result_assigned {
+                                    result = data.amount as f64;
+                                    result_assigned = true;
+                                }
                             }
                         }
                         _ => {}

@@ -197,6 +197,19 @@ fn get_trade_data(
                     inner_insrtuctions,
                 );
         }
+        "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ" => {
+            result =
+                dapps::dapp_SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ::parse_trade_instruction(
+                    &signer,
+                    instruction_data,
+                    &accounts,
+                    input_accounts,
+                    pre_token_balances,
+                    post_token_balances,
+                    inner_instruction_index,
+                    inner_insrtuctions,
+                );
+        }
         _ => {}
     }
 
