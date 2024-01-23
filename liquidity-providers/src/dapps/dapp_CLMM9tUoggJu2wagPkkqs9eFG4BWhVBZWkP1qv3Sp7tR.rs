@@ -29,7 +29,7 @@ pub fn parse_trade_instruction(
     match discriminator {
         IncreaseLiquidityWithFixedToken => {
             td.instruction_type = "IncreaseLiquidityWithFixedToken".to_string();
-            td.pool = "".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(6).unwrap().to_string();
             td.account_b = input_accounts.get(7).unwrap().to_string();
             td.account_c = "".to_string();
@@ -65,7 +65,7 @@ pub fn parse_trade_instruction(
         }
         DecreaseLiquidity => {
             td.instruction_type = "DecreaseLiquidity".to_string();
-            td.pool = "".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(6).unwrap().to_string();
             td.account_b = input_accounts.get(7).unwrap().to_string();
             td.account_c = "".to_string();

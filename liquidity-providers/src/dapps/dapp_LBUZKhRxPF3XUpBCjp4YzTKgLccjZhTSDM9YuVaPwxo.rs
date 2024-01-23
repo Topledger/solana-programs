@@ -28,7 +28,7 @@ pub fn parse_trade_instruction(
     match discriminator {
         AddLiquidityByWeight => {
             td.instruction_type = "AddLiquidityByWeight".to_string();
-            td.pool = "".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(5).unwrap().to_string();
             td.account_b = input_accounts.get(6).unwrap().to_string();
             td.account_c = "".to_string();
@@ -64,7 +64,7 @@ pub fn parse_trade_instruction(
         }
         RemoveLiquidity => {
             td.instruction_type = "RemoveLiquidity".to_string();
-            td.pool = "".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(5).unwrap().to_string();
             td.account_b = input_accounts.get(6).unwrap().to_string();
             td.account_c = "".to_string();
