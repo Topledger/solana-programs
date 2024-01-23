@@ -5,8 +5,8 @@ use crate::{
     utils::{get_mint_address_for, get_token_transfer},
 };
 
-const IncreaseLiquidity: u64 = u64::from_le_bytes([46, 156, 243, 118, 13, 205, 251, 178]);
-const DecreaseLiquidity: u64 = u64::from_le_bytes([160, 38, 208, 111, 104, 91, 44, 1]);
+const DepositAllTokenTypes: u8 = 2;
+const WithdrawAllTokenTypes: u8 = 3;
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -18,19 +18,19 @@ pub fn parse_trade_instruction(
     inner_idx: u32,
     inner_instructions: &Vec<InnerInstructions>,
 ) -> Option<TradeData> {
-    let (disc_bytes, rest) = bytes_stream.split_at(8);
-    let disc_bytes_arr: [u8; 8] = disc_bytes.to_vec().try_into().unwrap();
-    let discriminator: u64 = u64::from_le_bytes(disc_bytes_arr);
+    let (disc_bytes, rest) = bytes_stream.split_at(1);
+    let disc_bytes_arr: [u8; 1] = disc_bytes.to_vec().try_into().unwrap();
+    let discriminator: u8 = u8::from_le_bytes(disc_bytes_arr);
 
     let mut td = TradeData::default();
     let mut result = None;
 
     match discriminator {
-        IncreaseLiquidity => {
-            td.instruction_type = "IncreaseLiquidity".to_string();
+        DepositAllTokenTypes => {
+            td.instruction_type = "DepositAllTokenTypes".to_string();
             td.pool = input_accounts.get(0).unwrap().to_string();
-            td.account_a = input_accounts.get(7).unwrap().to_string();
-            td.account_b = input_accounts.get(8).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
             td.account_c = "".to_string();
             td.lp_wallet = signer.to_string();
 
@@ -62,11 +62,11 @@ pub fn parse_trade_instruction(
 
             result = Some(td);
         }
-        DecreaseLiquidity => {
-            td.instruction_type = "DecreaseLiquidity".to_string();
+        WithdrawAllTokenTypes => {
+            td.instruction_type = "WithdrawAllTokenTypes".to_string();
             td.pool = input_accounts.get(0).unwrap().to_string();
-            td.account_a = input_accounts.get(7).unwrap().to_string();
-            td.account_b = input_accounts.get(8).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
             td.account_c = "".to_string();
             td.lp_wallet = signer.to_string();
 

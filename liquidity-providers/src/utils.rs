@@ -43,7 +43,7 @@ pub fn get_token_transfer(
     input_inner_idx: u32,
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
-    inward: bool,
+    account_name_to_check: String,
 ) -> f64 {
     let mut result = 0.0;
     inner_instructions.iter().for_each(|inner_instruction| {
@@ -69,7 +69,7 @@ pub fn get_token_transfer(
                             let destination = input_accounts.get(1).unwrap().to_string();
 
                             let mut address_to_be_checked = destination;
-                            if inward {
+                            if account_name_to_check.eq("source") {
                                 address_to_be_checked = source;
                             }
 
