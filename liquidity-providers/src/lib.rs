@@ -158,6 +158,19 @@ fn get_trade_data(
                     inner_insrtuctions,
                 );
         }
+        "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK" => {
+            result =
+                dapps::dapp_CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK::parse_trade_instruction(
+                    &signer,
+                    instruction_data,
+                    &accounts,
+                    input_accounts,
+                    pre_token_balances,
+                    post_token_balances,
+                    inner_instruction_index,
+                    inner_insrtuctions,
+                );
+        }
         _ => {}
     }
 

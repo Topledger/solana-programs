@@ -60,6 +60,7 @@ pub fn get_token_transfer(
                 {
                     let (discriminator_bytes, rest) = inner_inst.data.split_at(1);
                     let discriminator: u8 = u8::from(discriminator_bytes[0]);
+
                     match discriminator {
                         3 => {
                             let input_accounts =
@@ -67,6 +68,29 @@ pub fn get_token_transfer(
 
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
+
+                            let mut address_to_be_checked = destination;
+                            if account_name_to_check.eq("source") {
+                                address_to_be_checked = source;
+                            }
+
+                            let condition = if input_inner_idx > 0 {
+                                inner_idx as u32 > input_inner_idx
+                            } else {
+                                true
+                            };
+
+                            if condition & address_to_be_checked.eq(address) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                result = data.amount as f64;
+                            }
+                        }
+                        12 => {
+                            let input_accounts =
+                                prepare_input_accounts(&inner_inst.accounts, accounts);
+
+                            let source = input_accounts.get(0).unwrap().to_string();
+                            let destination = input_accounts.get(2).unwrap().to_string();
 
                             let mut address_to_be_checked = destination;
                             if account_name_to_check.eq("source") {
