@@ -29,8 +29,8 @@ pub fn parse_trade_instruction(
         CreatePosition => {
             td.instruction_type = "CreatePosition".to_string();
             td.pool = input_accounts.get(2).unwrap().to_string();
-            td.account_a = input_accounts.get(14).unwrap().to_string();
-            td.account_b = input_accounts.get(15).unwrap().to_string();
+            td.account_a = input_accounts.get(13).unwrap().to_string();
+            td.account_b = input_accounts.get(14).unwrap().to_string();
             td.account_c = "".to_string();
             td.lp_wallet = signer.to_string();
 
