@@ -27,30 +27,36 @@ pub struct TradeData {
     #[prost(string, required, tag="9")]
     pub mint_c: ::prost::alloc::string::String,
     #[prost(string, required, tag="10")]
-    pub account_a: ::prost::alloc::string::String,
+    pub mint_d: ::prost::alloc::string::String,
     #[prost(string, required, tag="11")]
-    pub account_b: ::prost::alloc::string::String,
+    pub account_a: ::prost::alloc::string::String,
     #[prost(string, required, tag="12")]
+    pub account_b: ::prost::alloc::string::String,
+    #[prost(string, required, tag="13")]
     pub account_c: ::prost::alloc::string::String,
-    #[prost(double, required, tag="13")]
-    pub token_a_amount: f64,
-    #[prost(double, required, tag="14")]
-    pub token_b_amount: f64,
+    #[prost(string, required, tag="14")]
+    pub account_d: ::prost::alloc::string::String,
     #[prost(double, required, tag="15")]
+    pub token_a_amount: f64,
+    #[prost(double, required, tag="16")]
+    pub token_b_amount: f64,
+    #[prost(double, required, tag="17")]
     pub token_c_amount: f64,
-    #[prost(string, required, tag="16")]
-    pub lp_wallet: ::prost::alloc::string::String,
-    #[prost(string, required, tag="17")]
-    pub instruction_type: ::prost::alloc::string::String,
-    #[prost(bool, required, tag="18")]
-    pub is_inner_instruction: bool,
+    #[prost(double, required, tag="18")]
+    pub token_d_amount: f64,
     #[prost(string, required, tag="19")]
+    pub lp_wallet: ::prost::alloc::string::String,
+    #[prost(string, required, tag="20")]
+    pub instruction_type: ::prost::alloc::string::String,
+    #[prost(bool, required, tag="21")]
+    pub is_inner_instruction: bool,
+    #[prost(string, required, tag="22")]
     pub outer_program: ::prost::alloc::string::String,
-    #[prost(uint32, required, tag="20")]
+    #[prost(uint32, required, tag="23")]
     pub instruction_index: u32,
-    #[prost(string, required, tag="21")]
+    #[prost(string, required, tag="24")]
     pub inner_program: ::prost::alloc::string::String,
-    #[prost(uint32, required, tag="22")]
+    #[prost(uint32, required, tag="25")]
     pub inner_instruction_index: u32,
 }
 // @@protoc_insertion_point(module)
