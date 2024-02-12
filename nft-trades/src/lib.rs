@@ -132,6 +132,7 @@ fn get_trade_data(
                 dapps::dapp_M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
+                    accounts,
                     log_messages,
                     post_token_balances,
                 );
