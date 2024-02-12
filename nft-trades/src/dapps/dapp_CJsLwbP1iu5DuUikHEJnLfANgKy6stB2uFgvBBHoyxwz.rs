@@ -84,7 +84,6 @@ pub fn parse_trade_instruction(
                 pre_balances,
                 post_balances,
             );
-            trade_data.royalty = 0.0; // TODO
 
             trade_data.mint = input_accounts.get(10).unwrap().to_string();
             trade_data.buyer = input_accounts.get(0).unwrap().to_string();
