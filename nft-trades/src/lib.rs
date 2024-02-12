@@ -157,6 +157,17 @@ fn get_trade_data(
                     log_messages,
                 );
         }
+        "CJsLwbP1iu5DuUikHEJnLfANgKy6stB2uFgvBBHoyxwz" => {
+            result =
+                dapps::dapp_CJsLwbP1iu5DuUikHEJnLfANgKy6stB2uFgvBBHoyxwz::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    pre_balances,
+                    post_balances,
+                    log_messages,
+                );
+        }
         _ => {}
     }
 
