@@ -24,7 +24,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "BuyNftFromPair".to_string();
             trade_data.platform = "hadeswap".to_string();
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
             trade_data.taker_fee = 0.0;
             trade_data.amm_fee = 0.0;
             trade_data.royalty = 0.0;
@@ -54,7 +54,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SellNftToLiquidityPair".to_string();
             trade_data.platform = "hadeswap".to_string();
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
             trade_data.taker_fee = 0.0;
             trade_data.amm_fee = 0.0;
             trade_data.royalty = 0.0;
@@ -84,7 +84,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SellNftToTokenToNftPair".to_string();
             trade_data.platform = "hadeswap".to_string();
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
             trade_data.taker_fee = 0.0;
             trade_data.amm_fee = 0.0;
             trade_data.royalty = 0.0;

@@ -121,7 +121,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SolFulfillBuy".to_string();
             trade_data.platform = "coralcube_me_amm".to_string();
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             let buyer = input_accounts.get(1).unwrap();
             trade_data.mint = input_accounts.get(8).unwrap().to_string();
@@ -141,7 +141,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SolFulfillSell".to_string();
             trade_data.platform = "coralcube_me_amm".to_string();
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             let buyer = input_accounts.get(0).unwrap();
             trade_data.mint = input_accounts.get(8).unwrap().to_string();
@@ -161,7 +161,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SolMip1FulfillBuy".to_string();
             trade_data.platform = "coralcube_me_amm".to_string();
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             let buyer = input_accounts.get(1).unwrap();
             trade_data.mint = input_accounts.get(7).unwrap().to_string();
@@ -181,7 +181,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SolMip1FulfillSell".to_string();
             trade_data.platform = "coralcube_me_amm".to_string();
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             let buyer = input_accounts.get(0).unwrap();
             trade_data.mint = input_accounts.get(7).unwrap().to_string();
@@ -201,7 +201,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SolOcpFulfillBuy".to_string();
             trade_data.platform = "coralcube_me_amm".to_string();
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             let buyer = input_accounts.get(1).unwrap();
             trade_data.mint = input_accounts.get(7).unwrap().to_string();

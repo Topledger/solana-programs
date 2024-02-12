@@ -75,7 +75,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SellNftTokenPool".to_string();
             trade_data.platform = "tensorswap".to_string();
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(6).unwrap().to_string();
             trade_data.buyer = input_accounts.get(9).unwrap().to_string();
@@ -91,7 +91,7 @@ pub fn parse_trade_instruction(
             trade_data.platform = "tensorswap".to_string();
 
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(5).unwrap().to_string();
             trade_data.buyer = input_accounts.get(11).unwrap().to_string();
@@ -107,7 +107,7 @@ pub fn parse_trade_instruction(
             trade_data.platform = "tensorswap".to_string();
 
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(5).unwrap().to_string();
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
@@ -123,7 +123,7 @@ pub fn parse_trade_instruction(
             trade_data.platform = "tensorswap".to_string();
 
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(6).unwrap().to_string();
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
