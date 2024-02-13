@@ -8,7 +8,10 @@ pub fn parse_logs(log_messages: &Vec<String>, amount: f64, amm_fee: f64) -> Opti
     let mut result: Option<(f64, f64)> = None;
 
     for log_message in log_messages {
-        if log_message.starts_with("Program log: ") & log_message.contains(&amm_fee.to_string()) {
+        if log_message.starts_with("Program log: ")
+            & (amm_fee > 0.0)
+            & log_message.contains(&amm_fee.to_string())
+        {
             let val_str = log_message
                 .replace("Program log: ", "")
                 .replace(&amm_fee.to_string(), "")
