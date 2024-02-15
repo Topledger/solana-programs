@@ -14,7 +14,7 @@ pub fn parse_logs(log_messages: &Vec<String>, amount: f64, amm_fee: f64) -> Opti
         {
             let val_str = log_message
                 .replace("Program log: ", "")
-                .replace(&amm_fee.to_string(), "")
+                .replacen(&amm_fee.to_string(), "", 1)
                 .replace("  ", " ")
                 .trim()
                 .to_string();
