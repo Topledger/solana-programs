@@ -1,9 +1,6 @@
 use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 
-use crate::{
-    prepare_input_accounts,
-    trade_instruction::{self, TradeInstruction},
-};
+use crate::{prepare_input_accounts, trade_instruction::TradeInstruction};
 
 const SWAP_DISCRIMINATOR: u64 = u64::from_le_bytes([248, 198, 158, 145, 225, 117, 135, 200]);
 

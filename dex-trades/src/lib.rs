@@ -459,6 +459,13 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo" => {
+            result =
+                dapps::dapp_LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
         _ => {}
     }
 
@@ -498,7 +505,7 @@ fn get_amt(
             post_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
         });
 
-    return (post_balance - pre_balance).abs();
+    return post_balance - pre_balance;
 }
 
 fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
