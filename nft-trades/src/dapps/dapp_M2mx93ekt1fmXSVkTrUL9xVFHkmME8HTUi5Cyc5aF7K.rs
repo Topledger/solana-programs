@@ -63,7 +63,9 @@ pub fn get_currency_mint(post_token_balances: &Vec<TokenBalance>, nft_mint: &Str
         mints.push(x.mint.to_string());
     }
 
-    let distinct_mints: HashSet<String> = mints.into_iter().collect();
+    let mut distinct_mints: HashSet<String> = mints.into_iter().collect();
+    distinct_mints.remove("FZN7QZ8ZUUAxMPfxYEYkH3cXUASzH8EqA6B4tyCL8f1j");
+
     match distinct_mints.len() {
         1 => {
             return "So11111111111111111111111111111111111111112".to_string();
