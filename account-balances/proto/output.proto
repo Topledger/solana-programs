@@ -9,9 +9,8 @@ message Output {
 message AccountStats {
   required uint64 block_slot = 1;
   required string block_date = 2;
-  required string account_key = 3;
-  required string mint = 4;
-  required double pre_balance = 5;
+  required string token_account = 3;
+  required string owner = 4;
+  required string mint = 5;
   required double post_balance = 6;
-  required double balance_change = 7;
 }
