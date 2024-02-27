@@ -13,14 +13,12 @@ pub struct AccountStats {
     #[prost(string, required, tag="2")]
     pub block_date: ::prost::alloc::string::String,
     #[prost(string, required, tag="3")]
-    pub account_key: ::prost::alloc::string::String,
+    pub token_account: ::prost::alloc::string::String,
     #[prost(string, required, tag="4")]
+    pub owner: ::prost::alloc::string::String,
+    #[prost(string, required, tag="5")]
     pub mint: ::prost::alloc::string::String,
-    #[prost(double, required, tag="5")]
-    pub pre_balance: f64,
     #[prost(double, required, tag="6")]
     pub post_balance: f64,
-    #[prost(double, required, tag="7")]
-    pub balance_change: f64,
 }
 // @@protoc_insertion_point(module)
