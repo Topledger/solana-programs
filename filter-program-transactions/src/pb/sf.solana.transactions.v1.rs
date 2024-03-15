@@ -64,10 +64,6 @@ pub struct Instruction {
     pub data: ::prost::alloc::string::String,
     #[prost(message, repeated, tag="4")]
     pub inner_instructions: ::prost::alloc::vec::Vec<InnerInstruction>,
-    #[prost(string, repeated, tag="8")]
-    pub program_logs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, repeated, tag="9")]
-    pub program_data: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -78,10 +74,6 @@ pub struct InnerInstruction {
     pub account_arguments: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, required, tag="3")]
     pub data: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="4")]
-    pub program_logs: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
-    #[prost(string, repeated, tag="5")]
-    pub program_data: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

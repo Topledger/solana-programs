@@ -3,20 +3,6 @@ use std::collections::HashMap;
 pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
     let program_data = vec![
         (
-            "metaplex",
-            vec![
-                "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
-                "hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk",
-                "cndyAnrLdpjq1Ssp1z8xxDsB8dxe7u4HL5Nxi2K5WXZ",
-                "cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ",
-                "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
-                "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
-                "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY",
-                "hyDQ4Nz1eYyegS6JfenyKwKzYxRsCWCriYSAjtzP4Vg",
-                "trifMWutwBxkSuatmpPVnEe7NoE3BJKgjVi8sSyoXWX",
-            ],
-        ),
-        (
             "staratlas",
             vec![
                 "traderDnaR5w6Tcoi3NFm53i48FTDNbGjBSZwWXDRrg",
@@ -115,10 +101,6 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             ],
         ),
         (
-            "solend",
-            vec!["So1endDq2YkqhipRh3WViPa8hdiSpxWy6z3Z6tMCpAo"],
-        ),
-        (
             "zeta",
             vec![
                 "ZETAxsqBRek56DhiGXrn75yj2NHU3aYUnxvHXpkf3aD",
@@ -136,13 +118,6 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             ],
         ),
         (
-            "drift",
-            vec![
-                "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
-                "DraWMeQX9LfzQQSYoeBwHAgM5JcqFkgrX7GbTfjzVMVL",
-            ],
-        ),
-        (
             "magiceden",
             vec![
                 "M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K",
@@ -153,13 +128,6 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "CMZYPASGWeTz7RNGHaRJfCq2XQ5pYK6nDvVQxzkH51zb",
                 "ocp4vWUzA2z2XMYJ3QhM9vWdyoyoQwAFJhRdVTbvo9E",
                 "M3mxk5W2tt27WGT7THox7PmgRDp4m6NEhL5xvxrBfS1",
-            ],
-        ),
-        (
-            "marginfi",
-            vec![
-                "LipsxuAkFkwa4RKNzn51wAsW7Dedzt1RNHMkTkDEZUW",
-                "MFv2hWf31Z9kbCa1snEPYctwafyhdvnV7FZnsebVacA",
             ],
         ),
         (
@@ -185,31 +153,6 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
         ),
         ("robox", vec!["rbxKHT1j2EnkfvVgANWFXdcV5Sm8EkdZLLDjJ5R1Lwa"]),
         ("saber", vec!["SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ"]),
-        (
-            "wormhole",
-            vec![
-                "worm2ZoG2kUd4vFXhvjh93UUH596ayRfgQ2MgjNMTth",
-                "wormDTUJ6AWPNvk59vGQbDvGJmqbDTdgWgAqcLBCgUb",
-                "WnFt12ZrnzZrFZkt2xsNsaNWoQribnuQ5B5FrDbwDhD",
-            ],
-        ),
-        (
-            "mayan_swap",
-            vec!["8LPjGDbxhW4G2Q8S6FvdvUdfGWssgtqmvsc63bwNFA7E"],
-        ),
-        (
-            "debridge",
-            vec![
-                "dst5MGcFPoBeREFAA5E3tU5ij8m5uVYwkzkSAbsLbNo",
-                "src5qyZHqTqecJV4aY6Cb6zDZLMDzrDKKezs22MPHr4",
-                "DEbrdGj3HsRsAzx6uH4MKyREKxVAfBydijLUF3ygsFfh",
-                "DeSetTwWhjZq6Pz9Kfdo1KoS5NqtsM6G8ERbX4SSCSft",
-            ],
-        ),
-        (
-            "allbridge",
-            vec!["BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB"],
-        ),
         (
             "xnftbackpack",
             vec!["xnft5aaToUM4UFETUQfj7NUDUBdvYHTVhNFThEYTm55"],
@@ -268,14 +211,6 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
         (
             "fluxbeam",
             vec!["FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X"],
-        ),
-        (
-            "hubble",
-            vec![
-                "HubbLeXBb7qyLHt3x7gvYaRrxQmmgExb7fCJgDqFuB6T",
-                "6LtLpnUFNByNXLyCoK9wA2MykKAmQNZKBdY8s47dehDc",
-                "KLend2g3cP87fffoy8q1mQqGKjrxjC8boSyAYavgmjD",
-            ],
         ),
         (
             "hadeswap",

@@ -1,10 +1,12 @@
+mod missing_blocks;
 mod pb;
-mod programs;
+mod low_priority_programs;
 mod utils;
 
+use missing_blocks::MISSING_BLOCKS;
 use pb::sf::solana::transactions;
 use pb::sf::solana::transactions::v1::{Output, TransactionStats};
-use programs::create_programs_map;
+use low_priority_programs::create_programs_map;
 
 use std::collections::HashSet;
 
@@ -35,62 +37,73 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         .into_vec()
         .expect("Failed to decode vote account");
 
-    for (index, trx) in block.transactions.iter().enumerate() {
-        let meta = match trx.meta.as_ref() {
-            Some(meta) => meta,
-            None => continue,
-        };
+    for range in MISSING_BLOCKS.iter() {
+        if block.slot >= range.0 && block.slot <= range.1 {
+            for (index, trx) in block.transactions.iter().enumerate() {
+                let meta = match trx.meta.as_ref() {
+                    Some(meta) => meta,
+                    None => continue,
+                };
 
-        let transaction = match trx.transaction.as_ref() {
-            Some(transaction) => transaction,
-            None => continue,
-        };
+                let transaction = match trx.transaction.as_ref() {
+                    Some(transaction) => transaction,
+                    None => continue,
+                };
 
-        if meta.err.is_some() {
-            continue;
-        }
+                if meta.err.is_some() {
+                    continue;
+                }
 
-        let message = transaction.message.as_ref().expect("Message is missing");
+                let message = transaction.message.as_ref().expect("Message is missing");
 
-        // Skip Vote Transactions
-        if message.account_keys.contains(&decoded_vote_account) {
-            continue;
-        }
+                // Skip Vote Transactions
+                if message.account_keys.contains(&decoded_vote_account) {
+                    continue;
+                }
 
-        let accounts = trx.resolved_accounts_as_strings();
-        if accounts
-            .iter()
-            .all(|account| !program_accounts.contains(&account.as_str()))
-        {
-            continue;
-        }
+                let accounts = trx.resolved_accounts_as_strings();
+                if accounts
+                    .iter()
+                    .all(|account| !program_accounts.contains(&account.as_str()))
+                {
+                    continue;
+                }
 
-        let header = message.header.as_ref().expect("Header is missing");
+                let header = message.header.as_ref().expect("Header is missing");
 
-        let parsed_logs = parse_logs(&meta.log_messages);
+                let parsed_logs = parse_logs(&meta.log_messages);
 
-        let mut transaction_stats = TransactionStats::default();
-        transaction_stats.block_slot = block_slot as u32;
-        transaction_stats.block_date = block_date.to_string();
-        transaction_stats.block_time = block_time.unwrap().timestamp as u64;
+                let mut transaction_stats = TransactionStats::default();
+                transaction_stats.block_slot = block_slot as u32;
+                transaction_stats.block_date = block_date.to_string();
+                transaction_stats.block_time = block_time.unwrap().timestamp as u64;
 
-        populate_transaction_stats(
-            &mut transaction_stats,
-            &transaction,
-            &accounts,
-            &meta,
-            &parsed_logs,
-            index,
-            meta.fee,
-            header,
-            &message,
-        );
+                populate_transaction_stats(
+                    &mut transaction_stats,
+                    &transaction,
+                    &accounts,
+                    &meta,
+                    &parsed_logs,
+                    index,
+                    meta.fee,
+                    header,
+                    &message,
+                );
 
-        for account in transaction_stats.executing_accounts.iter() {
-            if let Some(&program_name) = programs_map.get(account.as_str()) {
-                let mut updated_transaction = transaction_stats.clone(); // Clone the original transaction
-                updated_transaction.program = program_name.to_string(); // Update the program
-                data.push(updated_transaction); // Add to the vector
+                let mut processed_programs = HashSet::new(); // Reset for each transaction
+                for account in transaction_stats.executing_accounts.iter() {
+                    if let Some(&program_name) = programs_map.get(account.as_str()) {
+                        // Check if the program has already been processed for this transaction
+
+                        if !processed_programs.contains(program_name) {
+                            let mut updated_transaction = transaction_stats.clone(); // Clone the original transaction
+                            updated_transaction.program = program_name.to_string(); // Update the program
+                            data.push(updated_transaction); // Add to the vector
+
+                            processed_programs.insert(program_name); // Mark this program as processed for this transaction
+                        }
+                    }
+                }
             }
         }
     }
@@ -189,7 +202,7 @@ fn update_transaction_stats_instructions(
         .map(|(index, compiled)| process_instruction(compiled, accounts, meta, index))
         .collect();
 
-    assign_logs_to_instructions(&mut instructions, parsed_logs);
+    // assign_logs_to_instructions(&mut instructions, parsed_logs);
     transaction_stats.instructions = instructions;
 }
 
@@ -247,30 +260,30 @@ fn process_inner_instruction(
     };
 }
 
-fn assign_logs_to_instructions(
-    instructions: &mut Vec<transactions::v1::Instruction>,
-    log_contexts: &Vec<LogContext>,
-) {
-    let mut iterator = LogContextIterator::new(log_contexts);
+// fn assign_logs_to_instructions(
+//     instructions: &mut Vec<transactions::v1::Instruction>,
+//     log_contexts: &Vec<LogContext>,
+// ) {
+//     let mut iterator = LogContextIterator::new(log_contexts);
 
-    for instruction in instructions.iter_mut() {
-        if let Some(log_context) = iterator.next() {
-            if log_context.program_id == instruction.executing_account {
-                instruction.program_logs = log_context.program_logs.clone();
-                instruction.program_data = log_context.program_data.clone();
-            }
+//     for instruction in instructions.iter_mut() {
+//         if let Some(log_context) = iterator.next() {
+//             if log_context.program_id == instruction.executing_account {
+//                 instruction.program_logs = log_context.program_logs.clone();
+//                 instruction.program_data = log_context.program_data.clone();
+//             }
 
-            for inner_instruction in instruction.inner_instructions.iter_mut() {
-                if let Some(inner_log_context) = iterator.next() {
-                    if inner_log_context.program_id == inner_instruction.executing_account {
-                        inner_instruction.program_logs = inner_log_context.program_logs.clone();
-                        inner_instruction.program_data = inner_log_context.program_data.clone();
-                    }
-                }
-            }
-        }
-    }
-}
+//             for inner_instruction in instruction.inner_instructions.iter_mut() {
+//                 if let Some(inner_log_context) = iterator.next() {
+//                     if inner_log_context.program_id == inner_instruction.executing_account {
+//                         inner_instruction.program_logs = inner_log_context.program_logs.clone();
+//                         inner_instruction.program_data = inner_log_context.program_data.clone();
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
 fn update_transaction_stats_token_balances(
     transaction_stats: &mut TransactionStats,

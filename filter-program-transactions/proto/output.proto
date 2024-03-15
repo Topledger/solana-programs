@@ -38,8 +38,6 @@ message Instruction {
   repeated string account_arguments = 2;
   required string data = 3;
   repeated InnerInstruction inner_instructions = 4;
-  repeated string program_logs = 8;
-  repeated string program_data = 9;
 
 }
 
@@ -47,8 +45,6 @@ message InnerInstruction {
   required string executing_account = 1;
   repeated string account_arguments = 2;
   required string data = 3;
-  repeated string program_logs = 4;
-  repeated string program_data = 5;
    
 }
 
