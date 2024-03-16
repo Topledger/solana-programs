@@ -1,0 +1,34 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_block_stats_1_0_4'
+  version: v1.0.4
+
+protobuf:
+  files:
+    - output.proto
+    - files.proto
+  importPaths:
+    - ./proto
+
+imports:
+  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v0.2.0/substreams-sink-files-v0.2.0.spkg
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.block_stats.v1.BlockStats
+
+  - name: jsonl_out
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.substreams.sink.files.v1.Lines
