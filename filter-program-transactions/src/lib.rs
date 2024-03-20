@@ -1,12 +1,17 @@
+mod mid_priority_programs;
 mod missing_blocks;
 mod pb;
-mod low_priority_programs;
 mod utils;
 
+use mid_priority_programs::create_programs_map;
 use missing_blocks::MISSING_BLOCKS;
 use pb::sf::solana::transactions;
 use pb::sf::solana::transactions::v1::{Output, TransactionStats};
-use low_priority_programs::create_programs_map;
+
+use pb::sf::{
+    substreams::sink::files::v1::Lines,
+};
+use serde_json::json;
 
 use std::collections::HashSet;
 
@@ -71,7 +76,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
                 let header = message.header.as_ref().expect("Header is missing");
 
-                let parsed_logs = parse_logs(&meta.log_messages);
 
                 let mut transaction_stats = TransactionStats::default();
                 transaction_stats.block_slot = block_slot as u32;
@@ -83,7 +87,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                     &transaction,
                     &accounts,
                     &meta,
-                    &parsed_logs,
                     index,
                     meta.fee,
                     header,
@@ -111,12 +114,105 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     Ok(Output { data })
 }
 
+fn process_block(block: Block) -> Vec<String> {
+    let block_time = block.block_time.as_ref();
+    let block_date = match block_time {
+        Some(block_time) => match convert_to_date(block_time.timestamp) {
+            Ok(date) => date,
+            Err(_) => "Error converting block time to date".to_string(),
+        },
+        None => "Block time is not available".to_string(),
+    };
+    let block_slot = block.slot;
+    let mut data = Vec::new();
+    let programs_map = create_programs_map();
+    let program_accounts: HashSet<_> = programs_map.keys().collect();
+
+    let decoded_vote_account = bs58::decode(VOTE_ACCOUNT)
+        .into_vec()
+        .expect("Failed to decode vote account");
+
+    for (index, trx) in block.transactions.iter().enumerate() {
+        let meta = match trx.meta.as_ref() {
+            Some(meta) => meta,
+            None => continue,
+        };
+
+        let transaction = match trx.transaction.as_ref() {
+            Some(transaction) => transaction,
+            None => continue,
+        };
+
+        if meta.err.is_some() {
+            continue;
+        }
+
+        let message = transaction.message.as_ref().expect("Message is missing");
+
+        // Skip Vote Transactions
+        if message.account_keys.contains(&decoded_vote_account) {
+            continue;
+        }
+
+        let accounts = trx.resolved_accounts_as_strings();
+        if accounts
+            .iter()
+            .all(|account| !program_accounts.contains(&account.as_str()))
+        {
+            continue;
+        }
+
+        let header = message.header.as_ref().expect("Header is missing");
+
+
+        let mut transaction_stats = TransactionStats::default();
+        transaction_stats.block_slot = block_slot as u32;
+        transaction_stats.block_date = block_date.to_string();
+        transaction_stats.block_time = block_time.unwrap().timestamp as u64;
+
+        populate_transaction_stats(
+            &mut transaction_stats,
+            &transaction,
+            &accounts,
+            &meta,
+            index,
+            meta.fee,
+            header,
+            &message,
+        );
+
+        let mut processed_programs = HashSet::new(); // Reset for each transaction
+        for account in transaction_stats.executing_accounts.iter() {
+            if let Some(&program_name) = programs_map.get(account.as_str()) {
+                // Check if the program has already been processed for this transaction
+
+                if !processed_programs.contains(program_name) {
+                    let mut updated_transaction = transaction_stats.clone(); // Clone the original transaction
+                    updated_transaction.program = program_name.to_string(); // Update the program
+                    data.push(json!(updated_transaction).to_string()); // Add to the vector
+
+                    processed_programs.insert(program_name); // Mark this program as processed for this transaction
+                }
+            }
+        }
+    }
+
+    return data;
+}
+
+#[substreams::handlers::map]
+fn jsonl_out(block: Block) -> Result<Lines, substreams::errors::Error> {
+    let transaction_stats = process_block(block);
+    Ok(Lines {
+        lines: transaction_stats,
+    })
+}
+
 fn populate_transaction_stats(
     transaction_stats: &mut TransactionStats,
     transaction: &Transaction,
     accounts: &Vec<String>,
     meta: &TransactionStatusMeta,
-    parsed_logs: &Vec<LogContext>,
     index: usize,
     fees: u64,
     header: &MessageHeader,
@@ -145,10 +241,17 @@ fn populate_transaction_stats(
         "legacy".into()
     };
     transaction_stats.logs_truncated = contains_substring(&meta.log_messages, "Log truncated");
-    transaction_stats.log_messages = meta.log_messages.clone();
+
+   
+
+    let mut logs = Vec::new();
+    for log in meta.log_messages.iter() {
+        logs.push(json!(log).to_string())
+    }
+    transaction_stats.log_messages = logs;
     transaction_stats.account_keys = accounts.clone();
 
-    update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
+    update_transaction_stats_instructions(transaction_stats, accounts, meta, message);
     update_transaction_stats_token_balances(transaction_stats, meta, accounts);
     update_transaction_stats_executing_accounts(transaction_stats);
 }
@@ -193,7 +296,6 @@ fn update_transaction_stats_instructions(
     accounts: &Vec<String>,
     meta: &TransactionStatusMeta,
     message: &Message,
-    parsed_logs: &Vec<LogContext>,
 ) {
     let mut instructions = message
         .instructions

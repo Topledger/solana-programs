@@ -1,13 +1,18 @@
 specVersion: v0.1.0
 package:
-  name: 'missing_blocks_v1_0_7'
-  version: v1.0.7
+  name: 'mid_priority_programs_v1_0_4'
+  version: v1.0.4
 
 protobuf:
   files:
     - output.proto
+    - files.proto
   importPaths:
     - ./proto
+
+
+imports:
+  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v0.2.0/substreams-sink-files-v0.2.0.spkg
 
 binaries:
   default:
@@ -21,3 +26,10 @@ modules:
       - source: sf.solana.type.v1.Block
     output:
       type: proto:sf.solana.transactions.v1.Output
+
+  - name: jsonl_out
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.substreams.sink.files.v1.Lines

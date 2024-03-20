@@ -1,12 +1,16 @@
+use serde::{Serialize, Deserialize};
+
 // @generated
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Serialize, Deserialize)]
 pub struct Output {
     #[prost(message, repeated, tag="1")]
     pub data: ::prost::alloc::vec::Vec<TransactionStats>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Serialize, Deserialize)]
 pub struct TransactionStats {
     #[prost(uint32, required, tag="1")]
     pub block_slot: u32,
@@ -55,6 +59,7 @@ pub struct TransactionStats {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Serialize, Deserialize)]
 pub struct Instruction {
     #[prost(string, required, tag="1")]
     pub executing_account: ::prost::alloc::string::String,
@@ -67,6 +72,7 @@ pub struct Instruction {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Serialize, Deserialize)]
 pub struct InnerInstruction {
     #[prost(string, required, tag="1")]
     pub executing_account: ::prost::alloc::string::String,
@@ -77,6 +83,7 @@ pub struct InnerInstruction {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Serialize, Deserialize)]
 pub struct TokenBalance {
     #[prost(string, required, tag="1")]
     pub account: ::prost::alloc::string::String,
