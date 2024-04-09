@@ -1,0 +1,24 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_programs_compute_budget'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - main.proto
+  importPaths:
+    - ./proto
+
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.programs.compute.budget.v1.Output
