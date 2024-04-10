@@ -1,4 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
+use substreams::log;
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default)]
 pub struct RequestHeapFrameLayout {
@@ -58,7 +59,11 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         3 => {
             instruction_name = String::from("SetComputeUnitPrice");
-            setComputeUnitPriceArg = SetComputeUnitPriceLayout::deserialize(rest_bytes).unwrap();
+            log::info!("{:?}", rest_bytes);
+            if rest_bytes.len() > 7 {
+                setComputeUnitPriceArg = SetComputeUnitPriceLayout::deserialize(rest_bytes).unwrap();
+            }
+            
         }
         4 => {
             instruction_name = String::from("SetLoadedAccountsDataSizeLimit");
