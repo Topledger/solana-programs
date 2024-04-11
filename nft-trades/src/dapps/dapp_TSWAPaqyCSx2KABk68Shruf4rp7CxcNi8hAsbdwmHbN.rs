@@ -109,7 +109,7 @@ pub fn parse_trade_instruction(
             trade_data.category = "buy".to_string();
             trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
-            trade_data.mint = input_accounts.get(5).unwrap().to_string();
+            trade_data.mint = input_accounts.get(4).unwrap().to_string();
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
             trade_data.seller = input_accounts.get(7).unwrap().to_string();
 
