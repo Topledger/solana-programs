@@ -48,9 +48,7 @@ pub struct TransactionStats {
     pub executing_accounts: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(bool, required, tag="20")]
     pub logs_truncated: bool,
-    #[prost(string, required, tag="21")]
-    pub program: ::prost::alloc::string::String,
-    #[prost(string, repeated, tag="22")]
+    #[prost(string, repeated, tag="21")]
     pub log_messages: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

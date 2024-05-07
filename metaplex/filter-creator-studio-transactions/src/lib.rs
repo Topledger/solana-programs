@@ -29,8 +29,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let block_slot = block.slot;
     let mut data = Vec::new();
     let filter_accounts = filter_accounts();
-    // let programs_map = create_programs_map();
-    // let program_accounts: HashSet<_> = programs_map.keys().collect();
 
     let decoded_vote_account = bs58::decode(VOTE_ACCOUNT)
         .into_vec()
@@ -93,14 +91,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         );
 
         data.push(transaction_stats);
-
-        // for account in transaction_stats.executing_accounts.iter() {
-        //     if let Some(&program_name) = programs_map.get(account.as_str()) {
-        //         let mut updated_transaction = transaction_stats.clone(); // Clone the original transaction
-        //         updated_transaction.program = program_name.to_string(); // Update the program
-        //         data.push(updated_transaction); // Add to the vector
-        //     }
-        // }
     }
 
     Ok(Output { data })
