@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+package sf.solana.account_sol_balance.v1;
+
+message Output {
+  repeated AccountStats data = 1;
+}
+
+message AccountStats {
+  required uint64 block_slot = 1;
+  required string block_date = 2;
+  required string account = 3;
+  required uint64 post_balance = 4;
+}
