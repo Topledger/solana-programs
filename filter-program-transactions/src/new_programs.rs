@@ -3,109 +3,36 @@ use std::collections::HashMap;
 pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
     let program_data = vec![
         (
-            "parcl",
-            vec!["3parcLrT7WnXAcyPfkCz49oofuuf2guUKkjuFkAhZW8Y"],
+            "token22",
+            vec![
+                "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+            ],
+        ),
+        (
+            "allbridge",
+            vec![
+                "BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB",
+                "2bbbTeKEBNK6xamKrY51byxrYiHksPo6vSkivw2zJFSQ",
+                "BBbD1WSjbHKfyE3TSFWF6vx1JV51c8msKSQy4ess6pXp"
+                ],
+        ),
+        (
+            "circuit-trading",
+            vec![
+                "vAuLTsyrvSfZRuRB3XgvkPwNGgYSs9YRYymVebLKoxR",
+                ],
+
         ),
         (
             "sanctum",
             vec![
-                "stkitrT1Uoy18Dk1fTrgPw8W6MVzoCfYoAFT4MLsmhq",
-                "unpXTU2Ndrc7WWNyEhQWe4udTzSibLPi25SXv2xbCHQ",
+                "SPMBzsVUuoHA4Jm6KunbsotaahvVikZs1JyTW6iJvbn",
+                "SP12tWFxD9oJsVWNavTTBZvMbA6gkAmxtVgxdqvyvhY",
+                "5ocnV1qiCgaQR8Jb8xWnVbApfaygJ8tNoZfgPwsgx9kx",
+                "unpXTU2Ndrc7WWNyEhQWe4udTzSibLPi25SXv2xbCHQ"
             ],
         ),
-        (
-            "ionet",
-            vec!["AYGdvqsQruZoaJPWsViLqUgtbfXGRnxzgxzW4zmbbckL"],
-        ),
-        (
-            "whales_market",
-            vec!["stPdYNaJNsV3ytS9Xtx4GXXXRcVqVS6x66ZFa26K39S"],
-        ),
-        (
-            "access_protocol",
-            vec!["6HW8dXjtiTGkD4jzXs7igdFmZExPpmwUrRN5195xGup"],
-        ),
-        (
-            "dispatch_unknown",
-            vec!["GLsSp8Dr9EAe5UL67XmmjA3c8qqwYgNeD63pLZEcVGCw"],
-        ),
-        (
-            "raindrops",
-            vec![
-                "itEm2FtqJWqUmMTYrUxoFcmFtBxEpd68VTmxJamQXA3",
-                "AvAtARWmYZLbUFfoQc3RzT7zR5zLRs92VSMm8CsCadYN",
-            ],
-        ),
-        (
-            "underdog",
-            vec!["updg8JyjrmFE2h3d71p71zRXDR8q4C6Up8dDoeq3LTM"],
-        ),
-        (
-            "xnft_backpack",
-            vec!["xnft5aaToUM4UFETUQfj7NUDUBdvYHTVhNFThEYTm55"],
-        ),
-        (
-            "sgraph_protocol",
-            vec!["graph8zS8zjLVJHdiSvP7S9PP7hNJpnHdbnJLR81FMg"],
-        ),
-        (
-            "baze_one",
-            vec!["Human1nfyFpJsPU3BBKqWPwD9FeaZgdPYzDVrBj32Xj"],
-        ),
-        (
-            "code_canvas",
-            vec!["CoCaSGpuNso2yQP3oqi1tXt82wBp3y78SJDwLCboc8WS"],
-        ),
-        (
-            "nina_protocol",
-            vec!["ninaN2tm9vUkxoanvGcNApEeWiidLMM2TdBX8HoJuL4"],
-        ),
-        (
-            "mallow_auction",
-            vec!["MAUsg1KhgYQV2Kxr9ccAkv7bUod88Qi3AKe5nUN41oe"],
-        ),
-        (
-            "five_dollar_nft",
-            vec!["7WUKntragGhmc2gGt7q6pAhg4txu9vLmfMi28fAcnUf9"],
-        ),
-        (
-            "only_one",
-            vec![
-                "mkt59DL1S91CcGPNhgPT2pq7fR26LcbXBZtdDFQhYQX",
-                "pssZn3LTGJpknPtSDiqLXZq98VwfYVicy6zDfPu82Cs",
-            ],
-        ),
-        (
-            "hub_three",
-            vec!["2pi53pUUC5S4zyUU6Wrbe6EfYXS9LNcpikpwPFahtQQw"],
-        ),
-        (
-            "vault_music",
-            vec!["Drop9NhG6Mm6oQmPnzr8FQP6rWaPiwFkin59SeAKApLc"],
-        ),
-        (
-            "bonfida",
-            vec![
-                "jCebN34bUfdeUYJT13J1yG16XWQpt5PDx6Mse9GUqhR",
-                "nftD3vbNkNqfj2Sd3HZwbpw4BxxKWr4AjGb9X38JeZk",
-                "AVWV7vdWbLqXiLKFaP19GhYurhwxaLp2qRBSjT5tR5vT",
-                "85iDfUvr3HJyLM2zcq5BXSiDvUWfw6cSE1FfNBo8Ap29",
-            ],
-        ),
-        (
-            "helium",
-            vec![
-                "circAbx64bbsscPbQzZAUvuXpHqrCe6fLMzc2uKXz9g",
-                "credMBJhYFzfn7NxBMdU4aUqFggAjgztaCcv2Fo6fPT",
-                "hemjuPXBpNvggtaUnN1MwT3wrdhttKEfosTcc2P9Pg8",
-                "hdaoVTCqhfHHo75XdAMxBKdUqvq1i5bF23sisBqVgGR",
-                "1azyuavdMyvsivtNxPoz6SucD18eDHeXzFCUPq5XU7w",
-                "1atrmQs3eq1N2FEYWu6tyTXbCjP4uQwExpjtnhXtS8h",
-                "treaf4wWBBty3fHdyBpo35Mz84M8k3heKXmjmi9vFt5",
-                "hvsrNC3NKbcryqDs2DocYHZ9yPKEVzdSjQG6RVtK1s8",
-                "memMa1HG4odAFmUbGWfPwS1WWfK95k99F2YTkGvyxZr",
-            ],
-        ),
+
     ];
 
     let mut program_map: HashMap<&str, &str> = HashMap::new();

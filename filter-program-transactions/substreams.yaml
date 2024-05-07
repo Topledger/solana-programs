@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'mid_priority_programs_v1_0_4'
-  version: v1.0.4
+  name: 'missing_programs_v1_0_0'
+  version: v1.0.0
 
 protobuf:
   files:

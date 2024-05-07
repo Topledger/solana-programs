@@ -120,20 +120,7 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "APooLSMjJV9kkqEWX2QvDyStkdPesVugMALsMvPLbsnx",
             ],
         ),
-        (
-            "metaplex",
-            vec![
-                "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
-                "hausS13jsjafwWwGqZTUQRmWyvyxn9EQpqMwV1PBBmk",
-                "cndyAnrLdpjq1Ssp1z8xxDsB8dxe7u4HL5Nxi2K5WXZ",
-                "cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ",
-                "CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR",
-                "Guard1JwRhJkVH6XZhzoYxeBVQe872VH6QggF4BWmS9g",
-                "BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY",
-                "hyDQ4Nz1eYyegS6JfenyKwKzYxRsCWCriYSAjtzP4Vg",
-                "trifMWutwBxkSuatmpPVnEe7NoE3BJKgjVi8sSyoXWX",
-            ],
-        ),
+       
         (
             "mango_markets",
             vec![

@@ -96,6 +96,10 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             "native_stake",
             vec!["Stake11111111111111111111111111111111111111"],
         ),
+        (
+            "stake_pool",
+            vec!["SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy"],
+        ),
     ];
 
     let mut program_map: HashMap<&str, &str> = HashMap::new();
