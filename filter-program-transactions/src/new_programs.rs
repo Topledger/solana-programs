@@ -3,33 +3,31 @@ use std::collections::HashMap;
 pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
     let program_data = vec![
         (
-            "token22",
+            "moonwalk",
             vec![
-                "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+                "FitAFk15vtx2PBjfr7QTnefaHRx6HwajRiZMt1DdSSKU"
             ],
         ),
         (
-            "allbridge",
+            "nosana",
             vec![
-                "BrdgN2RPzEMWF96ZbnnJaUtQDQx7VRXYaHHbYCBvceWB",
-                "2bbbTeKEBNK6xamKrY51byxrYiHksPo6vSkivw2zJFSQ",
-                "BBbD1WSjbHKfyE3TSFWF6vx1JV51c8msKSQy4ess6pXp"
+                "nosJhNRqr2bc9g1nfGDcXXTXvYUmxD4cVwy2pMWhrYM",
+                "nosRB8DUV67oLNrL45bo2pFLrmsWPiewe2Lk2DRNYCp",
+                "nosScmHY2uR24Zh751PmGj9ww9QRNHewh9H59AfrTJE",
+                "nosPdZrfDzND1LAR28FLMDEATUPK53K8xbRBXAirevD"
                 ],
         ),
         (
-            "circuit-trading",
+            "bpf_program",
             vec![
-                "vAuLTsyrvSfZRuRB3XgvkPwNGgYSs9YRYymVebLKoxR",
+                "BPFLoaderUpgradeab1e11111111111111111111111",
                 ],
 
         ),
         (
-            "sanctum",
+            "pump",
             vec![
-                "SPMBzsVUuoHA4Jm6KunbsotaahvVikZs1JyTW6iJvbn",
-                "SP12tWFxD9oJsVWNavTTBZvMbA6gkAmxtVgxdqvyvhY",
-                "5ocnV1qiCgaQR8Jb8xWnVbApfaygJ8tNoZfgPwsgx9kx",
-                "unpXTU2Ndrc7WWNyEhQWe4udTzSibLPi25SXv2xbCHQ"
+                "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
             ],
         ),
 
