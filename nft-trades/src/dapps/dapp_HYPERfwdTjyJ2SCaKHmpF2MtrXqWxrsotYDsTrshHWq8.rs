@@ -53,7 +53,9 @@ pub fn parse_trade_instruction(
 
             let instruction_data: ExecuteSaleLayout;
             instruction_data = ExecuteSaleLayout::deserialize(&mut rest.clone()).unwrap();
-
+            
+            trade_data.taker_fee = ((instruction_data.buyerBrokerBasisPoints as u64 * instruction_data.buyerPrice) / 10000) as f64;
+            trade_data.maker_fee = ((instruction_data.sellerBrokerBasisPoints as f64 * instruction_data.buyerPrice as f64) / 10000.0) as f64;
             trade_data.amount = instruction_data.buyerPrice as f64;
             trade_data.amm_fee = 0.0;
 
