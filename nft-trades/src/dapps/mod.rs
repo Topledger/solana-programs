@@ -1,4 +1,5 @@
 pub mod dapp_CJsLwbP1iu5DuUikHEJnLfANgKy6stB2uFgvBBHoyxwz;
+pub mod dapp_HYPERfwdTjyJ2SCaKHmpF2MtrXqWxrsotYDsTrshHWq8;
 pub mod dapp_M2mx93ekt1fmXSVkTrUL9xVFHkmME8HTUi5Cyc5aF7K;
 pub mod dapp_SNPRohhBurQwrpwAptw1QYtpFdfEKitr4WSJ125cN1g;
 pub mod dapp_TSWAPaqyCSx2KABk68Shruf4rp7CxcNi8hAsbdwmHbN;

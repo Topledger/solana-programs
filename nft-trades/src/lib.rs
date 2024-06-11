@@ -179,6 +179,16 @@ fn get_trade_data(
                     post_balances,
                     log_messages,
                 );
+        },
+        "HYPERfwdTjyJ2SCaKHmpF2MtrXqWxrsotYDsTrshHWq8" => {
+            result = 
+                dapps::dapp_HYPERfwdTjyJ2SCaKHmpF2MtrXqWxrsotYDsTrshHWq8::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                    accounts,
+                    log_messages,
+                    post_token_balances,
+            );
         }
         _ => {}
     }
