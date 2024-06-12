@@ -167,8 +167,11 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             vec!["ninaN2tm9vUkxoanvGcNApEeWiidLMM2TdBX8HoJuL4"],
         ),
         (
-            "mallow_auction",
-            vec!["MAUsg1KhgYQV2Kxr9ccAkv7bUod88Qi3AKe5nUN41oe"],
+            "mallow",
+            vec![
+                "MAUsg1KhgYQV2Kxr9ccAkv7bUod88Qi3AKe5nUN41oe",
+                "MMA7VebX8Pi5JrrvaTBBm7nW81sfCww7ZtLBBT1YCy8"
+                ],
         ),
         (
             "five_dollar_nft",
@@ -302,7 +305,88 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "SPMBzsVUuoHA4Jm6KunbsotaahvVikZs1JyTW6iJvbn",
                 "SP12tWFxD9oJsVWNavTTBZvMbA6gkAmxtVgxdqvyvhY",
                 "5ocnV1qiCgaQR8Jb8xWnVbApfaygJ8tNoZfgPwsgx9kx",
-                "unpXTU2Ndrc7WWNyEhQWe4udTzSibLPi25SXv2xbCHQ"
+                "unpXTU2Ndrc7WWNyEhQWe4udTzSibLPi25SXv2xbCHQ",
+                "stkitrT1Uoy18Dk1fTrgPw8W6MVzoCfYoAFT4MLsmhq"
+            ],
+        ),
+        (
+            "moonwalk",
+            vec![
+                "FitAFk15vtx2PBjfr7QTnefaHRx6HwajRiZMt1DdSSKU",
+                "FitAF2RmjKDiTnmhChJfiSo3fNjk7apRHz5FBdpenGQ1"
+            ],
+        ),
+        (
+            "nosana",
+            vec![
+                "nosJhNRqr2bc9g1nfGDcXXTXvYUmxD4cVwy2pMWhrYM",
+                "nosRB8DUV67oLNrL45bo2pFLrmsWPiewe2Lk2DRNYCp",
+                "nosScmHY2uR24Zh751PmGj9ww9QRNHewh9H59AfrTJE",
+                "nosPdZrfDzND1LAR28FLMDEATUPK53K8xbRBXAirevD"
+                ],
+        ),
+        (
+            "bpf_program",
+            vec![
+                "BPFLoaderUpgradeab1e11111111111111111111111",
+                ],
+
+        ),
+        (
+            "pump",
+            vec![
+                "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P",
+            ],
+        ),
+        (
+            "Honeycomb",
+            vec![
+                "HivezrprVqHR6APKKQkkLHmUG8waZorXexEBRZWh5LRm"
+                ,"ChRCtrG7X5kb9YncA4wuyD68DXXL8Szt3zBCCGiioBTg"
+                ,"CrncyaGmZfWvpxRcpHEkSrqeeyQsdn4MAedo9KuARAc4"
+                ,"Pay9ZxrVRXjt9Da8qpwqq4yBRvvrfx3STWnKK4FstPr"
+                ,"Assetw8uxLogzVXic5P8wGYpVdesS1oZHfSnBFHAu42s"
+                ,"HuntaX1CmUt5EByyFPE8pMf13SpvezybmMTtjmpmGmfj"
+                ,"MiNESdRXUSmWY7NkAKdW9nMkjJZCaucguY3MDvkSmr6"
+            ],
+        ),
+        (
+            "cctp",
+            vec![
+                "CCTPmbSD7gX1bxKPAmg77w8oFzNFpaQiQUWD43TKaecd"
+                ,"CCTPiPYPc6AsJuwueEnWgSgucamXDZwBd53dQ11YiKX3"
+                ],
+        ),
+        (
+            "moonwalk",
+            vec![
+                "FitAFk15vtx2PBjfr7QTnefaHRx6HwajRiZMt1DdSSKU",
+                "FitAF2RmjKDiTnmhChJfiSo3fNjk7apRHz5FBdpenGQ1"
+            ],
+        ),
+        (
+            "switchboard",
+            vec![
+                "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
+                ,"SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+
+            ],
+        ),
+        (
+            "hivemapper",
+            vec![
+                "BNH1dUp3ExFbgo3YctSqQbJXRFn3ffkwbcmSas8azfaW"
+              ,"6563bNZpM7bn63rJYzdqP7pN6ndqkDvzgSZXbHtaDgWn"
+              ,"AFMLFi8Mh1yehDsE1gTQs5xcJcMN39cvzSorpU152HaE" 
+              ,"EEjwuvCMVYjgHUeX1BM9qmUog59Pft88c3jbt2ATwcJw" 
+            ],
+        ),
+        (
+            "candy_guard_fork",
+            vec![
+                "TFCMaAnX3cbvHVQUsnJmUah49vJJ5gABbiV43qfGmsd"
+                ,"TFCGs5oBAZmVNTsGWPMquE8uqXUtZt6zRY1LBxQs35G"
+
             ],
         ),
 

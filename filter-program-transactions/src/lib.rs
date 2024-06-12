@@ -1,11 +1,10 @@
-mod missing_blocks;
 mod pb;
-mod missing_programs;
+mod new_programs;
 mod utils;
 
 use pb::sf::solana::transactions;
 use pb::sf::solana::transactions::v1::TransactionStats;
-use missing_programs::create_programs_map;
+use new_programs::create_programs_map;
 
 use pb::sf::substreams::sink::files::v1::Lines;
 use serde_json::json;
@@ -57,7 +56,7 @@ fn process_block(block: Block) -> Vec<String> {
             None => continue,
         };
 
-        if meta.err.is_some() {
+        if meta.err.is_some() { 
             continue;
         }
 

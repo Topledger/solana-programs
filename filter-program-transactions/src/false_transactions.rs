@@ -3,11 +3,19 @@ use std::collections::HashMap;
 pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
     let program_data = vec![
         (
-            "drift",
+            "flash",
             vec![
-                "dRiftyHA39MWEi3m9aunc5MzRF1JYuBsbn6VPcn33UH",
-                "DraWMeQX9LfzQQSYoeBwHAgM5JcqFkgrX7GbTfjzVMVL",
+                "FLASH6Lo6h3iasJKWDs2F8TkW2UKf3s15C8PMGuVfgBn",
+                "FSWAPViR8ny5K96hezav8jynVubP2dJ2L7SbKzds2hwm",
             ],
+        ),
+        (
+            "pyth",
+            vec![
+                "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
+                "pythWSnswVUd12oZpeFP8e9CVaEqJg25g1Vtc2biRsT",
+            ],
+
         )
        
     ];
