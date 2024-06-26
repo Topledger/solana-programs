@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+package sf.solana.block_meta.v1;
+
+message SplMemoData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 6;
+  required bool is_inner_instruction = 7;
+  required string outer_program = 8;
+  required uint32 inner_instruction_index = 9;
+  required string signer = 10;
+  required string args = 11;
+}
+
+message Output {
+  repeated SplMemoData data = 1;
+}
