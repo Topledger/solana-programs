@@ -141,6 +141,9 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             vec![
                 "R2y9ip6mxmWUj4pt54jP2hz2dgvMozy9VTSwMWE7evs",
                 "FASQhaZQT53W9eT9wWnPoBFw8xzZDey9TbMmJj6jCQTs",
+                "PSYFiYqguvMXwpDooGdYV6mju92YEbFobbvW617VNcq",
+                "pSystkitWgLkzprdAvraP8DSBiXwee715wiSXGJe8yr"
+
             ],
         ),
         (

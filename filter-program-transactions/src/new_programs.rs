@@ -6,19 +6,12 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             "switchboard",
             vec![
                 "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
-                ,"SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+                ,"SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f",
+                "SBondMDrcV3K4kxZR1HNVT7osZxAHVHgYXL5Ze1oMUv",
+                "SBSTk6t52R89MmCdD739Rdd97HdbTQUFHe41vCX7pTt",
 
             ],
         ),
-        (
-            "candy_guard_fork",
-            vec![
-                "TFCMaAnX3cbvHVQUsnJmUah49vJJ5gABbiV43qfGmsd"
-                ,"TFCGs5oBAZmVNTsGWPMquE8uqXUtZt6zRY1LBxQs35G"
-
-            ],
-        ),
-
     ];
 
     let mut program_map: HashMap<&str, &str> = HashMap::new();

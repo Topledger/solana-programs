@@ -368,7 +368,9 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             "switchboard",
             vec![
                 "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
-                ,"SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+                ,"SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f",
+                "SBondMDrcV3K4kxZR1HNVT7osZxAHVHgYXL5Ze1oMUv",
+                "SBSTk6t52R89MmCdD739Rdd97HdbTQUFHe41vCX7pTt",
 
             ],
         ),
@@ -382,11 +384,39 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             ],
         ),
         (
-            "candy_guard_fork",
+            "three_land",
+            vec![
+                "HgtiJuEcdN6bN6WyYpamL3QKpyMcF8g8FxutDQNB96J9"
+            ],
+        ),
+        (
+            "metaplex_truffle",
             vec![
                 "TFCMaAnX3cbvHVQUsnJmUah49vJJ5gABbiV43qfGmsd"
                 ,"TFCGs5oBAZmVNTsGWPMquE8uqXUtZt6zRY1LBxQs35G"
 
+            ],
+        ),  
+        (
+            "wns",
+            vec![
+                "wns1gDLt8fgLcGhWi5MqAqgXpwEP1JftKE9eZnXS1HM"
+                ,"diste3nXmK7ddDTs1zb6uday6j4etCa9RChD8fJ1xay"
+
+            ],
+        ),  
+        (
+            "sol_lightning",
+            vec![
+                "4hfUykhqmD7ZRvNh1HuzVKEY7ToENixtdUKZspNDCrEM"
+                ,"3KHSHFpEK6bsjg3bqcxQ9qssJYtRCMi2S9TYVe4q6CQc"
+
+            ],
+        ),  
+        (
+            "cubik",
+            vec![
+                "CUbkXMRWxumGzDwf43ysyFm3da77JRuUqLF1bmW4tGoZ"
             ],
         ),
 
