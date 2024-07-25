@@ -23,8 +23,9 @@ message Meta {
   required uint32 instruction_index = 7;
   required bool is_inner_instruction = 8;
   required uint32 inner_instruction_index = 9;
-  required string instruction_type = 10;
-  required InputAccounts input_accounts = 11;
+  required string outer_program = 10;
+  required string instruction_type = 11;
+  required InputAccounts input_accounts = 12;
 }
 
 message Output {

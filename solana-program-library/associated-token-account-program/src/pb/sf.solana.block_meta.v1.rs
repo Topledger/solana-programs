@@ -41,8 +41,10 @@ pub struct Meta {
     #[prost(uint32, required, tag="9")]
     pub inner_instruction_index: u32,
     #[prost(string, required, tag="10")]
+    pub outer_program: ::prost::alloc::string::String,
+    #[prost(string, required, tag="11")]
     pub instruction_type: ::prost::alloc::string::String,
-    #[prost(message, required, tag="11")]
+    #[prost(message, required, tag="12")]
     pub input_accounts: InputAccounts,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

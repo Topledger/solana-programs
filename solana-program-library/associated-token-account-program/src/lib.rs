@@ -48,6 +48,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                     meta.block_slot = slot;
                     meta.tx_id = tx_id.clone();
                     meta.dapp = constants::PROGRAM_ADDRESS.to_string();
+                    meta.outer_program = constants::PROGRAM_ADDRESS.to_string();
                     meta.instruction_index = idx as u32;
                     meta.is_inner_instruction = false;
                     meta.inner_instruction_index = 0;
@@ -77,6 +78,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     meta.block_slot = slot;
                                     meta.tx_id = tx_id.clone();
                                     meta.dapp = constants::PROGRAM_ADDRESS.to_string();
+                                    meta.outer_program = program.to_string();
                                     meta.instruction_index = idx as u32;
                                     meta.is_inner_instruction = true;
                                     meta.inner_instruction_index = inner_idx as u32;
