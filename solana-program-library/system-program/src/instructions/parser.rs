@@ -22,7 +22,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
 
     if bytes_stream.len() >= 4 {
         let (disc_bytes, rest) = bytes_stream.split_at(4);
-        let discriminator: u32 = disc_bytes.clone().get_u32();
+        let discriminator: u32 = disc_bytes.clone().get_u32_le();
         let rest_bytes = &mut rest.clone();
 
         match discriminator {
