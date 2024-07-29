@@ -6,6 +6,7 @@ use borsh::BorshDeserialize;
 use bytes::Buf;
 
 use super::structs::{CreateAccountLayout, CreateAccountWithSeedLayout};
+use substreams::log;
 
 const CREATE_ACCOUNT_DISCRIMINATOR: u32 = 0;
 const CREATE_ACCOUNT_WITH_SEED_DISCRIMINATOR: u32 = 3;
@@ -33,8 +34,10 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
             }
             CREATE_ACCOUNT_WITH_SEED_DISCRIMINATOR => {
                 result.instructionType = "CreateAccountWithSeed".to_string();
-                result.createAccountWithSeed =
-                    CreateAccountWithSeedLayout::deserialize(rest_bytes).unwrap();
+                match CreateAccountWithSeedLayout::deserialize(rest_bytes) {
+                    Ok(layout) => result.createAccountWithSeed = layout,
+                    Err(e) => log::info!("Deserialization error: {:?}", rest_bytes),
+                }
             }
             _ => {}
         }
