@@ -50,6 +50,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
         let mut transaction_stats = TransactionStats::default();
         transaction_stats.block_date = block_date.clone();
+        transaction_stats.block_slot = block.slot;
         transaction_stats.block_time = block_time.unwrap().timestamp as u64;
         transaction_stats.fees = meta.fee;
         transaction_stats.success = !meta.err.is_some();

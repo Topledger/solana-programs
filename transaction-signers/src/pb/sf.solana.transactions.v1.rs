@@ -11,14 +11,16 @@ pub struct TransactionStats {
     #[prost(string, required, tag="1")]
     pub block_date: ::prost::alloc::string::String,
     #[prost(uint64, required, tag="2")]
-    pub block_time: u64,
+    pub block_slot: u64,
     #[prost(uint64, required, tag="3")]
+    pub block_time: u64,
+    #[prost(uint64, required, tag="4")]
     pub fees: u64,
-    #[prost(string, required, tag="4")]
+    #[prost(string, required, tag="5")]
     pub signer: ::prost::alloc::string::String,
-    #[prost(bool, required, tag="5")]
+    #[prost(bool, required, tag="6")]
     pub success: bool,
-    #[prost(uint32, required, tag="6")]
+    #[prost(uint32, required, tag="7")]
     pub required_signatures: u32,
 }
 // @@protoc_insertion_point(module)
