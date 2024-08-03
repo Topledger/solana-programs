@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package sf.solana.transactions.v1;
+
+message Output {
+  repeated TransactionStats data = 1;
+}
+
+message TransactionStats {
+  required string block_date = 1;
+  required uint64 block_time = 2;
+  required uint64 fees = 3;
+  required string signer = 4;
+  required bool success = 5;
+  required uint32 required_signatures = 6;
+}
