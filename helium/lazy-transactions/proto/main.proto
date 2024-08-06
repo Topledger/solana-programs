@@ -1,0 +1,94 @@
+syntax = "proto2";
+
+package sf.solana.block_meta.v1;
+
+message PbInitializeLazyTransactionsArgsV0Layout {
+  repeated uint32 root = 1;
+  required string name = 2;
+  required string authority = 3;
+  required uint32 maxDepth = 4;
+}
+
+message PbCompiledInstructionLayout {
+  required uint32 programIdIndex = 1;
+  repeated uint32 accounts = 2;
+  repeated uint32 data = 3;
+}
+
+message PbSetCanopyArgsV0Layout {
+  required uint32 offset = 1;
+  repeated uint32 bytes = 2;
+}
+
+message PbExecuteTransactionArgsV0Layout {
+  repeated PbCompiledInstructionLayout instructions = 1;
+  repeated uint32 signerSeeds = 2;
+  required uint32 index = 3;
+}
+
+message PbCloseMarkerArgsV0Layout {
+  required uint32 index = 1;
+}
+
+message PbUpdateLazyTransactionsArgsV0Layout {
+  repeated uint32 root = 1;
+  optional string authority = 2;
+}
+
+message PbInitializeLazyTransactionsV0Layout {
+  required PbInitializeLazyTransactionsArgsV0Layout initializeLazyTransactionsV0Args = 1;
+}
+
+message PbExecuteTransactionV0Layout {
+  required PbExecuteTransactionArgsV0Layout executeTransactionV0Args = 1;
+}
+
+message PbCloseMarkerV0Layout {
+  required PbCloseMarkerArgsV0Layout closeMarkerV0Args = 1;
+}
+
+message PbUpdateLazyTransactionsV0Layout {
+  required PbUpdateLazyTransactionsArgsV0Layout updateLazyTransactionsV0Args = 1;
+}
+
+message PbSetCanopyV0Layout {
+  required PbSetCanopyArgsV0Layout setCanopyV0Args = 1;
+}
+
+message Arg {
+  required string instruction_type = 1;
+  optional PbInitializeLazyTransactionsV0Layout initializeLazyTransactionsV0 = 2;
+  optional PbExecuteTransactionV0Layout executeTransactionV0 = 3;
+  optional PbCloseMarkerV0Layout closeMarkerV0 = 4;
+  optional PbUpdateLazyTransactionsV0Layout updateLazyTransactionsV0 = 5;
+  optional PbSetCanopyV0Layout setCanopyV0 = 6;
+}
+
+message InputAccounts {
+  optional string payer = 1;
+  optional string lazyTransactions = 2;
+  optional string canopy = 3;
+  optional string systemProgram = 4;
+  optional string lazySigner = 5;
+  optional string block = 6;
+  optional string refund = 7;
+  optional string authority = 8;
+}
+
+message Meta {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 7;
+  required bool is_inner_instruction = 8;
+  required uint32 inner_instruction_index = 9;
+  required string instruction_type = 10;
+  required Arg args = 11;
+  required InputAccounts input_accounts = 12;
+}
+
+message Output {
+  repeated Meta data = 1;
+}
