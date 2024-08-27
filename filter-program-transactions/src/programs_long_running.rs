@@ -5,6 +5,11 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
         (
             "staratlas",
             vec![
+                "Cargo2VNTPPTi9c1vq1Jw5d3BWUNr18MjRtSupAghKEk", 
+                "CRAFT2RPXPJWCEix4WpJST3E7NLf79GTqZUL75wngXo5",
+                "Point2iBvz7j5TMVef8nEgpmz4pDr7tU7v3RjAfkQbM",
+                "PsToRxhEPScGt1Bxpm7zNDRzaMk31t8Aox7fyewoVse",
+                "SAGE2HAwep459SNq61LHvjxPk4pLPEJLoMETef7f7EE",
                 "traderDnaR5w6Tcoi3NFm53i48FTDNbGjBSZwWXDRrg",
                 "FLEET1qqzpexyaDpqb2DGsSzE2sDCizewCg9WjrA6DBW",
                 "ATLocKpzDbTokxgvnLew3d7drZkEzLzDpzwgrgWKDbmc",
@@ -21,6 +26,7 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "pv1ttom8tbyh83C1AVh6QH2naGRdVQUVt3HY1Yst5sv",
                 "pFACSRuobDmvfMKq1bAzwj27t6d2GJhSCHb1VcfnRmq",
                 "APR1MEny25pKupwn72oVqMH4qpDouArsX8zX4VwwfoXD",
+
             ],
         ),
         (
@@ -417,6 +423,13 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
             "cubik",
             vec![
                 "CUbkXMRWxumGzDwf43ysyFm3da77JRuUqLF1bmW4tGoZ"
+            ],
+        ),
+        (
+            "skytrade",
+            vec![
+                "HAS8wvo7CPg7nmzbQoxJ4KDEqLyskxDG2p9HGHZ9ub77", 
+                "HmqstutaEpbddgt5hjhJAsnrXhTUfQpveCpyWEvEdnWM",
             ],
         ),
 

@@ -51,6 +51,8 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "hyDQ4Nz1eYyegS6JfenyKwKzYxRsCWCriYSAjtzP4Vg",
                 "trifMWutwBxkSuatmpPVnEe7NoE3BJKgjVi8sSyoXWX",
                 "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d",
+                "MPL4o4wMzndgh8T1NVDxELQCj5UQfYTYEkabX3wNKtb",
+                "CMACYFENjoBMHzapRXyo1JZkVS6EtaDDzkjMrmQLvr4J"
             ],
         ),
         (
