@@ -12,4 +12,3 @@ buf.gen.yaml
 target/
 
 # Ignore '.spkg' files in any subdirectory
-*.spkg
