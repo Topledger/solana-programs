@@ -44,6 +44,8 @@ pub struct TransactionStats {
     pub logs_truncated: bool,
     #[prost(uint32, required, tag="19")]
     pub signatures_size: u32,
+    #[prost(string, required, tag="20")]
+    pub signer: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

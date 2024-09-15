@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 substreams = "^0.5.13"
 substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+substreams-solana-core = "0.13.0"
 substreams-solana-program-instructions = "0.1"
 bytes = "1.1.0"
 prost = "0.11"

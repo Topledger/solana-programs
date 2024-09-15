@@ -25,6 +25,7 @@ message TransactionStats {
   required uint32 readable_alt_accounts_size = 17;
   required bool logs_truncated = 18;
   required uint32 signatures_size = 19;
+  required string signer = 20;
 
 }
 
