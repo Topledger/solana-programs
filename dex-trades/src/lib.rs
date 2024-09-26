@@ -70,12 +70,14 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 0 as u32,
                                 &inner_instructions,
                                 &accounts,
+                                &post_token_balances,
                             ),
                             quote_amount: get_amt(
                                 &td.vault_b,
                                 0 as u32,
                                 &inner_instructions,
                                 &accounts,
+                                &post_token_balances,
                             ),
                             base_vault: td.vault_a,
                             quote_vault: td.vault_b,
@@ -139,12 +141,14 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 inner_idx as u32,
                                                 &inner_instructions,
                                                 &accounts,
+                                                &post_token_balances,
                                             ),
                                             quote_amount: get_amt(
                                                 &td.vault_b,
                                                 inner_idx as u32,
                                                 &inner_instructions,
                                                 &accounts,
+                                                &post_token_balances,
                                             ),
                                             base_vault: td.vault_a,
                                             quote_vault: td.vault_b,
@@ -503,6 +507,7 @@ fn get_amt(
     input_inner_idx: u32,
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
+    post_token_balances: &Vec<TokenBalance>,
 ) -> f64 {
     let mut result: f64 = 0.0;
 
@@ -526,6 +531,18 @@ fn get_amt(
     } else if destination_transfer_amt > 0.0 {
         result = destination_transfer_amt;
     }
+
+    if result != 0.0 {
+        let index = accounts.iter().position(|r| r == address).unwrap();
+        post_token_balances
+            .iter()
+            .filter(|token_balance| token_balance.account_index == index as u32)
+            .for_each(|token_balance: &TokenBalance| {
+                let decimals = token_balance.ui_token_amount.clone().unwrap().decimals;
+                result = result / (u64::pow(10, decimals)) as f64;
+            });
+    }
+
     result
 }
 
