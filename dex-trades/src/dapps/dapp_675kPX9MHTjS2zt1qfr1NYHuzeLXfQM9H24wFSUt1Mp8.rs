@@ -25,6 +25,15 @@ pub fn parse_trade_instruction(
                 vault_b: get_vault_b(&input_accounts, post_token_balances, accounts),
             });
         }
+        11 => {
+            result = Some(TradeInstruction {
+                dapp_address: String::from("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"),
+                name: String::from("SwapBaseOut"),
+                amm: input_accounts.get(1).unwrap().to_string(),
+                vault_a: get_vault_a(&input_accounts, post_token_balances, accounts),
+                vault_b: get_vault_b(&input_accounts, post_token_balances, accounts),
+            });
+        }
         _ => {}
     }
 
