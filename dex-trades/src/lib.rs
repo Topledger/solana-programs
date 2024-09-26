@@ -10,8 +10,8 @@ use pb::sf::solana::dex::trades::v1::{Output, TradeData};
 use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
-use utils::convert_to_date;
 use utils::get_mint;
+use utils::{convert_to_date, get_token_transfer};
 mod trade_instruction;
 
 #[substreams::handlers::map]
@@ -67,14 +67,14 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             quote_mint: get_mint(&td.vault_b, &pre_token_balances, &accounts),
                             base_amount: get_amt(
                                 &td.vault_a,
-                                &pre_token_balances,
-                                &post_token_balances,
+                                0 as u32,
+                                &inner_instructions,
                                 &accounts,
                             ),
                             quote_amount: get_amt(
                                 &td.vault_b,
-                                &pre_token_balances,
-                                &post_token_balances,
+                                0 as u32,
+                                &inner_instructions,
                                 &accounts,
                             ),
                             base_vault: td.vault_a,
@@ -136,14 +136,14 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             ),
                                             base_amount: get_amt(
                                                 &td.vault_a,
-                                                &pre_token_balances,
-                                                &post_token_balances,
+                                                inner_idx as u32,
+                                                &inner_instructions,
                                                 &accounts,
                                             ),
                                             quote_amount: get_amt(
                                                 &td.vault_b,
-                                                &pre_token_balances,
-                                                &post_token_balances,
+                                                inner_idx as u32,
+                                                &inner_instructions,
                                                 &accounts,
                                             ),
                                             base_vault: td.vault_a,
@@ -473,10 +473,64 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb" => {
+            let jupiter_dapps = vec![
+                "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
+                "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph".to_string(),
+                "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB".to_string(),
+                "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow".to_string(),
+                "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8".to_string(),
+                "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4".to_string(),
+                "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk".to_string(),
+            ];
+
+            if is_inner & jupiter_dapps.contains(outer_program) {
+                result =
+                dapps::dapp_opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+            }
+        }
         _ => {}
     }
 
     return result;
+}
+
+fn get_amt(
+    address: &String,
+    input_inner_idx: u32,
+    inner_instructions: &Vec<InnerInstructions>,
+    accounts: &Vec<String>,
+) -> f64 {
+    let mut result: f64 = 0.0;
+
+    let source_transfer_amt = get_token_transfer(
+        address,
+        input_inner_idx,
+        inner_instructions,
+        accounts,
+        "source".to_string(),
+    );
+    let destination_transfer_amt = get_token_transfer(
+        address,
+        input_inner_idx,
+        inner_instructions,
+        accounts,
+        "destination".to_string(),
+    );
+
+    if source_transfer_amt > 0.0 {
+        result = -1.0 * source_transfer_amt;
+    } else if destination_transfer_amt > 0.0 {
+        result = destination_transfer_amt;
+    }
+    result
+}
+
+fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
+    return (post_balances[0] - pre_balances[0]) as i64;
 }
 
 fn prepare_input_accounts(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {
@@ -485,38 +539,6 @@ fn prepare_input_accounts(account_indices: &Vec<u8>, accounts: &Vec<String>) -> 
         instruction_accounts.push(accounts.as_slice()[el as usize].to_string());
     }
     return instruction_accounts;
-}
-
-fn get_amt(
-    address: &String,
-    pre_token_balances: &Vec<TokenBalance>,
-    post_token_balances: &Vec<TokenBalance>,
-    accounts: &Vec<String>,
-) -> f64 {
-    let index = accounts.iter().position(|r| r == address).unwrap();
-
-    let mut pre_balance: f64 = 0 as f64;
-    let mut post_balance: f64 = 0 as f64;
-
-    pre_token_balances
-        .iter()
-        .filter(|token_balance| token_balance.account_index == index as u32)
-        .for_each(|token_balance: &TokenBalance| {
-            pre_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
-        });
-
-    post_token_balances
-        .iter()
-        .filter(|token_balance| token_balance.account_index == index as u32)
-        .for_each(|token_balance: &TokenBalance| {
-            post_balance = token_balance.ui_token_amount.clone().unwrap().ui_amount;
-        });
-
-    return post_balance - pre_balance;
-}
-
-fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
-    return (post_balances[0] - pre_balances[0]) as i64;
 }
 
 fn filter_inner_instructions(
