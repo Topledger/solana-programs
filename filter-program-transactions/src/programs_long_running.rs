@@ -432,6 +432,55 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "HmqstutaEpbddgt5hjhJAsnrXhTUfQpveCpyWEvEdnWM",
             ],
         ),
+        (
+            "genopets",
+            vec![
+                "HAbiTatJVqoCJd9asyr6RxMEdwtfrQugwp7VAFyKWb1g", 
+                "CrAFTUv7zKXBaS5471aCwHx7mq9Jp1eQQB5FQgdiSLyi",
+                "StaKe9nb7aUjXpjpZ45o6uJBsZxj2BWCDBtjk8LCg2v",
+                "nftpSLhPxHPX6ZE8uaArJJeBND5YN3JyQ4iFKDtTXiq",
+                "MrkTtX78X1M2zLaDTm8LdzYSUKGBD6QuVWfKxc4Z9Jz",
+                "srmv4uTCPF81hWDaPyEN2mLZ8XbvzuEM6LsAxR8NpjU",
+            ],
+        ),
+        (
+            "aurory",
+            vec![
+                "STkwf3sbMapjy7KV3hgrJtcVvY4SvRxWQ8pj4Enw1i5",
+                "EXpwP3pqPzA4arF8i89w7smtvxHzyYETmCpPspLPrR7J",
+                "StKLLTf7CQ9n5BgXPSDXENovLTCuNc7N2ehvTb6JZ5x",
+                "comp8FLpN5bbNUC2fhnkFtM7T16DWvaHs8N5dcaoZWP",
+                "CAsieqooSrgVxhgWRwh21gyjq7Rmuhmo4qTW9XzXtAvW"
+            ],
+        ),
+        (
+            "defiland",
+            vec![
+                "5NzYoXGSJ5j9pFNKeExZuX7RZSjKZ7hqVcYVrfwXiHy6",
+                "KJ6b6PswEZeNSwEh1po51wxnbX1C3FPhQPhg8eD2Y6E",
+            ],
+        ),
+        (
+            "honeyland",
+            vec![
+                "HLgmgZ4rbzAgP3p8Uj8rTa2PZgnZKaxmUVxprwqqUCyN",
+                "F1pkXm8W1WNbRvMoZTuKftHJ92ffuzddCCSRKKvCVL7n",
+            ],
+        ),
+        (
+            "elementra",
+            vec![
+                "ELEMisgsfkmp58w1byRvrdpGG1HcapQoCrmMJeorBCxq",
+            ],
+        ),
+        (
+            "solayer",
+            vec![
+                "sSo1iU21jBrU9VaJ8PJib1MtorefUV4fzC9GURa2KNn",
+                "endoLNCKTqDn8gSVnN2hDdpgACUPWHZTwoYnnMybpAT",
+            ],
+        ),
+        
 
     ];
 

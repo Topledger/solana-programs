@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'programs_long_running_v1_0_9'
-  version: v1.0.9
+  name: 'new_program_transactions_v1_0_21'
+  version: v1.0.21
 
 protobuf:
   files:
