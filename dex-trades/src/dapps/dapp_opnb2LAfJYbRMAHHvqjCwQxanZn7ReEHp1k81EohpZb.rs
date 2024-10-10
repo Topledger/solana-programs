@@ -18,8 +18,8 @@ pub fn parse_trade_instruction(
                 dapp_address: String::from("opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb"),
                 name: String::from("PlaceTakeOrder"),
                 amm: accounts.get(2).unwrap().to_string(),
-                vault_a: accounts.get(11).unwrap().to_string(),
-                vault_b: accounts.get(12).unwrap().to_string(),
+                vault_a: accounts.get(6).unwrap().to_string(),
+                vault_b: accounts.get(7).unwrap().to_string(),
             });
         }
         _ => {}
