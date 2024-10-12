@@ -25,6 +25,6 @@ message TradeData {
   required uint32 inner_instruxtion_index = 16;
   required string outer_program = 17;
   required string inner_program = 18;
-  required uint64 txn_fee = 19;
-  required int64 signer_sol_change = 20;
+  required uint64 txn_fee_lamports = 19;
+  required int64 signer_lamports_change = 20;
 }

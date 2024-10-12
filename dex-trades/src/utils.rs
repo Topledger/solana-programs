@@ -65,18 +65,21 @@ pub fn get_token_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
 
-                            let mut address_to_be_checked = destination;
-                            if account_name_to_check.eq("source") {
-                                address_to_be_checked = source;
-                            }
-
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
                                 true
                             };
 
-                            if condition & address_to_be_checked.eq(address) {
+                            if condition && address.eq(&source) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                if !result_assigned {
+                                    result = -1.0 * data.amount as f64;
+                                    result_assigned = true;
+                                }
+                            }
+
+                            if condition && address.eq(&destination) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
                                     result = data.amount as f64;
@@ -91,18 +94,21 @@ pub fn get_token_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(2).unwrap().to_string();
 
-                            let mut address_to_be_checked = destination;
-                            if account_name_to_check.eq("source") {
-                                address_to_be_checked = source;
-                            }
-
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
                                 true
                             };
 
-                            if condition & address_to_be_checked.eq(address) {
+                            if condition && address.eq(&source) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                if !result_assigned {
+                                    result = -1.0 * data.amount as f64;
+                                    result_assigned = true;
+                                }
+                            }
+
+                            if condition && address.eq(&destination) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
                                     result = data.amount as f64;
@@ -165,18 +171,21 @@ pub fn get_token_22_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
 
-                            let mut address_to_be_checked = destination;
-                            if account_name_to_check.eq("source") {
-                                address_to_be_checked = source;
-                            }
-
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
                                 true
                             };
 
-                            if condition & address_to_be_checked.eq(address) {
+                            if condition && address.eq(&source) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                if !result_assigned {
+                                    result = Some(-1.0 * data.amount as f64);
+                                    result_assigned = true;
+                                }
+                            }
+
+                            if condition && address.eq(&destination) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
                                     result = Some(data.amount as f64);
@@ -191,18 +200,21 @@ pub fn get_token_22_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(2).unwrap().to_string();
 
-                            let mut address_to_be_checked = destination;
-                            if account_name_to_check.eq("source") {
-                                address_to_be_checked = source;
-                            }
-
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
                                 true
                             };
 
-                            if condition & address_to_be_checked.eq(address) {
+                            if condition && address.eq(&source) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                if !result_assigned {
+                                    result = Some(-1.0 * data.amount as f64);
+                                    result_assigned = true;
+                                }
+                            }
+
+                            if condition && address.eq(&destination) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
                                     result = Some(data.amount as f64);

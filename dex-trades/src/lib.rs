@@ -87,8 +87,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             inner_instruxtion_index: 0,
                             outer_program: td.dapp_address,
                             inner_program: "".to_string(),
-                            txn_fee: meta.fee,
-                            signer_sol_change: get_signer_balance_change(
+                            txn_fee_lamports: meta.fee,
+                            signer_lamports_change: get_signer_balance_change(
                                 &pre_balances,
                                 &post_balances,
                             ),
@@ -158,8 +158,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             inner_instruxtion_index: inner_idx as u32,
                                             outer_program: program.to_string(),
                                             inner_program: td.dapp_address,
-                                            txn_fee: meta.fee,
-                                            signer_sol_change: get_signer_balance_change(
+                                            txn_fee_lamports: meta.fee,
+                                            signer_lamports_change: get_signer_balance_change(
                                                 &pre_balances,
                                                 &post_balances,
                                             ),
@@ -518,6 +518,7 @@ fn get_amt(
         accounts,
         "source".to_string(),
     );
+
     let destination_transfer_amt = get_token_transfer(
         address,
         input_inner_idx,
@@ -526,9 +527,9 @@ fn get_amt(
         "destination".to_string(),
     );
 
-    if source_transfer_amt > 0.0 {
-        result = -1.0 * source_transfer_amt;
-    } else if destination_transfer_amt > 0.0 {
+    if source_transfer_amt != 0.0 {
+        result = source_transfer_amt;
+    } else if destination_transfer_amt != 0.0 {
         result = destination_transfer_amt;
     }
 
