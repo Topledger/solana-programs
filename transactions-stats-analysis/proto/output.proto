@@ -12,7 +12,6 @@ message TransactionStats {
   required string block_date = 3;
   required uint64 fee = 4;
   required string id = 5;
-  required bool success = 6;
   repeated string executing_accounts = 7;
   repeated Instruction instructions = 8;
   required string version = 9;
@@ -26,6 +25,7 @@ message TransactionStats {
   required uint32 readable_alt_accounts_size = 17;
   required bool logs_truncated = 18;
   required uint32 signatures_size = 19;
+  required string signer = 20;
 
 }
 

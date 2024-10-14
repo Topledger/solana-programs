@@ -17,8 +17,6 @@ pub struct BuyLayout {
     creatorVerified: Vec<bool>,
     sellerFeeBasisPoints: u16,
     maxAmount: u64,
-    currency: Option<[u8; 32]>,
-    makerBroker: Option<[u8; 32]>,
     optionalRoyaltyPct: Option<u16>,
 }
 
@@ -83,8 +81,6 @@ pub struct TakeBidFullMetaLayout {
     root: [u8; 32],
     metaArgs: TMetadataArgsLayout,
     minAmount: u64,
-    currency: Option<[u8; 32]>,
-    makerBroker: Option<[u8; 32]>,
     optionalRoyaltyPct: Option<u16>,
 }
 
@@ -98,8 +94,6 @@ pub struct TakeBidMetaHashLayout {
     creatorVerified: Vec<bool>,
     sellerFeeBasisPoints: u16,
     minAmount: u64,
-    currency: Option<[u8; 32]>,
-    makerBroker: Option<[u8; 32]>,
     optionalRoyaltyPct: Option<u16>,
 }
 

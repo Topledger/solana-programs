@@ -9,6 +9,7 @@ use substreams_solana::pb::sf::solana::r#type::v1::{
     Block, CompiledInstruction, InnerInstructions, Message, MessageHeader, Transaction,
     TransactionStatusMeta,
 };
+use substreams_solana_core::base58;
 use utils::{
     calculate_byte_size, calculate_instruction_size, compact_array_size, convert_to_date,
     parse_logs, LogContext,
@@ -51,8 +52,12 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             continue;
         }
 
+        if  meta.err.is_some() {
+            continue
+        }
+
         let header = message.header.as_ref().expect("Header is missing");
-        let accounts = trx.resolved_accounts_as_strings();
+        let accounts = trx.resolved_accounts().iter().map(base58::encode).collect();
         let parsed_logs = parse_logs(&meta.log_messages);
         let _num_required_signatures = header.num_required_signatures;
 
@@ -90,7 +95,6 @@ fn populate_transaction_stats(
 ) {
     let num_required_signatures = header.num_required_signatures;
     transaction_stats.id = bs58::encode(&transaction.signatures[0]).into_string();
-    transaction_stats.success = meta.err.is_none();
     transaction_stats.signatures_size = transaction.signatures.len() as u32;
 
     transaction_stats.version = if message.versioned {
@@ -111,6 +115,7 @@ fn populate_transaction_stats(
         &meta.inner_instructions,
         accounts,
     ));
+    transaction_stats.signer =  accounts.get(0).unwrap().to_string();
     update_transaction_stats_compute_units(transaction_stats, parsed_logs, meta);
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
 }

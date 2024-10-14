@@ -23,34 +23,34 @@ pub struct TradeData {
     #[prost(double, required, tag="7")]
     pub amount: f64,
     #[prost(string, required, tag="8")]
-    pub currency: ::prost::alloc::string::String,
-    #[prost(string, required, tag="9")]
     pub category: ::prost::alloc::string::String,
-    #[prost(string, required, tag="10")]
+    #[prost(string, required, tag="9")]
     pub buyer: ::prost::alloc::string::String,
-    #[prost(string, required, tag="11")]
+    #[prost(string, required, tag="10")]
     pub seller: ::prost::alloc::string::String,
-    #[prost(double, required, tag="12")]
+    #[prost(double, required, tag="11")]
     pub taker_fee: f64,
-    #[prost(double, required, tag="13")]
+    #[prost(double, required, tag="12")]
     pub maker_fee: f64,
-    #[prost(double, required, tag="14")]
+    #[prost(double, required, tag="13")]
     pub amm_fee: f64,
-    #[prost(double, required, tag="15")]
+    #[prost(double, required, tag="14")]
     pub royalty: f64,
-    #[prost(string, required, tag="16")]
+    #[prost(string, required, tag="15")]
     pub instruction_type: ::prost::alloc::string::String,
-    #[prost(uint32, required, tag="17")]
+    #[prost(uint32, required, tag="16")]
     pub instruction_index: u32,
-    #[prost(string, required, tag="18")]
+    #[prost(string, required, tag="17")]
     pub outer_program: ::prost::alloc::string::String,
-    #[prost(string, required, tag="19")]
+    #[prost(string, required, tag="18")]
     pub inner_program: ::prost::alloc::string::String,
-    #[prost(uint32, required, tag="20")]
+    #[prost(uint32, required, tag="19")]
     pub inner_instruxtion_index: u32,
-    #[prost(bool, required, tag="21")]
+    #[prost(bool, required, tag="20")]
     pub is_inner_instruction: bool,
-    #[prost(string, required, tag="22")]
+    #[prost(string, required, tag="21")]
     pub platform: ::prost::alloc::string::String,
+    #[prost(string, required, tag="22")]
+    pub currency_mint: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)

@@ -1,11 +1,16 @@
+use std::collections::HashSet;
+
 use borsh::{BorshDeserialize, BorshSerialize};
 use serde_json::Value;
+use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
 
 use crate::pb::sf::solana::nft::trades::v1::TradeData;
 
 const EXECUTE_SALE_V2_DISCRIMINATOR: u64 = 13922176540003654747;
 const OCP_EXECUTE_SALE_V2_DISCRIMINATOR: u64 = 6995388316419838920;
 const MIP1_EXECUTE_SALE_V2_DISCRIMINATOR: u64 = 8569101353535448044;
+const EXT_EXECUTE_SALE_V2_DISCRIMINATOR: u64 = 11489375918448294006;
+const CORE_EXECUTE_SALE_V2_DISCRIMINATOR: u64 = 2565422251654865621;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 pub struct ExecuteSaleV2Layout {
@@ -28,6 +33,21 @@ pub struct MIP1ExecuteSaleV2Layout {
     price: u64,
     makerFeeBp: i16,
     takerFeeBp: u16,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+pub struct ExtExecuteSaleV2Layout {
+    price: u64,
+    makerFeeBp: i16,
+    takerFeeBp: u16,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+pub struct CoreExecuteSaleV2Layout {
+    price: u64,
+    makerFeeBp: i16,
+    takerFeeBp: u16,
+    compressionProof: Option<Vec<u8>>,
 }
 
 pub fn parse_logs(log_messages: &Vec<String>) -> Option<f64> {
@@ -54,14 +74,47 @@ pub fn enrich_with_logs_data(trade_data: &mut TradeData, log_messages: &Vec<Stri
     }
 }
 
+pub fn get_currency_mint(post_token_balances: &Vec<TokenBalance>, nft_mint: &String) -> String {
+    let mut mints: Vec<String> = vec![];
+    for x in post_token_balances.iter() {
+        mints.push(x.mint.to_string());
+    }
+
+    let mut distinct_mints: HashSet<String> = mints.into_iter().collect();
+    distinct_mints.remove("FZN7QZ8ZUUAxMPfxYEYkH3cXUASzH8EqA6B4tyCL8f1j");
+
+    match distinct_mints.len() {
+        0 => {
+            return "So11111111111111111111111111111111111111112".to_string();
+        }
+        1 => {
+            return "So11111111111111111111111111111111111111112".to_string();
+        }
+        2 => {
+            let nft_mints: HashSet<String> = vec![nft_mint.to_string()].into_iter().collect();
+            let result = distinct_mints
+                .difference(&nft_mints)
+                .collect::<Vec<&String>>();
+            return result.get(0).unwrap().to_string();
+        }
+        _ => {
+            panic!("Found 3 distinct mints");
+        }
+    }
+}
+
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
+    accounts: &Vec<String>,
     log_messages: &Vec<String>,
+    post_token_balances: &Vec<TokenBalance>,
 ) -> Option<TradeData> {
     let (disc_bytes, rest) = bytes_stream.split_at(8);
     let disc_bytes_arr: [u8; 8] = disc_bytes.to_vec().try_into().unwrap();
     let discriminator: u64 = u64::from_le_bytes(disc_bytes_arr);
+
+    let signer = accounts.get(0).unwrap().to_string();
 
     let mut result = None;
     let mut trade_data: TradeData;
@@ -71,12 +124,18 @@ pub fn parse_trade_instruction(
             trade_data = TradeData::default();
             trade_data.instruction_type = "ExecuteSaleV2".to_string();
             trade_data.platform = "magiceden".to_string();
-            trade_data.category = "".to_string();
-            trade_data.currency = "SOL".to_string();
 
             trade_data.mint = input_accounts.get(4).unwrap().to_string();
             trade_data.buyer = input_accounts.get(0).unwrap().to_string();
             trade_data.seller = input_accounts.get(1).unwrap().to_string();
+
+            if signer.eq(&trade_data.buyer.to_string()) {
+                trade_data.category = "buy".to_string();
+            } else {
+                trade_data.category = "sell".to_string();
+            }
+
+            trade_data.currency_mint = get_currency_mint(post_token_balances, &trade_data.mint);
 
             let instruction_data: ExecuteSaleV2Layout;
             if rest.len() > 38 {
@@ -103,12 +162,18 @@ pub fn parse_trade_instruction(
             trade_data = TradeData::default();
             trade_data.instruction_type = "OcpExecuteSaleV2".to_string();
             trade_data.platform = "magiceden".to_string();
-            trade_data.category = "".to_string();
-            trade_data.currency = "SOL".to_string();
 
             trade_data.mint = input_accounts.get(7).unwrap().to_string();
             trade_data.buyer = input_accounts.get(1).unwrap().to_string();
             trade_data.seller = input_accounts.get(2).unwrap().to_string();
+
+            if signer.eq(&trade_data.buyer.to_string()) {
+                trade_data.category = "buy".to_string();
+            } else {
+                trade_data.category = "sell".to_string();
+            }
+
+            trade_data.currency_mint = get_currency_mint(post_token_balances, &trade_data.mint);
 
             let instruction_data = OCPExecuteSaleV2Layout::try_from_slice(rest).unwrap();
             trade_data.taker_fee = ((instruction_data.takerFeeBp as f64
@@ -130,12 +195,18 @@ pub fn parse_trade_instruction(
             trade_data = TradeData::default();
             trade_data.instruction_type = "Mip1ExecuteSaleV2".to_string();
             trade_data.platform = "magiceden".to_string();
-            trade_data.category = "".to_string();
-            trade_data.currency = "SOL".to_string();
 
             trade_data.mint = input_accounts.get(7).unwrap().to_string();
             trade_data.buyer = input_accounts.get(1).unwrap().to_string();
             trade_data.seller = input_accounts.get(2).unwrap().to_string();
+
+            if signer.eq(&trade_data.buyer.to_string()) {
+                trade_data.category = "buy".to_string();
+            } else {
+                trade_data.category = "sell".to_string();
+            }
+
+            trade_data.currency_mint = get_currency_mint(post_token_balances, &trade_data.mint);
 
             let instruction_data: MIP1ExecuteSaleV2Layout;
             if rest.len() > 12 {
@@ -144,6 +215,79 @@ pub fn parse_trade_instruction(
             } else {
                 instruction_data = MIP1ExecuteSaleV2Layout::try_from_slice(rest).unwrap();
             }
+
+            trade_data.taker_fee = ((instruction_data.takerFeeBp as f64
+                * instruction_data.price as f64)
+                / 10000.0) as f64;
+            trade_data.maker_fee = ((instruction_data.makerFeeBp as f64
+                * instruction_data.price as f64)
+                / 10000.0) as f64;
+            trade_data.amount = instruction_data.price as f64
+                + trade_data.taker_fee as f64
+                + trade_data.maker_fee as f64;
+            trade_data.amm_fee = 0.0;
+            enrich_with_logs_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        EXT_EXECUTE_SALE_V2_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "ExtExecuteSaleV2".to_string();
+            trade_data.platform = "magiceden".to_string();
+
+            trade_data.mint = input_accounts.get(7).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(1).unwrap().to_string();
+            trade_data.seller = input_accounts.get(2).unwrap().to_string();
+
+            if signer.eq(&trade_data.buyer.to_string()) {
+                trade_data.category = "buy".to_string();
+            } else {
+                trade_data.category = "sell".to_string();
+            }
+
+            trade_data.currency_mint = get_currency_mint(post_token_balances, &trade_data.mint);
+
+            let instruction_data: ExtExecuteSaleV2Layout;
+            if rest.len() > 12 {
+                let (rest_split, _) = rest.split_at(12);
+                instruction_data = ExtExecuteSaleV2Layout::try_from_slice(rest_split).unwrap();
+            } else {
+                instruction_data = ExtExecuteSaleV2Layout::try_from_slice(rest).unwrap();
+            }
+
+            trade_data.taker_fee = ((instruction_data.takerFeeBp as f64
+                * instruction_data.price as f64)
+                / 10000.0) as f64;
+            trade_data.maker_fee = ((instruction_data.makerFeeBp as f64
+                * instruction_data.price as f64)
+                / 10000.0) as f64;
+            trade_data.amount = instruction_data.price as f64
+                + trade_data.taker_fee as f64
+                + trade_data.maker_fee as f64;
+            trade_data.amm_fee = 0.0;
+            enrich_with_logs_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        CORE_EXECUTE_SALE_V2_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "CoreExecuteSaleV2".to_string();
+            trade_data.platform = "magiceden".to_string();
+
+            trade_data.mint = input_accounts.get(5).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(1).unwrap().to_string();
+            trade_data.seller = input_accounts.get(2).unwrap().to_string();
+
+            if signer.eq(&trade_data.buyer.to_string()) {
+                trade_data.category = "buy".to_string();
+            } else {
+                trade_data.category = "sell".to_string();
+            }
+
+            trade_data.currency_mint = get_currency_mint(post_token_balances, &trade_data.mint);
+
+            let instruction_data: CoreExecuteSaleV2Layout;
+            instruction_data = CoreExecuteSaleV2Layout::deserialize(&mut rest.clone()).unwrap();
 
             trade_data.taker_fee = ((instruction_data.takerFeeBp as f64
                 * instruction_data.price as f64)

@@ -1,4 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
+use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
 use crate::{
@@ -62,11 +63,7 @@ pub fn enrich_with_inner_instructions_data(
                             let _pool_mint = input_accounts.get(1).unwrap().to_string();
                             let _withdraw_authority = input_accounts.get(2).unwrap().to_string();
 
-                            if _pool_mint.as_str().eq(trade_data.pool_mint.as_str())
-                                & _withdraw_authority
-                                    .as_str()
-                                    .eq(trade_data.withdraw_authority.as_str())
-                            {
+                            if _pool_mint.as_str().eq(trade_data.pool_mint.as_str()){
                                 let burn_data = BurnLayout::deserialize(&mut rest.clone()).unwrap();
                                 total_burn_amount += burn_data.amount as f64;
                             }

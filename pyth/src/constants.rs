@@ -1,0 +1,1 @@
+pub const PYTH_ORACLE_PROGRAM_ADDRESS: &str = "FsJ3A3u2vn5cTVofAjvy6y5kwABJAqYWpe4975bi2epH";

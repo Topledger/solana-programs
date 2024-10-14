@@ -1,0 +1,35 @@
+syntax = "proto2";
+
+package sf.solana.liquidity.providers.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required string signer = 5;
+  required string pool = 6;
+  required string mint_a = 7;
+  required string mint_b = 8;
+  required string mint_c = 9;
+  required string mint_d = 10;
+  required string account_a = 11;
+  required string account_b = 12;
+  required string account_c = 13;
+  required string account_d = 14;
+  required double token_a_amount = 15;
+  required double token_b_amount = 16;
+  required double token_c_amount = 17;
+  required double token_d_amount = 18;
+  required string lp_wallet = 19;
+  required string instruction_type = 20;
+  required bool is_inner_instruction = 21;
+  required string outer_program = 22;
+  required uint32 instruction_index = 23;
+  required string inner_program = 24;
+  required uint32 inner_instruction_index = 25;
+}

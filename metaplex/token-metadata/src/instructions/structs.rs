@@ -1055,6 +1055,18 @@ pub enum DelegateArgsLayoutName {
     ProgrammableConfigV1 {
         authorization_data: Option<AuthorizationDataLayout>,
     },
+    AuthorityItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
+    DataItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
+    CollectionItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
+    ProgrammableConfigItemV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
 }
 
 impl Default for DelegateArgsLayoutName {
@@ -1157,6 +1169,38 @@ impl DelegateArgsLayout {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
             }
+            DelegateArgsLayoutName::AuthorityItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "AuthorityItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::DataItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "DataItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::CollectionItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "CollectionItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::ProgrammableConfigItemV1 {
+                authorization_data: auth_data,
+            } => {
+                name = "ProgrammableConfigItemV1".to_string();
+                if auth_data.is_some() {
+                    authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
         }
 
         PbDelegateArgsLayout {
@@ -1174,13 +1218,17 @@ pub enum RevokeArgsLayoutName {
     CollectionV1,
     SaleV1,
     TransferV1,
-    UpdateV1,
+    DataV1,
     UtilityV1,
     StakingV1,
     StandardV1,
     LockedTransferV1,
     ProgrammableConfigV1,
     MigrationV1,
+    AuthorityItemV1,
+    DataItemV1,
+    CollectionItemV1,
+    ProgrammableConfigItemV1,
 }
 
 #[derive(BorshDeserialize, Debug, Default)]
@@ -1201,8 +1249,8 @@ impl RevokeArgsLayout {
             RevokeArgsLayoutName::TransferV1 => {
                 result = "TransferV1".to_string();
             }
-            RevokeArgsLayoutName::UpdateV1 => {
-                result = "UpdateV1".to_string();
+            RevokeArgsLayoutName::DataV1 => {
+                result = "DataV1".to_string();
             }
             RevokeArgsLayoutName::UtilityV1 => {
                 result = "UtilityV1".to_string();
@@ -1221,6 +1269,18 @@ impl RevokeArgsLayout {
             }
             RevokeArgsLayoutName::MigrationV1 => {
                 result = "MigrationV1".to_string();
+            }
+            RevokeArgsLayoutName::AuthorityItemV1 => {
+                result = "AuthorityItemV1".to_string();
+            }
+            RevokeArgsLayoutName::DataItemV1 => {
+                result = "DataItemV1".to_string();
+            }
+            RevokeArgsLayoutName::CollectionItemV1 => {
+                result = "CollectionItemV1".to_string();
+            }
+            RevokeArgsLayoutName::ProgrammableConfigItemV1 => {
+                result = "ProgrammableConfigItemV1".to_string();
             }
         }
 
@@ -1375,7 +1435,9 @@ impl MigrateArgsLayout {
             } => {
                 name = "V1".to_string();
                 migration_type = Some(mig_type.to_proto_struct());
-                rule_set = Some(r_set.unwrap().to_proto_struct());
+                if r_set.is_some() {
+                    rule_set = Some(r_set.unwrap().to_proto_struct());
+                }
             }
         }
 

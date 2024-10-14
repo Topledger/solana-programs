@@ -1,0 +1,23 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_programs_associated_token_account_program_1_0_0'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - main.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.block_meta.v1.Output

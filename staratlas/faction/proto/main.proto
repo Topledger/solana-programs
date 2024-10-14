@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+package sf.solana.block_meta.v1;
+
+message PbProcessEnlistPlayerLayout {
+  required uint32 bump = 1;
+  required uint32 factionId = 2;
+}
+
+message Arg {
+  required string instruction_type = 1;
+  optional PbProcessEnlistPlayerLayout processEnlistPlayer = 2;
+}
+
+message InputAccounts {
+  optional string playerFactionAccount = 1;
+  optional string playerAccount = 2;
+  optional string systemProgram = 3;
+  optional string clock = 4;
+}
+
+message Meta {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 7;
+  required bool is_inner_instruction = 8;
+  required uint32 inner_instruction_index = 9;
+  required string instruction_type = 10;
+  required Arg args = 11;
+  required InputAccounts input_accounts = 12;
+}
+
+message Output {
+  repeated Meta data = 1;
+}

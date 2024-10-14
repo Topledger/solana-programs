@@ -9,6 +9,14 @@ const BUY_SINGLE_LISTING_DISCRIMINATOR: u64 = 10182184063413640437;
 const SELL_NFT_TOKEN_POOL_DISCRIMINATOR: u64 = 3488891489721789497;
 const BUY_NFT_DISCRIMINATOR: u64 = 16020266160874061920;
 const SELL_NFT_TRADE_POOL_DISCRIMINATOR: u64 = 6495489243035292291;
+const BUY_SINGLE_LISTING_T22_DISCRIMINATOR: u64 = 15588158998506002790;
+const SELL_NFT_TOKEN_POOL_T22_DISCRIMINATOR: u64 = 3577586649810332309;
+const SELL_NFT_TRADE_POOL_T22_DISCRIMINATOR: u64 = 672568274287300988;
+const BUY_NFT_T22_DISCRIMINATOR: u64 = 5707124689885649819;
+const WNS_BUY_SINGLE_LISTING_DISCRIMINATOR: u64 = 14373793278627941916;
+const WNS_BUY_NFT_DISCRIMINATOR: u64 = 5620760298461527512;
+const WNS_SELL_NFT_TOKEN_POOL_DISCRIMINATOR: u64 = 10317446357617561128;
+const WNS_SELL_NFT_TRADE_POOL_DISCRIMINATOR: u64 = 541012503203524521;
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 pub struct Event {
@@ -75,7 +83,7 @@ pub fn parse_trade_instruction(
             trade_data.instruction_type = "SellNftTokenPool".to_string();
             trade_data.platform = "tensorswap".to_string();
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(6).unwrap().to_string();
             trade_data.buyer = input_accounts.get(9).unwrap().to_string();
@@ -91,11 +99,11 @@ pub fn parse_trade_instruction(
             trade_data.platform = "tensorswap".to_string();
 
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(5).unwrap().to_string();
             trade_data.buyer = input_accounts.get(11).unwrap().to_string();
-            trade_data.seller = input_accounts.get(9).unwrap().to_string();
+            trade_data.seller = input_accounts.get(10).unwrap().to_string();
 
             enrich_with_events_data(&mut trade_data, log_messages);
 
@@ -107,9 +115,9 @@ pub fn parse_trade_instruction(
             trade_data.platform = "tensorswap".to_string();
 
             trade_data.category = "buy".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
-            trade_data.mint = input_accounts.get(5).unwrap().to_string();
+            trade_data.mint = input_accounts.get(4).unwrap().to_string();
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
             trade_data.seller = input_accounts.get(7).unwrap().to_string();
 
@@ -123,11 +131,139 @@ pub fn parse_trade_instruction(
             trade_data.platform = "tensorswap".to_string();
 
             trade_data.category = "sell".to_string();
-            trade_data.currency = "SOL".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
 
             trade_data.mint = input_accounts.get(6).unwrap().to_string();
             trade_data.buyer = input_accounts.get(8).unwrap().to_string();
             trade_data.seller = input_accounts.get(10).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        BUY_SINGLE_LISTING_T22_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "BuySingleListingT22".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "buy".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(4).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(7).unwrap().to_string();
+            trade_data.seller = input_accounts.get(6).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        SELL_NFT_TOKEN_POOL_T22_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "SellNftTokenPoolT22".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "sell".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(6).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(8).unwrap().to_string();
+            trade_data.seller = input_accounts.get(9).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        SELL_NFT_TRADE_POOL_T22_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "SellNftTradePoolT22".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "sell".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(6).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(8).unwrap().to_string();
+            trade_data.seller = input_accounts.get(9).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        BUY_NFT_T22_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "BuyNftT22".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "buy".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(5).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(10).unwrap().to_string();
+            trade_data.seller = input_accounts.get(9).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        WNS_BUY_SINGLE_LISTING_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "WnsBuySingleListing".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "buy".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(4).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(7).unwrap().to_string();
+            trade_data.seller = input_accounts.get(6).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        WNS_BUY_NFT_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "WnsBuyNft".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "buy".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(5).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(10).unwrap().to_string();
+            trade_data.seller = input_accounts.get(9).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        WNS_SELL_NFT_TOKEN_POOL_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "WnsSellNftTokenPool".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "sell".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(6).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(8).unwrap().to_string();
+            trade_data.seller = input_accounts.get(9).unwrap().to_string();
+
+            enrich_with_events_data(&mut trade_data, log_messages);
+
+            result = Some(trade_data);
+        }
+        WNS_SELL_NFT_TRADE_POOL_DISCRIMINATOR => {
+            trade_data = TradeData::default();
+            trade_data.instruction_type = "WnsSellNftTradePool".to_string();
+            trade_data.platform = "tensorswap".to_string();
+
+            trade_data.category = "sell".to_string();
+            trade_data.currency_mint = "So11111111111111111111111111111111111111112".to_string();
+
+            trade_data.mint = input_accounts.get(6).unwrap().to_string();
+            trade_data.buyer = input_accounts.get(8).unwrap().to_string();
+            trade_data.seller = input_accounts.get(9).unwrap().to_string();
 
             enrich_with_events_data(&mut trade_data, log_messages);
 

@@ -18,8 +18,6 @@ pub struct TransactionStats {
     pub fee: u64,
     #[prost(string, required, tag="5")]
     pub id: ::prost::alloc::string::String,
-    #[prost(bool, required, tag="6")]
-    pub success: bool,
     #[prost(string, repeated, tag="7")]
     pub executing_accounts: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(message, repeated, tag="8")]
@@ -46,6 +44,8 @@ pub struct TransactionStats {
     pub logs_truncated: bool,
     #[prost(uint32, required, tag="19")]
     pub signatures_size: u32,
+    #[prost(string, required, tag="20")]
+    pub signer: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

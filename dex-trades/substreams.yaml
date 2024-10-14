@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_dex_trades_1_0_10'
-  version: v1.0.10
+  name: 'tl_solana_dex_trades_1_0_21'
+  version: v1.0.21
 
 protobuf:
   files:
@@ -9,23 +9,20 @@ protobuf:
   importPaths:
     - ./proto
 
-
-
 binaries:
   default:
     type: wasm/rust-v1
     file: target/wasm32-unknown-unknown/release/substreams.wasm
 
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
 modules:
-  - name: map_block_before_lookup
-    kind: map
-    inputs:
-      - source: sf.solana.type.v1.Block
-    output:
-      type: proto:sf.solana.dex.trades.v1.Output
   - name: map_block
     kind: map
     inputs:
-      - source: sf.solana.type.v1.Block
+      - map: sol:blocks_without_votes
     output:
       type: proto:sf.solana.dex.trades.v1.Output
+
+network: solana

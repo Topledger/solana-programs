@@ -1,0 +1,104 @@
+syntax = "proto2";
+
+package sf.solana.block_meta.v1;
+
+message PbFeesLayout {
+  required uint64 admin_trade_fee_numerator = 1;
+  required uint64 admin_trade_fee_denominator = 2;
+  required uint64 admin_withdraw_fee_numerator = 3;
+  required uint64 admin_withdraw_fee_denominator = 4;
+  required uint64 trade_fee_numerator = 5;
+  required uint64 trade_fee_denominator = 6;
+  required uint64 withdraw_fee_numerator = 7;
+  required uint64 withdraw_fee_denominator = 8;
+}
+
+message PbInitializeLayout {
+  required uint32 nonce = 1;
+  required uint64 amp_factor = 2;
+  required PbFeesLayout fees = 3;
+}
+
+message PbSwapLayout {
+  required uint64 amount_in = 1;
+  required uint64 minimum_amount_out = 2;
+}
+
+message PbDepositLayout {
+  required uint64 token_a_amount = 1;
+  required uint64 token_b_amount = 2;
+  required uint64 min_mint_amount = 3;
+}
+
+message PbWithdrawLayout {
+  required uint64 pool_token_amount = 1;
+  required uint64 minimum_token_a_amount = 2;
+  required uint64 minimum_token_b_amount = 3;
+}
+
+message PbWithdrawOneLayout {
+  required uint64 pool_token_amount = 1;
+  required uint64 minimum_token_amount = 2;
+}
+
+message Arg {
+  required string instruction_type = 1;
+  optional PbInitializeLayout initialize = 2;
+  optional PbSwapLayout swap = 3;
+  optional PbDepositLayout deposit = 4;
+  optional PbWithdrawLayout withdraw = 5;
+  optional PbWithdrawOneLayout withdrawOne = 6;
+}
+
+message InputAccounts {
+  optional string newStableSwap = 1;
+  optional string authority = 2;
+  optional string adminAccount = 3;
+  optional string adminFeeAadminFeeAccount = 4;
+  optional string adminFeeBadminFeeAccount = 5;
+  optional string tokenAAccount = 6;
+  optional string tokenBAccount = 7;
+  optional string poolTokenMint = 8;
+  optional string stableSwap = 9;
+  optional string userAuthority = 10;
+  optional string tokenABSourceAccount = 11;
+  optional string tokenABBaseAccountSwapInto = 12;
+  optional string tokenABBaseAccountSwapFrom = 13;
+  optional string tokenABDestinationAccount = 14;
+  optional string tokenABAdminFeeAccount = 15;
+  optional string tokenProgramId = 16;
+  optional string tokenAAuthority = 17;
+  optional string tokenBAuthority = 18;
+  optional string tokenABaseAccountDepositInto = 19;
+  optional string tokenBBaseAccountDepositInto = 20;
+  optional string poolMintAccount = 21;
+  optional string poolAccountDeposit = 22;
+  optional string sourcePoolAccount = 23;
+  optional string tokenASwapAccountWithdrawFrom = 24;
+  optional string tokenBSwapAccountWithdrawFrom = 25;
+  optional string tokenAUserAccount = 26;
+  optional string tokenBUserAccount = 27;
+  optional string adminFeeAAccount = 28;
+  optional string adminFeeBAccount = 29;
+  optional string tokenABBaseSwapAccountWithdrawFrom = 30;
+  optional string tokenABQuoteSwapAccountExchange = 31;
+  optional string tokenABBaseUserAccountCredit = 32;
+}
+
+message Meta {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 7;
+  required bool is_inner_instruction = 8;
+  required uint32 inner_instruction_index = 9;
+  required string instruction_type = 10;
+  required Arg args = 11;
+  required InputAccounts input_accounts = 12;
+}
+
+message Output {
+  repeated Meta data = 1;
+}

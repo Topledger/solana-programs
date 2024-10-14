@@ -1,0 +1,25 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_accounts_transactions_1_0_0'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - output.proto
+    - files.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: jsonl_out
+    kind: map
+    inputs:
+      - params: string
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.substreams.sink.files.v1.Lines

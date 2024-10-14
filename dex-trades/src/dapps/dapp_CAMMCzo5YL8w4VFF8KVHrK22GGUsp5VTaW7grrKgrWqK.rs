@@ -1,6 +1,7 @@
 use crate::trade_instruction::TradeInstruction;
 
 const SWAP_DISCRIMINATOR: u64 = u64::from_le_bytes([248, 198, 158, 145, 225, 117, 135, 200]);
+const SWAP_V2_DISCRIMINATOR: u64 = u64::from_le_bytes([43, 4, 237, 11, 26, 201, 30, 98]);
 
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
@@ -18,6 +19,15 @@ pub fn parse_trade_instruction(
                 dapp_address: String::from("CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK"),
                 name: String::from("Swap"),
                 amm: accounts.get(1).unwrap().to_string(),
+                vault_a: accounts.get(5).unwrap().to_string(),
+                vault_b: accounts.get(6).unwrap().to_string(),
+            });
+        }
+        SWAP_V2_DISCRIMINATOR => {
+            result = Some(TradeInstruction {
+                dapp_address: String::from("CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK"),
+                name: String::from("SwapV2"),
+                amm: accounts.get(2).unwrap().to_string(),
                 vault_a: accounts.get(5).unwrap().to_string(),
                 vault_b: accounts.get(6).unwrap().to_string(),
             });
