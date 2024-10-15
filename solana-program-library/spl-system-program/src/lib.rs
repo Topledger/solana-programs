@@ -10,48 +10,43 @@ mod utils;
 use instruction::{parse_instruction, Instruction};
 use pb::sf::solana::spl::system::program::v1::{Arg, Output, SplSystemProgramMeta};
 use substreams::log;
-use substreams::store::{StoreGet, StoreGetArray};
+use substreams_solana_core::base58;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use utils::convert_to_date;
 
 #[substreams::handlers::map]
-fn map_block(
-    block: Block,
-    address_lookup_table_store: StoreGetArray<String>,
-) -> Result<Output, substreams::errors::Error> {
+fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let slot = block.slot;
     let parent_slot = block.parent_slot;
     let timestamp = block.block_time.as_ref().unwrap().timestamp;
     let mut data: Vec<SplSystemProgramMeta> = vec![];
 
     for trx in block.transactions_owned() {
+        let accounts: Vec<String> = trx.resolved_accounts().iter().map(base58::encode).collect();
         if let Some(transaction) = trx.transaction {
             let meta = trx.meta.unwrap();
             let msg = transaction.message.unwrap();
-            let mut accounts = vec![];
-            let mut writable_accounts = vec![];
-            let mut readable_accounts = vec![];
 
-            msg.account_keys
-                .into_iter()
-                .for_each(|addr| accounts.push(bs58::encode(addr).into_string()));
-            msg.address_table_lookups.into_iter().for_each(|addr| {
-                let acc = bs58::encode(&addr.account_key).into_string();
-                match address_lookup_table_store.get_last(format!("table:{}", acc)) {
-                    None => panic!("Address Lookup Table Account {} does not exist", acc),
-                    Some(accs) => {
-                        addr.writable_indexes.into_iter().for_each(|idx| {
-                            writable_accounts.push(accs[idx as usize].clone());
-                        });
-                        addr.readonly_indexes.into_iter().for_each(|idx| {
-                            readable_accounts.push(accs[idx as usize].clone());
-                        })
-                    }
-                }
-            });
+            // msg.account_keys
+            //     .into_iter()
+            //     .for_each(|addr| accounts.push(bs58::encode(addr).into_string()));
+            // msg.address_table_lookups.into_iter().for_each(|addr| {
+            //     let acc = bs58::encode(&addr.account_key).into_string();
+            //     match address_lookup_table_store.get_last(format!("table:{}", acc)) {
+            //         None => panic!("Address Lookup Table Account {} does not exist", acc),
+            //         Some(accs) => {
+            //             addr.writable_indexes.into_iter().for_each(|idx| {
+            //                 writable_accounts.push(accs[idx as usize].clone());
+            //             });
+            //             addr.readonly_indexes.into_iter().for_each(|idx| {
+            //                 readable_accounts.push(accs[idx as usize].clone());
+            //             })
+            //         }
+            //     }
+            // });
 
-            accounts.append(&mut writable_accounts);
-            accounts.append(&mut readable_accounts);
+            // accounts.append(&mut writable_accounts);
+            // accounts.append(&mut readable_accounts);
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
