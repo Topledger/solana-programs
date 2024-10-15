@@ -46,7 +46,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
                 createAccountWithSeed.base = PubKeyLayout {
                     value: base.to_vec().as_slice().try_into().unwrap(),
                 };
-                createAccountWithSeed.seed = String::from_utf8(seed.to_vec()).unwrap();
+                createAccountWithSeed.seed = String::from_utf8(seed.to_vec()).unwrap_or_default();
                 createAccountWithSeed.lamports = u64::from_le_bytes(lamports.try_into().unwrap());
                 createAccountWithSeed.space = u64::from_le_bytes(space.try_into().unwrap());
                 createAccountWithSeed.owner = PubKeyLayout {
