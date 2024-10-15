@@ -11,7 +11,7 @@ use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
 use utils::get_mint;
-use utils::{convert_to_date, get_token_transfer};
+use utils::{convert_to_date, get_amt};
 mod trade_instruction;
 
 #[substreams::handlers::map]
@@ -52,6 +52,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         &"".to_string(),
                         false,
                         &inner_instructions,
+                        0 as u32,
                     );
                     if trade_data.is_some() {
                         let td = trade_data.unwrap();
@@ -113,6 +114,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         &program.to_string(),
                                         true,
                                         &inner_instructions,
+                                        inner_idx as u32,
                                     );
 
                                     if trade_data.is_some() {
@@ -187,6 +189,7 @@ fn get_trade_instruction(
     outer_program: &String,
     is_inner: bool,
     inner_instructions: &Vec<InnerInstructions>,
+    input_inner_idx: u32,
 ) -> Option<trade_instruction::TradeInstruction> {
     let input_accounts = prepare_input_accounts(account_indices, accounts);
 
@@ -447,6 +450,8 @@ fn get_trade_instruction(
                     &pre_token_balances,
                     &post_token_balances,
                     accounts,
+                    input_inner_idx,
+                    inner_instructions,
                 );
         }
         "DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1" => {
@@ -500,51 +505,6 @@ fn get_trade_instruction(
     }
 
     return result;
-}
-
-fn get_amt(
-    address: &String,
-    input_inner_idx: u32,
-    inner_instructions: &Vec<InnerInstructions>,
-    accounts: &Vec<String>,
-    post_token_balances: &Vec<TokenBalance>,
-) -> f64 {
-    let mut result: f64 = 0.0;
-
-    let source_transfer_amt = get_token_transfer(
-        address,
-        input_inner_idx,
-        inner_instructions,
-        accounts,
-        "source".to_string(),
-    );
-
-    let destination_transfer_amt = get_token_transfer(
-        address,
-        input_inner_idx,
-        inner_instructions,
-        accounts,
-        "destination".to_string(),
-    );
-
-    if source_transfer_amt != 0.0 {
-        result = source_transfer_amt;
-    } else if destination_transfer_amt != 0.0 {
-        result = destination_transfer_amt;
-    }
-
-    if result != 0.0 {
-        let index = accounts.iter().position(|r| r == address).unwrap();
-        post_token_balances
-            .iter()
-            .filter(|token_balance| token_balance.account_index == index as u32)
-            .for_each(|token_balance: &TokenBalance| {
-                let decimals = token_balance.ui_token_amount.clone().unwrap().decimals;
-                result = result / (u64::pow(10, decimals)) as f64;
-            });
-    }
-
-    result
 }
 
 fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
