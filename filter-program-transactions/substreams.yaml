@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'new_program_transactions_v1_0_21'
-  version: v1.0.21
+  name: 'jupiter_perp_txns_v1_0_0'
+  version: v1.0.0
 
 protobuf:
   files:
@@ -12,8 +12,8 @@ protobuf:
 
 
 imports:
-  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v0.2.0/substreams-sink-files-v0.2.0.spkg
-  solana_explorers: https://github.com/streamingfast/substreams-explorers/releases/download/v1.0.1/solana-explorer-v0.2.0.spkg
+  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v2.1.0/substreams-sink-files-v2.1.0.spkg
+  solana: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
 
 binaries:
   default:
@@ -31,6 +31,6 @@ modules:
   - name: jsonl_out
     kind: map
     inputs:
-      - map: solana_explorers:map_block_without_votes
+      - map: solana:blocks_without_votes
     output:
       type: proto:sf.substreams.sink.files.v1.Lines
