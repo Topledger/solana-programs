@@ -29,7 +29,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
             CREATE_ACCOUNT_DISCRIMINATOR => {
                 result.instructionType = "CreateAccount".to_string();
                 result.createAccount =
-                    CreateAccountLayout::try_from_slice(rest_bytes).unwrap_or_default();
+                    CreateAccountLayout::deserialize(rest_bytes).unwrap_or_default();
             }
             CREATE_ACCOUNT_WITH_SEED_DISCRIMINATOR => {
                 result.instructionType = "CreateAccountWithSeed".to_string();
