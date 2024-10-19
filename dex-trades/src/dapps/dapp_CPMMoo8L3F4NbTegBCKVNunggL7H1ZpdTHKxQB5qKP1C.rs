@@ -23,6 +23,7 @@ pub fn parse_trade_instruction(
                 amm: accounts.get(3).unwrap().to_string(),
                 vault_a: accounts.get(6).unwrap().to_string(),
                 vault_b: accounts.get(7).unwrap().to_string(),
+                ..Default::default()
             });
         }
         SWAP_BASE_OUTPUT_PARTNER_DISCRIMINATOR => {
@@ -32,6 +33,7 @@ pub fn parse_trade_instruction(
                 amm: accounts.get(3).unwrap().to_string(),
                 vault_a: accounts.get(6).unwrap().to_string(),
                 vault_b: accounts.get(7).unwrap().to_string(),
+                ..Default::default()
             });
         }
         _ => {}
