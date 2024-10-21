@@ -514,7 +514,8 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             instruction_accounts.account = accounts.get(0).unwrap().to_string();
             instruction_accounts.mint = accounts.get(1).unwrap().to_string();
 
-            initializeAccount3Args = InitializeAccount3Layout::try_from_slice(rest).unwrap();
+            initializeAccount3Args =
+                InitializeAccount3Layout::deserialize((&mut rest.clone())).unwrap();
         }
         19 => {
             instruction_name = String::from("InitializeMultisig2");
