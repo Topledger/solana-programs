@@ -1,8 +1,9 @@
 mod pb;
 mod utils;
 
-use std::collections::HashSet;
+use std::{collections::HashSet, io::Read};
 
+use bytes::Buf;
 use pb::sf::solana::transaction_stats::v1::{Instruction, Output, TransactionStats};
 
 use substreams_solana::pb::sf::solana::r#type::v1::{
@@ -52,8 +53,8 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
             continue;
         }
 
-        if  meta.err.is_some() {
-            continue
+        if meta.err.is_some() {
+            continue;
         }
 
         let header = message.header.as_ref().expect("Header is missing");
@@ -115,8 +116,14 @@ fn populate_transaction_stats(
         &meta.inner_instructions,
         accounts,
     ));
-    transaction_stats.signer =  accounts.get(0).unwrap().to_string();
-    update_transaction_stats_compute_units(transaction_stats, parsed_logs, meta);
+    transaction_stats.signer = accounts.get(0).unwrap().to_string();
+    update_transaction_stats_compute_units(
+        transaction,
+        accounts,
+        transaction_stats,
+        parsed_logs,
+        meta,
+    );
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message, parsed_logs);
 }
 
@@ -154,16 +161,29 @@ fn update_transaction_stats_instructions(
 }
 
 fn update_transaction_stats_compute_units(
+    transaction: &Transaction,
+    accounts: &Vec<String>,
     transaction_stats: &mut TransactionStats,
     parsed_logs: &Vec<LogContext>,
     meta: &TransactionStatusMeta,
 ) {
-    for log_context in parsed_logs {
-        if log_context.depth == 1 {
-            transaction_stats.compute_units_allocated += log_context.compute_units as u64;
-            transaction_stats.compute_units_consumed += log_context.consumed_units as u64;
+    // Default compute units allocated as 0
+    let mut compute_units_allocated: u64 = 0;
+
+    let msg = transaction.message.clone().unwrap();
+    for (idx, inst) in msg.instructions.into_iter().enumerate() {
+        let program = &accounts[inst.program_id_index as usize];
+
+        if program.eq("ComputeBudget111111111111111111111111111111") {
+            let (disc_bytes, mut rest_bytes) = inst.data.split_at(1);
+            let discriminator: u8 = u8::from(disc_bytes[0]);
+            if discriminator == 2 {
+                compute_units_allocated = rest_bytes.get_u32_le() as u64;
+            }
         }
     }
+
+    transaction_stats.compute_units_allocated = compute_units_allocated;
 
     if let Some(compute_units) = meta.compute_units_consumed {
         transaction_stats.compute_units_consumed = compute_units;
