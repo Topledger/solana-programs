@@ -606,23 +606,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "substreams-solana-program-instructions"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2d2eac3fee28a079bd3af5573bb6d43cf9667d89ce577fc7dd40113bb31e9e1"
-dependencies = [
- "anyhow",
- "num_enum",
- "substreams",
-]
-
-[[package]]
 name = "substreams-solana-transactions-stats"
 version = "1.0.0"
 dependencies = [
  "borsh",
  "bs58 0.5.0",
- "bytes",
  "chrono",
  "num-bigint",
  "prost",
@@ -631,7 +619,6 @@ dependencies = [
  "serde_json",
  "substreams",
  "substreams-solana",
- "substreams-solana-program-instructions",
 ]
 
 [[package]]
