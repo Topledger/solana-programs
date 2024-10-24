@@ -21,6 +21,7 @@ pub fn parse_trade_instruction(
                 amm: accounts.get(1).unwrap().to_string(),
                 vault_a: accounts.get(5).unwrap().to_string(),
                 vault_b: accounts.get(6).unwrap().to_string(),
+                ..Default::default()
             });
         }
         SWAP_V2_DISCRIMINATOR => {
@@ -30,6 +31,7 @@ pub fn parse_trade_instruction(
                 amm: accounts.get(2).unwrap().to_string(),
                 vault_a: accounts.get(5).unwrap().to_string(),
                 vault_b: accounts.get(6).unwrap().to_string(),
+                ..Default::default()
             });
         }
         _ => {}

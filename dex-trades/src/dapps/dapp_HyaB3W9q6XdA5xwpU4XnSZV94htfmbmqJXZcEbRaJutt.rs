@@ -20,6 +20,7 @@ pub fn parse_trade_instruction(
                 amm: input_accounts.get(1).unwrap().to_string(),
                 vault_a: input_accounts.get(5).unwrap().to_string(),
                 vault_b: input_accounts.get(6).unwrap().to_string(),
+                ..Default::default()
             });
         }
         _ => {}
