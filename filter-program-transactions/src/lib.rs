@@ -1,10 +1,10 @@
 mod pb;
-mod jupiter_perp;
+mod programs_master;
 mod utils;
 
 use pb::sf::solana::transactions;
 use pb::sf::solana::transactions::v1::TransactionStats;
-use jupiter_perp::create_programs_map;
+use programs_master::create_programs_map;
 
 use pb::sf::substreams::sink::files::v1::Lines;
 use serde_json::json;
