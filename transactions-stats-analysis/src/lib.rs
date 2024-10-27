@@ -1,5 +1,6 @@
 mod pb;
 mod utils;
+use std::cmp;
 
 use std::{collections::HashSet, io::Read};
 
@@ -167,10 +168,15 @@ fn update_transaction_stats_compute_units(
     parsed_logs: &Vec<LogContext>,
     meta: &TransactionStatusMeta,
 ) {
-    // Default compute units allocated as 0
-    let mut compute_units_allocated: u64 = 0;
+    
+    
 
     let msg = transaction.message.clone().unwrap();
+    // Default compute units allocated as inst.len * 200_000
+    let mut compute_units_allocated: u64 = std::cmp::min(
+        (msg.instructions.len() as u64) * 200_000,
+        1_400_000,
+    );
     for (idx, inst) in msg.instructions.into_iter().enumerate() {
         let program = &accounts[inst.program_id_index as usize];
 
