@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_transactions_stats_1_0_7'
-  version: v1.0.7
+  name: 'tl_solana_transactions_stats_1_0_9'
+  version: v1.0.9
 
 protobuf:
   files:
@@ -10,8 +10,7 @@ protobuf:
     - ./proto
 
 imports:
-  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v0.2.0/substreams-sink-files-v0.2.0.spkg
-  solana_explorers: https://github.com/streamingfast/substreams-explorers/releases/download/v1.0.1/solana-explorer-v0.2.0.spkg
+  solana: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
 
 binaries:
   default:
@@ -22,6 +21,6 @@ modules:
   - name: map_block
     kind: map
     inputs:
-      - map: solana_explorers:map_block_without_votes
+      - map: solana:blocks_without_votes
     output:
       type: proto:sf.solana.transaction_stats.v1.Output
