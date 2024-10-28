@@ -155,7 +155,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 |(inner_idx, inner_inst)| {
                                     let inner_program =
                                         &accounts[inner_inst.program_id_index as usize];
-                                    let trade_data = get_trade_instruction(
+                                    let inner_trade_data = get_trade_instruction(
                                         inner_program,
                                         inner_inst.data.clone(),
                                         &inner_inst.accounts,
@@ -168,11 +168,11 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         inner_idx as u32,
                                     );
 
-                                    if trade_data.is_some() {
-                                        let td = trade_data.unwrap();
+                                    if inner_trade_data.is_some() {
+                                        let inner_td = inner_trade_data.unwrap();
 
-                                        let td_name = td.name;
-                                        let td_dapp_address = td.dapp_address;
+                                        let inner_td_name = inner_td.name;
+                                        let inner_td_dapp_address = inner_td.dapp_address;
 
                                         data.push(TradeData {
                                             block_date: convert_to_date(timestamp),
@@ -181,39 +181,39 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             block_slot: slot,
                                             block_time: timestamp,
                                             signer: accounts.get(0).unwrap().to_string(),
-                                            pool_address: td.amm,
+                                            pool_address: inner_td.amm,
                                             base_mint: get_mint(
-                                                &td.vault_a,
+                                                &inner_td.vault_a,
                                                 &pre_token_balances,
                                                 &accounts,
                                             ),
                                             quote_mint: get_mint(
-                                                &td.vault_b,
+                                                &inner_td.vault_b,
                                                 &pre_token_balances,
                                                 &accounts,
                                             ),
                                             base_amount: get_amt(
-                                                &td.vault_a,
+                                                &inner_td.vault_a,
                                                 inner_idx as u32,
                                                 &inner_instructions,
                                                 &accounts,
                                                 &post_token_balances,
                                             ),
                                             quote_amount: get_amt(
-                                                &td.vault_b,
+                                                &inner_td.vault_b,
                                                 inner_idx as u32,
                                                 &inner_instructions,
                                                 &accounts,
                                                 &post_token_balances,
                                             ),
-                                            base_vault: td.vault_a,
-                                            quote_vault: td.vault_b,
+                                            base_vault: inner_td.vault_a,
+                                            quote_vault: inner_td.vault_b,
                                             is_inner_instruction: true,
                                             instruction_index: idx as u32,
-                                            instruction_type: td_name.clone(),
+                                            instruction_type: inner_td_name.clone(),
                                             inner_instruxtion_index: inner_idx as u32,
                                             outer_program: program.to_string(),
-                                            inner_program: td_dapp_address.clone(),
+                                            inner_program: inner_td_dapp_address.clone(),
                                             txn_fee_lamports: meta.fee,
                                             signer_lamports_change: get_signer_balance_change(
                                                 &pre_balances,
@@ -221,7 +221,9 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             ),
                                         });
 
-                                        if td.second_swap_amm.clone().unwrap_or_default() != "" {
+                                        if inner_td.second_swap_amm.clone().unwrap_or_default()
+                                            != ""
+                                        {
                                             data.push(TradeData {
                                                 block_date: convert_to_date(timestamp),
                                                 tx_id: bs58::encode(&transaction.signatures[0])
@@ -229,42 +231,48 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 block_slot: slot,
                                                 block_time: timestamp,
                                                 signer: accounts.get(0).unwrap().to_string(),
-                                                pool_address: td.second_swap_amm.clone().unwrap(),
+                                                pool_address: inner_td
+                                                    .second_swap_amm
+                                                    .clone()
+                                                    .unwrap(),
                                                 base_mint: get_mint(
-                                                    &td.second_swap_vault_a.clone().unwrap(),
+                                                    &inner_td.second_swap_vault_a.clone().unwrap(),
                                                     &pre_token_balances,
                                                     &accounts,
                                                 ),
                                                 quote_mint: get_mint(
-                                                    &td.second_swap_vault_b.clone().unwrap(),
+                                                    &inner_td.second_swap_vault_b.clone().unwrap(),
                                                     &pre_token_balances,
                                                     &accounts,
                                                 ),
                                                 base_amount: get_amt(
-                                                    &td.second_swap_vault_a.clone().unwrap(),
+                                                    &inner_td.second_swap_vault_a.clone().unwrap(),
                                                     inner_idx as u32,
                                                     &inner_instructions,
                                                     &accounts,
                                                     &post_token_balances,
                                                 ),
                                                 quote_amount: get_amt(
-                                                    &td.second_swap_vault_b.clone().unwrap(),
+                                                    &inner_td.second_swap_vault_b.clone().unwrap(),
                                                     inner_idx as u32,
                                                     &inner_instructions,
                                                     &accounts,
                                                     &post_token_balances,
                                                 ),
-                                                base_vault: td.second_swap_vault_a.clone().unwrap(),
-                                                quote_vault: td
+                                                base_vault: inner_td
+                                                    .second_swap_vault_a
+                                                    .clone()
+                                                    .unwrap(),
+                                                quote_vault: inner_td
                                                     .second_swap_vault_b
                                                     .clone()
                                                     .unwrap(),
                                                 is_inner_instruction: true,
                                                 instruction_index: idx as u32,
-                                                instruction_type: td_name.clone(),
+                                                instruction_type: inner_td_name.clone(),
                                                 inner_instruxtion_index: inner_idx as u32,
                                                 outer_program: program.to_string(),
-                                                inner_program: td_dapp_address.clone(),
+                                                inner_program: inner_td_dapp_address.clone(),
                                                 txn_fee_lamports: meta.fee,
                                                 signer_lamports_change: get_signer_balance_change(
                                                     &pre_balances,
@@ -548,18 +556,18 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
-        "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky" => {
-            result =
-                dapps::dapp_MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky::parse_trade_instruction(
-                    instruction_data,
-                    input_accounts,
-                    &pre_token_balances,
-                    &post_token_balances,
-                    accounts,
-                    input_inner_idx,
-                    inner_instructions,
-                );
-        }
+        // "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky" => {
+        //     result =
+        //         dapps::dapp_MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky::parse_trade_instruction(
+        //             instruction_data,
+        //             input_accounts,
+        //             &pre_token_balances,
+        //             &post_token_balances,
+        //             accounts,
+        //             input_inner_idx,
+        //             inner_instructions,
+        //         );
+        // }
         "DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1" => {
             result =
                 dapps::dapp_DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1::parse_trade_instruction(

@@ -57,7 +57,7 @@ pub fn parse_trade_instruction(
             result = Some(TradeInstruction {
                 dapp_address: String::from("MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky"),
                 name: String::from("Exchange"),
-                amm: accounts.get(0).unwrap().to_string(),
+                amm: input_accounts.get(0).unwrap().to_string(),
                 vault_a,
                 vault_b,
                 ..Default::default()
