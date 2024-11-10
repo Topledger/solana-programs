@@ -1,10 +1,10 @@
 mod pb;
-mod programs_master;
+mod new_programs;
 mod utils;
 
 use pb::sf::solana::transactions;
 use pb::sf::solana::transactions::v1::TransactionStats;
-use programs_master::create_programs_map;
+use new_programs::create_programs_map;
 
 use pb::sf::substreams::sink::files::v1::Lines;
 use serde_json::json;
