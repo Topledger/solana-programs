@@ -30,6 +30,7 @@ pub fn parse_trade_instruction(
                 inner_instructions,
                 accounts,
                 post_token_balances,
+                "".to_string(),
             );
             let obj_b = get_amt(
                 &address_b,
@@ -37,6 +38,7 @@ pub fn parse_trade_instruction(
                 inner_instructions,
                 accounts,
                 post_token_balances,
+                "".to_string(),
             );
             let obj_c = get_amt(
                 &address_c,
@@ -44,6 +46,7 @@ pub fn parse_trade_instruction(
                 inner_instructions,
                 accounts,
                 post_token_balances,
+                "".to_string(),
             );
 
             let (vault_a, vault_b) = if obj_a == 0.0 {

@@ -48,7 +48,7 @@ fn get_vault_a(
     accounts: &Vec<String>,
 ) -> String {
     let mut vault_a = input_accounts.get(4).unwrap().to_string();
-    let mint_a = get_mint(&vault_a, post_token_balances, accounts);
+    let mint_a = get_mint(&vault_a, post_token_balances, accounts, "".to_string());
 
     if mint_a.is_empty() {
         vault_a = input_accounts.get(5).unwrap().to_string();
@@ -65,7 +65,7 @@ fn get_vault_b(
     let mut vault_a_index = 4;
 
     let mut vault_a = input_accounts.get(4).unwrap().to_string();
-    let mint_a = get_mint(&vault_a, post_token_balances, accounts);
+    let mint_a = get_mint(&vault_a, post_token_balances, accounts, "".to_string());
 
     if mint_a.is_empty() {
         vault_a_index += 1;

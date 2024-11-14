@@ -19,7 +19,14 @@ pub fn get_mint(
     address: &String,
     token_balances: &Vec<TokenBalance>,
     accounts: &Vec<String>,
+    dapp_address: String,
 ) -> String {
+    if dapp_address.eq("MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG")
+        || dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P")
+    {
+        return "So11111111111111111111111111111111111111112".to_string();
+    }
+
     let index = accounts.iter().position(|r| r == address).unwrap();
     let mut result: String = String::new();
 
@@ -38,6 +45,7 @@ pub fn get_amt(
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
     post_token_balances: &Vec<TokenBalance>,
+    dapp_address: String,
 ) -> f64 {
     let mut result: f64 = 0.0;
 
@@ -47,6 +55,7 @@ pub fn get_amt(
         inner_instructions,
         accounts,
         "source".to_string(),
+        dapp_address.clone(),
     );
 
     let destination_transfer_amt = get_token_transfer(
@@ -55,6 +64,7 @@ pub fn get_amt(
         inner_instructions,
         accounts,
         "destination".to_string(),
+        dapp_address.clone(),
     );
 
     if source_transfer_amt != 0.0 {
@@ -83,7 +93,20 @@ pub fn get_token_transfer(
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
     account_name_to_check: String,
+    dapp_address: String,
 ) -> f64 {
+    if dapp_address.eq("MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG")
+        || dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P")
+    {
+        return get_system_program_transfer(
+            address,
+            input_inner_idx,
+            inner_instructions,
+            accounts,
+            account_name_to_check,
+        );
+    }
+
     let mut result = 0.0;
     let mut result_assigned = false;
 
@@ -273,6 +296,71 @@ pub fn get_token_22_transfer(
             })
     });
 
+    result
+}
+
+fn get_system_program_transfer(
+    address: &String,
+    input_inner_idx: u32,
+    inner_instructions: &Vec<InnerInstructions>,
+    accounts: &Vec<String>,
+    account_name_to_check: String,
+) -> f64 {
+    let mut result = 0.0;
+    let mut result_assigned = false;
+
+    inner_instructions.iter().for_each(|inner_instruction| {
+        inner_instruction
+            .instructions
+            .iter()
+            .enumerate()
+            .for_each(|(inner_idx, inner_inst)| {
+                let inner_program = &accounts[inner_inst.program_id_index as usize];
+
+                if inner_program
+                    .as_str()
+                    .eq("11111111111111111111111111111111")
+                {
+                    let (discriminator_bytes, rest) = inner_inst.data.split_at(4);
+
+                    let disc_bytes_arr: [u8; 4] = discriminator_bytes.to_vec().try_into().unwrap();
+                    let discriminator: u32 = u32::from_le_bytes(disc_bytes_arr);
+
+                    match discriminator {
+                        2 => {
+                            let input_accounts =
+                                prepare_input_accounts(&inner_inst.accounts, accounts);
+
+                            let source = input_accounts.get(0).unwrap().to_string();
+                            let destination = input_accounts.get(1).unwrap().to_string();
+
+                            let condition = if input_inner_idx > 0 {
+                                inner_idx as u32 > input_inner_idx
+                            } else {
+                                true
+                            };
+
+                            if condition && address.eq(&source) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                if !result_assigned {
+                                    result = -1.0 * data.amount as f64;
+                                    result_assigned = true;
+                                }
+                            }
+
+                            if condition && address.eq(&destination) {
+                                let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
+                                if !result_assigned {
+                                    result = data.amount as f64;
+                                    result_assigned = true;
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            })
+    });
     result
 }
 
