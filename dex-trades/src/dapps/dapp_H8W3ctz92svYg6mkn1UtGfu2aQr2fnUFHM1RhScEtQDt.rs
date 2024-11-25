@@ -19,7 +19,7 @@ pub fn parse_trade_instruction(
                 name: String::from("Swap"),
                 amm: accounts.get(2).unwrap().to_string(),
                 vault_a: accounts.get(4).unwrap().to_string(),
-                vault_b: accounts.get(5).unwrap().to_string(),
+                vault_b: accounts.get(6).unwrap().to_string(),
                 ..Default::default()
             });
         }
