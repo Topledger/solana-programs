@@ -144,7 +144,8 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
     let mut upgradeNonceAccountArg: UpgradeNonceAccountLayout =
         UpgradeNonceAccountLayout::default();
 
-    let (disc_bytes, rest) = bytes_stream.split_at(4);
+    let (disc_bytes, rest_bytes) = bytes_stream.split_at(4);
+    let rest = &mut rest_bytes.clone();
     let discriminator: u32 = u32::try_from_slice(disc_bytes).unwrap();
 
     match discriminator {
@@ -158,47 +159,47 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
         }
         2 => {
             instruction_name = String::from("Transfer");
-            transferArg = TransferLayout::try_from_slice(rest).unwrap();
+            transferArg = TransferLayout::deserialize(rest).unwrap();
         }
         3 => {
             instruction_name = String::from("CreateAccountWithSeed");
-            createAccountWithSeedArg = CreateAccountWithSeedLayout::try_from_slice(rest).unwrap();
+            createAccountWithSeedArg = CreateAccountWithSeedLayout::deserialize(rest).unwrap();
         }
         4 => {
             instruction_name = String::from("AdvanceNonceAccount");
-            advanceNonceAccountArg = AdvanceNonceAccountLayout::try_from_slice(rest).unwrap();
+            advanceNonceAccountArg = AdvanceNonceAccountLayout::deserialize(rest).unwrap();
         }
         5 => {
             instruction_name = String::from("WithdrawNonceAccount");
-            withdrawNonceAccountArg = WithdrawNonceAccountLayout::try_from_slice(rest).unwrap();
+            withdrawNonceAccountArg = WithdrawNonceAccountLayout::deserialize(rest).unwrap();
         }
         6 => {
             instruction_name = String::from("InitializeNonceAccount");
-            initializeNonceAccountArg = InitializeNonceAccountLayout::try_from_slice(rest).unwrap();
+            initializeNonceAccountArg = InitializeNonceAccountLayout::deserialize(rest).unwrap();
         }
         7 => {
             instruction_name = String::from("AuthorizeNonceAccount");
-            authorizeNonceAccountArg = AuthorizeNonceAccountLayout::try_from_slice(rest).unwrap();
+            authorizeNonceAccountArg = AuthorizeNonceAccountLayout::deserialize(rest).unwrap();
         }
         8 => {
             instruction_name = String::from("Allocate");
-            allocateArg = AllocateLayout::try_from_slice(rest).unwrap();
+            allocateArg = AllocateLayout::deserialize(rest).unwrap();
         }
         9 => {
             instruction_name = String::from("AllocateWithSeed");
-            allocateWithSeedArg = AllocateWithSeedLayout::try_from_slice(rest).unwrap();
+            allocateWithSeedArg = AllocateWithSeedLayout::deserialize(rest).unwrap();
         }
         10 => {
             instruction_name = String::from("AssignWithSeed");
-            assignWithSeedArg = AssignWithSeedLayout::try_from_slice(rest).unwrap();
+            assignWithSeedArg = AssignWithSeedLayout::deserialize(rest).unwrap();
         }
         11 => {
             instruction_name = String::from("TransferWithSeed");
-            transferWithSeedArg = TransferWithSeedLayout::try_from_slice(rest).unwrap();
+            transferWithSeedArg = TransferWithSeedLayout::deserialize(rest).unwrap();
         }
         12 => {
             instruction_name = String::from("UpgradeNonceAccount");
-            upgradeNonceAccountArg = UpgradeNonceAccountLayout::try_from_slice(rest).unwrap();
+            upgradeNonceAccountArg = UpgradeNonceAccountLayout::deserialize(rest).unwrap();
         }
 
         _ => {}

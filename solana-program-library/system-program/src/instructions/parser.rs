@@ -29,7 +29,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
             CREATE_ACCOUNT_DISCRIMINATOR => {
                 result.instructionType = "CreateAccount".to_string();
                 result.createAccount =
-                    CreateAccountLayout::try_from_slice(rest_bytes).unwrap_or_default();
+                    CreateAccountLayout::deserialize(rest_bytes).unwrap_or_default();
             }
             CREATE_ACCOUNT_WITH_SEED_DISCRIMINATOR => {
                 result.instructionType = "CreateAccountWithSeed".to_string();
@@ -46,7 +46,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>) -> Instruction {
                 createAccountWithSeed.base = PubKeyLayout {
                     value: base.to_vec().as_slice().try_into().unwrap(),
                 };
-                createAccountWithSeed.seed = String::from_utf8(seed.to_vec()).unwrap();
+                createAccountWithSeed.seed = String::from_utf8(seed.to_vec()).unwrap_or_default();
                 createAccountWithSeed.lamports = u64::from_le_bytes(lamports.try_into().unwrap());
                 createAccountWithSeed.space = u64::from_le_bytes(space.try_into().unwrap());
                 createAccountWithSeed.owner = PubKeyLayout {

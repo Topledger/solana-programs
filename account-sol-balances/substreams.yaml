@@ -1,13 +1,16 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_account_sol_balances_1_0_0'
-  version: v1.0.0
+  name: 'tl_account_sol_balances_1_0_1'
+  version: v1.0.1
 
 protobuf:
   files:
     - output.proto
   importPaths:
     - ./proto
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
 
 binaries:
   default:
@@ -18,6 +21,6 @@ modules:
   - name: map_block
     kind: map
     inputs:
-      - source: sf.solana.type.v1.Block
+      - map: sol:blocks_without_votes
     output:
       type: proto:sf.solana.account_sol_balance.v1.Output

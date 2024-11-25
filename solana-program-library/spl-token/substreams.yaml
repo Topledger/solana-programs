@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_programs_spl_token_1_0_21'
-  version: v1.0.21
+  name: 'tl_solana_programs_spl_token_1_0_22'
+  version: v1.0.22
 
 protobuf:
   files:

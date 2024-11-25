@@ -13,6 +13,7 @@ const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
 
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
+    
     let block_slot = block.slot;
 
     let block_date = match block.block_time.as_ref() {
@@ -23,23 +24,24 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         None => "Block time is not available".to_string(),
     };
 
-    let decoded_vote_account = bs58::decode(VOTE_ACCOUNT)
-        .into_vec()
-        .expect("Failed to decode vote account");
 
-    let mut latest_stats: HashMap<String, AccountStats> = HashMap::new();
+    let mut latest_stats: HashMap<(String), AccountStats> = HashMap::new();
 
-    block.transactions.iter().for_each(|trx| {
-        if let (Some(meta), false) = (
-            &trx.meta,
-            transaction_contains_vote_account(trx, &decoded_vote_account),
-        ) {
-            if meta.err.is_none() && !meta.post_token_balances.is_empty() {
-                let accounts = trx.resolved_accounts_as_strings();
-                update_latest_stats(&mut latest_stats, meta, &accounts, block_slot, &block_date);
-            }
+    for trx in block.transactions.iter() {
+        let meta = match trx.meta.as_ref() {
+            Some(meta) => meta,
+            None => continue,
+        };
+
+        if meta.err.is_some() { 
+            continue;
         }
-    });
+
+        let accounts = trx.resolved_accounts_as_strings();
+        update_latest_stats(&mut latest_stats, meta, &accounts, block_slot, &block_date);
+
+
+    }
 
     Ok(Output {
         data: latest_stats.into_values().collect(),
