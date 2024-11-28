@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_liquidity_providers_1_0_3'
-  version: v1.0.3
+  name: 'tl_solana_liquidity_providers_2_0_0'
+  version: v2.0.0
 
 protobuf:
   files:
