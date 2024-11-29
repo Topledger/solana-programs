@@ -320,7 +320,10 @@ fn get_decimals(
     accounts: &Vec<String>,
 ) -> u32 {
     let mut decimals: u32 = 0;
-    let index = accounts.iter().position(|r| r == address).unwrap();
+    let index = accounts
+        .iter()
+        .position(|r| r == address)
+        .unwrap_or_default();
     post_token_balances
         .iter()
         .filter(|token_balance| token_balance.account_index == index as u32)
