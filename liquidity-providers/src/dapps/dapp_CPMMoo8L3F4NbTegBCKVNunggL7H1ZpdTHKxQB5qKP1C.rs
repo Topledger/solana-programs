@@ -7,6 +7,7 @@ use crate::{
 
 const Deposit: u64 = u64::from_le_bytes([242, 35, 198, 137, 82, 225, 242, 182]);
 const Withdraw: u64 = u64::from_le_bytes([183, 18, 70, 156, 148, 109, 161, 34]);
+const Initialize: u64 = u64::from_le_bytes([175, 175, 109, 31, 13, 152, 155, 237]);
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -28,15 +29,14 @@ pub fn parse_trade_instruction(
     match discriminator {
         Deposit => {
             td.instruction_type = "Deposit".to_string();
-            td.pool = input_accounts.get(0).unwrap().to_string();
-            td.account_a = input_accounts.get(4).unwrap().to_string();
-            td.account_b = "".to_string();
-            td.account_c = "".to_string();
+            td.pool = input_accounts.get(2).unwrap().to_string();
+            td.account_a = input_accounts.get(6).unwrap().to_string();
+            td.account_b = input_accounts.get(7).unwrap().to_string();
+
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
             td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
-            td.mint_c = get_mint_address_for(&td.account_c, post_token_balances, accounts);
 
             td.token_a_amount = get_token_transfer(
                 &td.account_a,
@@ -47,13 +47,6 @@ pub fn parse_trade_instruction(
             );
             td.token_b_amount = get_token_transfer(
                 &td.account_b,
-                inner_idx,
-                inner_instructions,
-                accounts,
-                "destination".to_string(),
-            );
-            td.token_c_amount = get_token_transfer(
-                &td.account_c,
                 inner_idx,
                 inner_instructions,
                 accounts,
@@ -64,15 +57,14 @@ pub fn parse_trade_instruction(
         }
         Withdraw => {
             td.instruction_type = "Withdraw".to_string();
-            td.pool = input_accounts.get(0).unwrap().to_string();
-            td.account_a = input_accounts.get(4).unwrap().to_string();
-            td.account_b = "".to_string();
-            td.account_c = "".to_string();
+            td.pool = input_accounts.get(2).unwrap().to_string();
+            td.account_a = input_accounts.get(6).unwrap().to_string();
+            td.account_b = input_accounts.get(7).unwrap().to_string();
+
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
             td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
-            td.mint_c = get_mint_address_for(&td.account_c, post_token_balances, accounts);
 
             td.token_a_amount = get_token_transfer(
                 &td.account_a,
@@ -88,12 +80,33 @@ pub fn parse_trade_instruction(
                 accounts,
                 "source".to_string(),
             );
-            td.token_c_amount = get_token_transfer(
-                &td.account_c,
+
+            result = Some(td);
+        }
+        Initialize => {
+            td.instruction_type = "Initialize".to_string();
+            td.pool = input_accounts.get(3).unwrap().to_string();
+            td.account_a = input_accounts.get(10).unwrap().to_string();
+            td.account_b = input_accounts.get(11).unwrap().to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
                 inner_idx,
                 inner_instructions,
                 accounts,
-                "source".to_string(),
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
             );
 
             result = Some(td);

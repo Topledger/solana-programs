@@ -24,26 +24,14 @@ pub struct TradeData {
     pub mint_a: ::prost::alloc::string::String,
     #[prost(string, required, tag="8")]
     pub mint_b: ::prost::alloc::string::String,
-    #[prost(string, required, tag="9")]
-    pub mint_c: ::prost::alloc::string::String,
-    #[prost(string, required, tag="10")]
-    pub mint_d: ::prost::alloc::string::String,
     #[prost(string, required, tag="11")]
     pub account_a: ::prost::alloc::string::String,
     #[prost(string, required, tag="12")]
     pub account_b: ::prost::alloc::string::String,
-    #[prost(string, required, tag="13")]
-    pub account_c: ::prost::alloc::string::String,
-    #[prost(string, required, tag="14")]
-    pub account_d: ::prost::alloc::string::String,
     #[prost(double, required, tag="15")]
     pub token_a_amount: f64,
     #[prost(double, required, tag="16")]
     pub token_b_amount: f64,
-    #[prost(double, required, tag="17")]
-    pub token_c_amount: f64,
-    #[prost(double, required, tag="18")]
-    pub token_d_amount: f64,
     #[prost(string, required, tag="19")]
     pub lp_wallet: ::prost::alloc::string::String,
     #[prost(string, required, tag="20")]
