@@ -75,7 +75,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             ),
                             quote_mint: get_mint(
                                 &td.vault_b,
-                                &pre_token_balances,
+                                &post_token_balances,
                                 &accounts,
                                 "".to_string(),
                             ),
@@ -86,6 +86,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 &accounts,
                                 &post_token_balances,
                                 td_dapp_address.clone(),
+                                pre_balances.clone(),
+                                post_balances.clone(),
                             ),
                             quote_amount: get_amt(
                                 &td.vault_b,
@@ -94,6 +96,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 &accounts,
                                 &post_token_balances,
                                 "".to_string(),
+                                pre_balances.clone(),
+                                post_balances.clone(),
                             ),
                             base_vault: td.vault_a,
                             quote_vault: td.vault_b,
@@ -126,7 +130,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 ),
                                 quote_mint: get_mint(
                                     &td.second_swap_vault_b.clone().unwrap(),
-                                    &pre_token_balances,
+                                    &post_token_balances,
                                     &accounts,
                                     "".to_string(),
                                 ),
@@ -137,6 +141,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     &accounts,
                                     &post_token_balances,
                                     "".to_string(),
+                                    pre_balances.clone(),
+                                    post_balances.clone(),
                                 ),
                                 quote_amount: get_amt(
                                     &td.second_swap_vault_b.clone().unwrap(),
@@ -145,6 +151,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     &accounts,
                                     &post_token_balances,
                                     "".to_string(),
+                                    pre_balances.clone(),
+                                    post_balances.clone(),
                                 ),
                                 base_vault: td.second_swap_vault_a.clone().unwrap(),
                                 quote_vault: td.second_swap_vault_b.clone().unwrap(),
@@ -200,13 +208,13 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             pool_address: inner_td.amm,
                                             base_mint: get_mint(
                                                 &inner_td.vault_a,
-                                                &pre_token_balances,
+                                                &post_token_balances,
                                                 &accounts,
                                                 inner_td_dapp_address.clone(),
                                             ),
                                             quote_mint: get_mint(
                                                 &inner_td.vault_b,
-                                                &pre_token_balances,
+                                                &post_token_balances,
                                                 &accounts,
                                                 "".to_string(),
                                             ),
@@ -217,6 +225,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 &accounts,
                                                 &post_token_balances,
                                                 inner_td_dapp_address.clone(),
+                                                pre_balances.clone(),
+                                                post_balances.clone(),
                                             ),
                                             quote_amount: get_amt(
                                                 &inner_td.vault_b,
@@ -225,6 +235,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 &accounts,
                                                 &post_token_balances,
                                                 "".to_string(),
+                                                pre_balances.clone(),
+                                                post_balances.clone(),
                                             ),
                                             base_vault: inner_td.vault_a,
                                             quote_vault: inner_td.vault_b,
@@ -257,13 +269,13 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     .unwrap(),
                                                 base_mint: get_mint(
                                                     &inner_td.second_swap_vault_a.clone().unwrap(),
-                                                    &pre_token_balances,
+                                                    &post_token_balances,
                                                     &accounts,
                                                     "".to_string(),
                                                 ),
                                                 quote_mint: get_mint(
                                                     &inner_td.second_swap_vault_b.clone().unwrap(),
-                                                    &pre_token_balances,
+                                                    &post_token_balances,
                                                     &accounts,
                                                     "".to_string(),
                                                 ),
@@ -274,6 +286,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     &accounts,
                                                     &post_token_balances,
                                                     "".to_string(),
+                                                    pre_balances.clone(),
+                                                    post_balances.clone(),
                                                 ),
                                                 quote_amount: get_amt(
                                                     &inner_td.second_swap_vault_b.clone().unwrap(),
@@ -282,6 +296,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     &accounts,
                                                     &post_token_balances,
                                                     "".to_string(),
+                                                    pre_balances.clone(),
+                                                    post_balances.clone(),
                                                 ),
                                                 base_vault: inner_td
                                                     .second_swap_vault_a
@@ -580,18 +596,6 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
-        // "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky" => {
-        //     result =
-        //         dapps::dapp_MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //             &pre_token_balances,
-        //             &post_token_balances,
-        //             accounts,
-        //             input_inner_idx,
-        //             inner_instructions,
-        //         );
-        // }
         "DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1" => {
             result =
                 dapps::dapp_DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1::parse_trade_instruction(
@@ -670,13 +674,6 @@ fn get_trade_instruction(
         "swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ" => {
             result =
                 dapps::dapp_swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ::parse_trade_instruction(
-                    instruction_data,
-                    input_accounts,
-                );
-        }
-        "MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG" => {
-            result =
-                dapps::dapp_MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );
