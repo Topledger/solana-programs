@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_dex_trades_pumpfun_refill_1_0_4'
-  version: v1.0.4
+  name: 'tl_solana_dex_trades_2_0_2'
+  version: v2.0.2
 
 protobuf:
   files:
