@@ -155,7 +155,15 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "pythWSnswVUd12oZpeFP8e9CVaEqJg25g1Vtc2biRsT",
             ],
 
-        )
+        ),
+        (
+            "exponent",
+            vec![
+                "ExponentnaRg3CQbW6dqQNZKXp7gtZ9DGMp1cwC4HAS7",
+                "XPK1ndTK1xrgRg99ifvdPP1exrx8D1mRXTuxBkkroCx",
+                "XPMfipyhcbq3DBvgvxkbZY7GekwmGNJLMD3wdiCkBc7",
+            ],
+        ),
 
     ];
 

@@ -3,10 +3,11 @@ use std::collections::HashMap;
 pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
     let program_data = vec![
         (
-            "solayer",
+            "exponent",
             vec![
-                "sSo1iU21jBrU9VaJ8PJib1MtorefUV4fzC9GURa2KNn",
-                "endoLNCKTqDn8gSVnN2hDdpgACUPWHZTwoYnnMybpAT",
+                "ExponentnaRg3CQbW6dqQNZKXp7gtZ9DGMp1cwC4HAS7",
+                "XPK1ndTK1xrgRg99ifvdPP1exrx8D1mRXTuxBkkroCx",
+                "XPMfipyhcbq3DBvgvxkbZY7GekwmGNJLMD3wdiCkBc7",
             ],
         ),
 

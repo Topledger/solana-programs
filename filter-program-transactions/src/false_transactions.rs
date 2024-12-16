@@ -16,7 +16,22 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "pythWSnswVUd12oZpeFP8e9CVaEqJg25g1Vtc2biRsT",
             ],
 
-        )
+        ),
+        (
+            "helium",
+            vec![
+                "circAbx64bbsscPbQzZAUvuXpHqrCe6fLMzc2uKXz9g",
+                "credMBJhYFzfn7NxBMdU4aUqFggAjgztaCcv2Fo6fPT",
+                "hemjuPXBpNvggtaUnN1MwT3wrdhttKEfosTcc2P9Pg8",
+                "hdaoVTCqhfHHo75XdAMxBKdUqvq1i5bF23sisBqVgGR",
+                "1azyuavdMyvsivtNxPoz6SucD18eDHeXzFCUPq5XU7w",
+                "1atrmQs3eq1N2FEYWu6tyTXbCjP4uQwExpjtnhXtS8h",
+                "treaf4wWBBty3fHdyBpo35Mz84M8k3heKXmjmi9vFt5",
+                "hvsrNC3NKbcryqDs2DocYHZ9yPKEVzdSjQG6RVtK1s8",
+                "iotEVVZLEywoTn1QdwNPddxPWszn3zFhEot3MfL9fns",
+                "mb1eu7TzEc71KxDpsmsKoucSSuuoGLv1drys1oP2jh6",
+            ],
+        ),
        
     ];
 
