@@ -113,28 +113,31 @@ pub fn parse_trade_instruction(
             td.instruction_type = "Initialize2".to_string();
             td.pool = input_accounts.get(4).unwrap().to_string();
             td.account_a = input_accounts.get(10).unwrap().to_string();
-            td.account_b = input_accounts.get(11).unwrap().to_string();
-            td.lp_wallet = signer.to_string();
 
-            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
-            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+            if input_accounts.get(11).is_some() {
+                td.account_b = input_accounts.get(11).unwrap().to_string();
+                td.lp_wallet = signer.to_string();
 
-            td.token_a_amount = get_token_transfer(
-                &td.account_a,
-                inner_idx,
-                inner_instructions,
-                accounts,
-                "destination".to_string(),
-            );
-            td.token_b_amount = get_token_transfer(
-                &td.account_b,
-                inner_idx,
-                inner_instructions,
-                accounts,
-                "destination".to_string(),
-            );
+                td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+                td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
 
-            result = Some(td);
+                td.token_a_amount = get_token_transfer(
+                    &td.account_a,
+                    inner_idx,
+                    inner_instructions,
+                    accounts,
+                    "destination".to_string(),
+                );
+                td.token_b_amount = get_token_transfer(
+                    &td.account_b,
+                    inner_idx,
+                    inner_instructions,
+                    accounts,
+                    "destination".to_string(),
+                );
+
+                result = Some(td);
+            }
         }
         _ => {}
     }
