@@ -26,7 +26,8 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let mut data: Vec<TradeData> = vec![];
     if timestamp.is_some() {
         let timestamp = timestamp.unwrap().timestamp;
-        for trx in block.transactions_owned() {
+        // (index, trx) in block.transactions.iter().enumerate()
+        for (tx_index, trx) in block.transactions_owned().enumerate() {
             let accounts = trx.resolved_accounts_as_strings();
             if let Some(transaction) = trx.transaction {
                 let meta = trx.meta.unwrap();
@@ -63,6 +64,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         data.push(TradeData {
                             block_date: convert_to_date(timestamp),
                             tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
+                            tx_index: tx_index as i64,
                             block_slot: slot,
                             block_time: timestamp,
                             signer: accounts.get(0).unwrap().to_string(),
@@ -133,6 +135,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             data.push(TradeData {
                                 block_date: convert_to_date(timestamp),
                                 tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
+                                tx_index: tx_index as i64,
                                 block_slot: slot,
                                 block_time: timestamp,
                                 signer: accounts.get(0).unwrap().to_string(),
@@ -232,6 +235,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             block_date: convert_to_date(timestamp),
                                             tx_id: bs58::encode(&transaction.signatures[0])
                                                 .into_string(),
+                                            tx_index: tx_index as i64,
                                             block_slot: slot,
                                             block_time: timestamp,
                                             signer: accounts.get(0).unwrap().to_string(),
@@ -305,6 +309,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 block_date: convert_to_date(timestamp),
                                                 tx_id: bs58::encode(&transaction.signatures[0])
                                                     .into_string(),
+                                                tx_index: tx_index as i64,
                                                 block_slot: slot,
                                                 block_time: timestamp,
                                                 signer: accounts.get(0).unwrap().to_string(),
