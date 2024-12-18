@@ -13,6 +13,8 @@ const AddLiquidityByStrategy: u64 = u64::from_le_bytes([7, 3, 150, 127, 148, 40,
 const AddLiquidityByStrategyOneSide: u64 = u64::from_le_bytes([41, 5, 238, 175, 100, 225, 6, 205]);
 const RemoveAllLiquidity: u64 = u64::from_le_bytes([10, 51, 61, 35, 112, 105, 24, 85]);
 const RemoveLiquidityByRange: u64 = u64::from_le_bytes([26, 82, 102, 152, 240, 74, 105, 26]);
+const ClaimFee: u64 = u64::from_le_bytes([169, 32, 79, 137, 136, 232, 70, 137]);
+const ClaimReward: u64 = u64::from_le_bytes([149, 95, 181, 242, 94, 90, 158, 162]);
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -90,7 +92,7 @@ pub fn parse_trade_instruction(
         AddLiquidityOneSide => {
             td.instruction_type = "AddLiquidityOneSide".to_string();
             td.pool = input_accounts.get(1).unwrap().to_string();
-            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_a = input_accounts.get(4).unwrap().to_string();
             td.account_b = "".to_string();
             td.lp_wallet = signer.to_string();
 
@@ -227,6 +229,60 @@ pub fn parse_trade_instruction(
             td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(5).unwrap().to_string();
             td.account_b = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+
+            result = Some(td);
+        }
+        ClaimFee => {
+            td.instruction_type = "ClaimFee".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+
+            result = Some(td);
+        }
+        ClaimReward => {
+            td.instruction_type = "ClaimReward".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = "".to_string();
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
