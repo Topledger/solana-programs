@@ -54,5 +54,17 @@ pub struct TradeData {
     pub trader: ::prost::alloc::string::String,
     #[prost(string, repeated, tag="23")]
     pub outer_executing_accounts: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(int64, required, tag="24")]
+    pub trader_lamports_change: i64,
+    #[prost(message, repeated, tag="25")]
+    pub trader_token_balance_changes: ::prost::alloc::vec::Vec<TraderTokenBalanceChange>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct TraderTokenBalanceChange {
+    #[prost(string, required, tag="1")]
+    pub mint: ::prost::alloc::string::String,
+    #[prost(double, required, tag="2")]
+    pub amount: f64,
 }
 // @@protoc_insertion_point(module)

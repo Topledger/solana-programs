@@ -30,4 +30,11 @@ message TradeData {
   required int64 signer_lamports_change = 21;
   required string trader = 22;
   repeated string outer_executing_accounts = 23;
+  required int64 trader_lamports_change = 24;
+  repeated TraderTokenBalanceChange trader_token_balance_changes = 25;
+}
+
+message TraderTokenBalanceChange {
+  required string mint = 1;
+  required double amount = 2;
 }

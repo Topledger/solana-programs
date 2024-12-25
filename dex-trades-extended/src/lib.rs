@@ -6,7 +6,9 @@ mod dapps;
 mod pb;
 mod utils;
 
-use pb::sf::solana::dex::trades::v1::{Output, TradeData};
+use std::collections::HashMap;
+
+use pb::sf::solana::dex::trades::v1::{Output, TradeData, TraderTokenBalanceChange};
 use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
@@ -60,6 +62,17 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
                         let td_name = td.name;
                         let td_dapp_address = td.dapp_address;
+                        let trader = get_trader_account(
+                            &td.vault_a,
+                            &td.vault_b,
+                            0 as u32,
+                            &inner_instructions,
+                            &accounts,
+                            &post_token_balances,
+                            td_dapp_address.clone(),
+                            pre_balances.clone(),
+                            post_balances.clone(),
+                        );
 
                         data.push(TradeData {
                             block_date: convert_to_date(timestamp),
@@ -101,17 +114,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 pre_balances.clone(),
                                 post_balances.clone(),
                             ),
-                            trader: get_trader_account(
-                                &td.vault_a,
-                                &td.vault_b,
-                                0 as u32,
-                                &inner_instructions,
-                                &accounts,
-                                &post_token_balances,
-                                td_dapp_address.clone(),
-                                pre_balances.clone(),
-                                post_balances.clone(),
-                            ),
+                            trader: trader.clone(),
                             base_vault: td.vault_a,
                             quote_vault: td.vault_b,
                             is_inner_instruction: false,
@@ -129,9 +132,33 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 &msg.instructions,
                                 &accounts,
                             ),
+                            trader_lamports_change: get_trader_balance_change(
+                                accounts.get(0).unwrap().to_string(),
+                                trader.clone(),
+                                &pre_balances,
+                                &post_balances,
+                                &accounts,
+                            ),
+                            trader_token_balance_changes: get_trader_token_balance_changes(
+                                &accounts.get(0).unwrap().to_string(),
+                                &trader,
+                                &pre_token_balances,
+                                &post_token_balances,
+                            ),
                         });
 
                         if td.second_swap_amm.clone().unwrap_or_default() != "" {
+                            let trader = get_trader_account(
+                                &td.second_swap_vault_a.clone().unwrap(),
+                                &td.second_swap_vault_b.clone().unwrap(),
+                                0 as u32,
+                                &inner_instructions,
+                                &accounts,
+                                &post_token_balances,
+                                "".to_string(),
+                                pre_balances.clone(),
+                                post_balances.clone(),
+                            );
                             data.push(TradeData {
                                 block_date: convert_to_date(timestamp),
                                 tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
@@ -172,17 +199,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     pre_balances.clone(),
                                     post_balances.clone(),
                                 ),
-                                trader: get_trader_account(
-                                    &td.second_swap_vault_a.clone().unwrap(),
-                                    &td.second_swap_vault_b.clone().unwrap(),
-                                    0 as u32,
-                                    &inner_instructions,
-                                    &accounts,
-                                    &post_token_balances,
-                                    "".to_string(),
-                                    pre_balances.clone(),
-                                    post_balances.clone(),
-                                ),
+                                trader: trader.clone(),
                                 base_vault: td.second_swap_vault_a.clone().unwrap(),
                                 quote_vault: td.second_swap_vault_b.clone().unwrap(),
                                 is_inner_instruction: false,
@@ -199,6 +216,19 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 outer_executing_accounts: get_outer_executing_accounts(
                                     &msg.instructions,
                                     &accounts,
+                                ),
+                                trader_lamports_change: get_trader_balance_change(
+                                    accounts.get(0).unwrap().to_string(),
+                                    trader.clone(),
+                                    &pre_balances,
+                                    &post_balances,
+                                    &accounts,
+                                ),
+                                trader_token_balance_changes: get_trader_token_balance_changes(
+                                    &accounts.get(0).unwrap().to_string(),
+                                    &trader,
+                                    &pre_token_balances,
+                                    &post_token_balances,
                                 ),
                             });
                         }
@@ -230,6 +260,17 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
                                         let inner_td_name = inner_td.name;
                                         let inner_td_dapp_address = inner_td.dapp_address;
+                                        let trader = get_trader_account(
+                                            &inner_td.vault_a,
+                                            &inner_td.vault_b,
+                                            inner_idx as u32,
+                                            &inner_instructions,
+                                            &accounts,
+                                            &post_token_balances,
+                                            "".to_string(),
+                                            pre_balances.clone(),
+                                            post_balances.clone(),
+                                        );
 
                                         data.push(TradeData {
                                             block_date: convert_to_date(timestamp),
@@ -272,17 +313,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
                                             ),
-                                            trader: get_trader_account(
-                                                &inner_td.vault_a,
-                                                &inner_td.vault_b,
-                                                inner_idx as u32,
-                                                &inner_instructions,
-                                                &accounts,
-                                                &post_token_balances,
-                                                "".to_string(),
-                                                pre_balances.clone(),
-                                                post_balances.clone(),
-                                            ),
+                                            trader: trader.clone(),
                                             base_vault: inner_td.vault_a,
                                             quote_vault: inner_td.vault_b,
                                             is_inner_instruction: true,
@@ -300,11 +331,36 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 &msg.instructions,
                                                 &accounts,
                                             ),
+                                            trader_lamports_change: get_trader_balance_change(
+                                                accounts.get(0).unwrap().to_string(),
+                                                trader.clone(),
+                                                &pre_balances,
+                                                &post_balances,
+                                                &accounts,
+                                            ),
+                                            trader_token_balance_changes:
+                                                get_trader_token_balance_changes(
+                                                    &accounts.get(0).unwrap().to_string(),
+                                                    &trader,
+                                                    &pre_token_balances,
+                                                    &post_token_balances,
+                                                ),
                                         });
 
                                         if inner_td.second_swap_amm.clone().unwrap_or_default()
                                             != ""
                                         {
+                                            let traders = get_trader_account(
+                                                &inner_td.second_swap_vault_a.clone().unwrap(),
+                                                &inner_td.second_swap_vault_b.clone().unwrap(),
+                                                inner_idx as u32,
+                                                &inner_instructions,
+                                                &accounts,
+                                                &post_token_balances,
+                                                "".to_string(),
+                                                pre_balances.clone(),
+                                                post_balances.clone(),
+                                            );
                                             data.push(TradeData {
                                                 block_date: convert_to_date(timestamp),
                                                 tx_id: bs58::encode(&transaction.signatures[0])
@@ -349,17 +405,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     pre_balances.clone(),
                                                     post_balances.clone(),
                                                 ),
-                                                trader: get_trader_account(
-                                                    &inner_td.second_swap_vault_a.clone().unwrap(),
-                                                    &inner_td.second_swap_vault_b.clone().unwrap(),
-                                                    inner_idx as u32,
-                                                    &inner_instructions,
-                                                    &accounts,
-                                                    &post_token_balances,
-                                                    "".to_string(),
-                                                    pre_balances.clone(),
-                                                    post_balances.clone(),
-                                                ),
+                                                trader: trader.clone(),
                                                 base_vault: inner_td
                                                     .second_swap_vault_a
                                                     .clone()
@@ -383,6 +429,20 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     get_outer_executing_accounts(
                                                         &msg.instructions,
                                                         &accounts,
+                                                    ),
+                                                trader_lamports_change: get_trader_balance_change(
+                                                    accounts.get(0).unwrap().to_string(),
+                                                    trader.clone(),
+                                                    &pre_balances,
+                                                    &post_balances,
+                                                    &accounts,
+                                                ),
+                                                trader_token_balance_changes:
+                                                    get_trader_token_balance_changes(
+                                                        &accounts.get(0).unwrap().to_string(),
+                                                        &trader,
+                                                        &pre_token_balances,
+                                                        &post_token_balances,
                                                     ),
                                             });
                                         }
@@ -759,6 +819,81 @@ fn get_trade_instruction(
 
 fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
     return (post_balances[0] - pre_balances[0]) as i64;
+}
+
+fn get_trader_balance_change(
+    signer: String,
+    trader: String,
+    pre_balances: &Vec<u64>,
+    post_balances: &Vec<u64>,
+    accounts: &Vec<String>,
+) -> i64 {
+    let mut result = (post_balances[0] - pre_balances[0]) as i64;
+    if !trader.is_empty() {
+        let index = accounts.iter().position(|r| r == &trader).unwrap();
+        result = (post_balances[index] - pre_balances[index]) as i64;
+    }
+    return result;
+}
+
+fn get_trader_token_balance_changes(
+    signer: &String,
+    trader: &String,
+    pre_token_balances: &Vec<TokenBalance>,
+    post_token_balances: &Vec<TokenBalance>,
+) -> Vec<TraderTokenBalanceChange> {
+    let mut address_to_use = signer;
+    if trader.ne(signer) {
+        address_to_use = trader;
+    }
+
+    let mut result: Vec<TraderTokenBalanceChange> = vec![];
+    let mut mint_map: HashMap<String, [f64; 2]> = HashMap::new();
+
+    post_token_balances
+        .iter()
+        .filter(|token_balance| token_balance.owner == address_to_use.to_string())
+        .for_each(|token_balance| {
+            mint_map.insert(
+                token_balance.mint.clone(),
+                [
+                    token_balance.ui_token_amount.clone().unwrap().ui_amount,
+                    0.0,
+                ],
+            );
+        });
+    pre_token_balances
+        .iter()
+        .filter(|token_balance| token_balance.owner == address_to_use.to_string())
+        .for_each(|token_balance| {
+            let mint = token_balance.mint.clone();
+            if mint_map.get(&mint).is_some() {
+                let value = mint_map.get(&mint);
+                mint_map.insert(
+                    mint,
+                    [
+                        value.unwrap()[0],
+                        token_balance.ui_token_amount.clone().unwrap().ui_amount,
+                    ],
+                );
+            } else {
+                mint_map.insert(
+                    mint,
+                    [
+                        0.0,
+                        token_balance.ui_token_amount.clone().unwrap().ui_amount,
+                    ],
+                );
+            }
+        });
+    mint_map.iter().for_each(|(key, value)| {
+        result.push(TraderTokenBalanceChange {
+            mint: key.to_string(),
+            amount: value[0] - value[1],
+        });
+    });
+
+    result
 }
 
 fn prepare_input_accounts(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {
