@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+package sf.solana.block.rewards.v1;
+
+message Output {
+  repeated BlockReward data = 1;
+}
+
+message BlockReward {
+  required uint64 block_slot = 1;
+  required uint64 block_time = 2;
+  required string block_date = 3;
+  required string pubkey = 4;
+  required int64 lamports = 5;
+  required uint64 post_balance = 6;
+  required int64 reward_type = 7;
+  required string commission = 8;
+}
