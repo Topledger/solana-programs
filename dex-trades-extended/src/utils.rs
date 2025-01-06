@@ -115,7 +115,7 @@ pub fn get_trader_account(
     if !owner_source_token_account.is_empty() {
         return owner_source_token_account;
     }
-    return "".to_string();
+    return accounts.get(0).unwrap().to_string();
 }
 
 pub fn get_amt(

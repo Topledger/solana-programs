@@ -350,7 +350,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         if inner_td.second_swap_amm.clone().unwrap_or_default()
                                             != ""
                                         {
-                                            let traders = get_trader_account(
+                                            let trader = get_trader_account(
                                                 &inner_td.second_swap_vault_a.clone().unwrap(),
                                                 &inner_td.second_swap_vault_b.clone().unwrap(),
                                                 inner_idx as u32,
@@ -830,8 +830,14 @@ fn get_trader_balance_change(
 ) -> i64 {
     let mut result = (post_balances[0] - pre_balances[0]) as i64;
     if !trader.is_empty() {
-        let index = accounts.iter().position(|r| r == &trader).unwrap();
-        result = (post_balances[index] - pre_balances[index]) as i64;
+        let index = accounts.iter().position(|r| r == &trader);
+        if index.is_some(){
+            let index = index.unwrap();
+            result = (post_balances[index] - pre_balances[index]) as i64;
+        }else{
+            result = 0 as i64;
+        }
+           
     }
     return result;
 }
