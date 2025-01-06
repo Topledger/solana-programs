@@ -830,8 +830,11 @@ fn get_trader_balance_change(
 ) -> i64 {
     let mut result = (post_balances[0] - pre_balances[0]) as i64;
     if !trader.is_empty() {
-        let index = accounts.iter().position(|r| r == &trader).unwrap();
-        result = (post_balances[index] - pre_balances[index]) as i64;
+        let unwapped_index = accounts.iter().position(|r| r == &trader);
+        if unwapped_index.is_some() {
+            let index = unwapped_index.unwrap();
+            result = (post_balances[index] - pre_balances[index]) as i64;
+        }
     }
     return result;
 }
