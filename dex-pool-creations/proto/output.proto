@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+package sf.solana.dex.pool.creations.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string signer = 3;
+  required string pool = 4;
+  required string dapp = 5;
+  required string associated_account = 6;
+}
