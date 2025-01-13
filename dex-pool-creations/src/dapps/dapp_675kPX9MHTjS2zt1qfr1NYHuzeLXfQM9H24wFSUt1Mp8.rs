@@ -19,6 +19,8 @@ pub fn parse_trade_instruction(
         Initialize2 => {
             td.dapp = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8".to_string();
             td.pool = input_accounts.get(4).unwrap().to_string();
+            td.base_mint = input_accounts.get(8).unwrap().to_string();
+            td.quote_mint = input_accounts.get(9).unwrap().to_string();
             result = Some(td);
         }
         _ => {}

@@ -13,4 +13,6 @@ message TradeData {
   required string pool = 4;
   required string dapp = 5;
   required string associated_account = 6;
+  required string base_mint = 7;
+  required string quote_mint = 8;
 }

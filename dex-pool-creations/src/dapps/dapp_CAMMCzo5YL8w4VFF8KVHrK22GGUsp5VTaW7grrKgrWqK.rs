@@ -19,6 +19,8 @@ pub fn parse_trade_instruction(
         CreatePool => {
             td.dapp = "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK".to_string();
             td.pool = input_accounts.get(1).unwrap().to_string();
+            td.base_mint = input_accounts.get(3).unwrap().to_string();
+            td.quote_mint = input_accounts.get(4).unwrap().to_string();
             result = Some(td);
         }
         _ => {}

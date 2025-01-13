@@ -20,6 +20,8 @@ pub fn parse_trade_instruction(
             td.dapp = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P".to_string();
             td.pool = input_accounts.get(2).unwrap().to_string();
             td.associated_account = input_accounts.get(3).unwrap().to_string();
+            td.base_mint = input_accounts.get(0).unwrap().to_string();
+            td.quote_mint = "So11111111111111111111111111111111111111112".to_string();
             result = Some(td);
         }
         _ => {}

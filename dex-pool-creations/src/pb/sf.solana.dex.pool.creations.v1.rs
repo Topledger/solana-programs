@@ -20,5 +20,9 @@ pub struct TradeData {
     pub dapp: ::prost::alloc::string::String,
     #[prost(string, required, tag="6")]
     pub associated_account: ::prost::alloc::string::String,
+    #[prost(string, required, tag="7")]
+    pub base_mint: ::prost::alloc::string::String,
+    #[prost(string, required, tag="8")]
+    pub quote_mint: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)
