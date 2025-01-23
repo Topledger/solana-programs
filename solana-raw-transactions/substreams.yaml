@@ -1,0 +1,35 @@
+specVersion: v0.1.0
+package:
+  name: 'solana_raw_transactions_1_0_0'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+
+imports:
+  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v2.1.0/substreams-sink-files-v2.1.0.spkg
+  solana: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - map: solana:blocks_without_votes
+    output:
+      type: proto:sf.solana.transactions.v1.Output
+
+  - name: jsonl_out
+    kind: map
+    inputs:
+      - map: solana:blocks_without_votes
+    output:
+      type: proto:sf.substreams.sink.files.v1.Lines
