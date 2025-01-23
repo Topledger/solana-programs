@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_raw_block_1_0_0'
-  version: v1.0.0
+  name: 'tl_solana_raw_block_1_0_4'
+  version: v1.0.4
 
 protobuf:
   files:
@@ -23,6 +23,6 @@ modules:
     inputs:
       - source: sf.solana.type.v1.Block
     output:
-      type: proto:sf.solana.raw.blocks.v1.BlockStat
+      type: proto:sf.solana.raw.blocks.v1.Output
 
 network: solana
