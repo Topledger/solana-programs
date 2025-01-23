@@ -3,22 +3,14 @@ use std::collections::HashMap;
 pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
     let program_data = vec![
         (
-            "jupiter",
+            "meteora",
             vec![
-                "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-                "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow",
-                "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8",
-                "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB",
-                "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph",
-                "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo",
-                "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk",
-                "PERPHjGBqRHArX4DySjwM6UJHiR3sWAatqfdBS2qQJu",
-                "jupoNjAxXgZ4rjzxzPMP4oxduvQsQtZzyknqvzYNrNu",
-                "DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M", 
-                "j1o2qRpjcyUwEvwtcfhEQefh773ZgjxcVRry7LDqg5X",
-                "VALaaymxQh2mNy2trH9jUqHT1mTow76wpTcGmSWSwJe",
-                "LocpQgucEQHbqNABEYvBvwoxCPsSbG91A1QaQhQQqjn",
-                "61DFfeTKM7trxYcPQCM78bJ794ddZprZpAwAnLiwTpYH"
+                "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+                "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB",
+                "FEESngU3neckdwib9X3KWqdL7Mjmqk9XNp3uh5JbP4KP",
+                "24Uqj9JCLxUeoC3hGfh5W3s9FM9uCHDS2SG3LYwBpyTi",
+                "FarmuwXPWXvefWUeqFAa5w6rifLkq5X6E8bimYvrhCB1",
+                "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
             ],
         ),
 

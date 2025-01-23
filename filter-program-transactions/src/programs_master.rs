@@ -105,9 +105,12 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
         (
             "meteora",
             vec![
-                "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB",
-                "24Uqj9JCLxUeoC3hGfh5W3s9FM9uCHDS2SG3LYwBpyTi",
                 "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+                "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB",
+                "FEESngU3neckdwib9X3KWqdL7Mjmqk9XNp3uh5JbP4KP",
+                "24Uqj9JCLxUeoC3hGfh5W3s9FM9uCHDS2SG3LYwBpyTi",
+                "FarmuwXPWXvefWUeqFAa5w6rifLkq5X6E8bimYvrhCB1",
+                "vaU6kP7iNEGkbmPkLmZfGwiGxd4Mob24QQCie5R9kd2",
             ],
         ),
         (
@@ -164,6 +167,15 @@ pub fn create_programs_map() -> HashMap<&'static str, &'static str> {
                 "XPMfipyhcbq3DBvgvxkbZY7GekwmGNJLMD3wdiCkBc7",
             ],
         ),
+        (
+            "parity_finance",
+            vec![
+                "ALukFrRp8cFkWCEZamFVsBiFtxKYPLUUGRxskFh1g5ZX",
+                "BZzrzzNm14rcF8edGVYY2NHyj9aQURFXubgEdRJoyzvH",
+                "AdXJ8Sr46ujd9DSLP5LRyF1BrqxT9azqmQqN2oTyV8cz"
+            ],
+        )
+
 
     ];
 
