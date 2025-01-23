@@ -36,7 +36,7 @@ fn process_block(block: Block) -> Vec<TransactionStats> {
             Ok(date) => date,
             Err(_) => "Error converting block time to date".to_string(),
         },
-        None => "".to_string(),
+        None => "2020-03-15".to_string(),
     };
     let block_slot = block.slot;
     let mut data = Vec::new();
