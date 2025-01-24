@@ -1,15 +1,8 @@
-use crate::trade_instruction::TradeInstruction;
-
 const SWAP_DISCRIMINATOR: u64 = u64::from_le_bytes([248, 198, 158, 145, 225, 117, 135, 200]);
 
-pub fn parse_trade_instruction(
-    bytes_stream: Vec<u8>,
-    accounts: Vec<String>,
-) -> Option<TradeInstruction> {
-    let mut result = None;
-
+pub fn is_trade_instruction(bytes_stream: Vec<u8>) -> bool {
     if bytes_stream.len() < 8 {
-        return result;
+        return false;
     }
 
     let (disc_bytes, rest) = bytes_stream.split_at(8);
@@ -18,17 +11,10 @@ pub fn parse_trade_instruction(
 
     match discriminator {
         SWAP_DISCRIMINATOR => {
-            result = Some(TradeInstruction {
-                dapp_address: String::from("SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe"),
-                name: String::from("Swap"),
-                amm: accounts.get(1).unwrap().to_string(),
-                vault_a: accounts.get(2).unwrap().to_string(),
-                vault_b: accounts.get(3).unwrap().to_string(),
-                ..Default::default()
-            });
+            return true;
         }
         _ => {}
     }
 
-    return result;
+    false
 }

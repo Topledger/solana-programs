@@ -9,14 +9,15 @@ message Output {
 message WalletPositionDexTradeData {
   required string block_date = 1;
   required int64 block_time = 2;
-  required string tx_id = 3;
-  required string trader = 4;
-  required double trader_sol_change = 5;
-  required string buy_mint = 6;
-  required string sell_mint = 7;
-  required double buy_amount = 8;
-  required double sell_amount = 9;
-  required uint64 txn_fee_lamports = 10;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required string trader = 5;
+  required double trader_sol_change = 6;
+  required string buy_mint = 7;
+  required string sell_mint = 8;
+  required double buy_amount = 9;
+  required double sell_amount = 10;
+  required uint64 txn_fee_lamports = 11;
 }
 
 message TraderTokenBalanceChange {

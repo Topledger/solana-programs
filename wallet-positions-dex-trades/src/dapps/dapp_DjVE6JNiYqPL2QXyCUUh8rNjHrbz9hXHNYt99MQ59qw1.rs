@@ -1,27 +1,13 @@
-use crate::trade_instruction::TradeInstruction;
-
-pub fn parse_trade_instruction(
-    bytes_stream: Vec<u8>,
-    accounts: Vec<String>,
-) -> Option<TradeInstruction> {
+pub fn is_trade_instruction(bytes_stream: Vec<u8>) -> bool {
     let (disc_bytes, rest) = bytes_stream.split_at(1);
     let discriminator: u8 = u8::from(disc_bytes[0]);
 
-    let mut result = None;
-
     match discriminator {
         1 => {
-            result = Some(TradeInstruction {
-                dapp_address: String::from("DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1"),
-                name: String::from("Swap"),
-                amm: accounts.get(0).unwrap().to_string(),
-                vault_a: accounts.get(4).unwrap().to_string(),
-                vault_b: accounts.get(5).unwrap().to_string(),
-                ..Default::default()
-            });
+            return true;
         }
         _ => {}
     }
 
-    return result;
+    false
 }

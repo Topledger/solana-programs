@@ -112,6 +112,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         data.push(WalletPositionDexTradeData {
                             block_date: convert_to_date(timestamp),
                             block_time: timestamp,
+                            block_slot: slot,
                             tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
                             trader: trader.clone(),
                             trader_sol_change: get_trader_balance_change(
@@ -120,7 +121,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 &post_balances,
                                 &accounts,
                             ),
-                            txn_fee_lamports: 1.0 as u64,
+                            txn_fee_lamports: meta.fee,
                             buy_mint: buy_mint,
                             sell_mint: sell_mint,
                             buy_amount: buy_amount,
@@ -128,122 +129,112 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         });
                     }
 
-                    // meta.inner_instructions
-                    //     .iter()
-                    //     .filter(|inner_instruction| inner_instruction.index == idx as u32)
-                    //     .for_each(|inner_instruction| {
-                    //         inner_instruction.instructions.iter().enumerate().for_each(
-                    //             |(inner_idx, inner_inst)| {
-                    //                 let inner_program =
-                    //                     &accounts[inner_inst.program_id_index as usize];
-                    //                 let inner_trade_data = get_trade_instruction(
-                    //                     inner_program,
-                    //                     inner_inst.data.clone(),
-                    //                     &inner_inst.accounts,
-                    //                     &accounts,
-                    //                     &pre_token_balances,
-                    //                     &post_token_balances,
-                    //                     &program.to_string(),
-                    //                     true,
-                    //                     &inner_instructions,
-                    //                     inner_idx as u32,
-                    //                 );
+                    meta.inner_instructions
+                        .iter()
+                        .filter(|inner_instruction| inner_instruction.index == idx as u32)
+                        .for_each(|inner_instruction| {
+                            inner_instruction.instructions.iter().enumerate().for_each(
+                                |(inner_idx, inner_inst)| {
+                                    let inner_program =
+                                        &accounts[inner_inst.program_id_index as usize];
 
-                    //                 if inner_trade_data.is_some() {
-                    //                     let inner_td = inner_trade_data.unwrap();
+                                    let is_trade_ix = is_trade_instruction(
+                                        inner_program,
+                                        inner_inst.data.clone(),
+                                    );
+                                    if is_trade_ix {
+                                        let trader = get_trader_account_v2(
+                                            msg.header.clone().unwrap().num_required_signatures,
+                                            &pre_token_balances,
+                                            &post_token_balances,
+                                            &accounts,
+                                        );
 
-                    //                     let inner_td_name = inner_td.name;
-                    //                     let inner_td_dapp_address = inner_td.dapp_address;
-                    //                     let trader = get_trader_account(
-                    //                         &inner_td.vault_a,
-                    //                         &inner_td.vault_b,
-                    //                         inner_idx as u32,
-                    //                         &inner_instructions,
-                    //                         &accounts,
-                    //                         &post_token_balances,
-                    //                         "".to_string(),
-                    //                         pre_balances.clone(),
-                    //                         post_balances.clone(),
-                    //                     );
+                                        let trader_token_balance_changes: Vec<
+                                            TraderTokenBalanceChange,
+                                        > = get_trader_token_balance_changes(
+                                            &trader,
+                                            &pre_token_balances,
+                                            &post_token_balances,
+                                        );
 
-                    //                     data.push(TradeData {
-                    //                         block_date: convert_to_date(timestamp),
-                    //                         tx_id: bs58::encode(&transaction.signatures[0])
-                    //                             .into_string(),
-                    //                         tx_index: tx_index as i64,
-                    //                         block_slot: slot,
-                    //                         block_time: timestamp,
-                    //                         signer: accounts.get(0).unwrap().to_string(),
-                    //                         pool_address: inner_td.amm,
-                    //                         base_mint: get_mint(
-                    //                             &inner_td.vault_a,
-                    //                             &post_token_balances,
-                    //                             &accounts,
-                    //                             inner_td_dapp_address.clone(),
-                    //                         ),
-                    //                         quote_mint: get_mint(
-                    //                             &inner_td.vault_b,
-                    //                             &post_token_balances,
-                    //                             &accounts,
-                    //                             "".to_string(),
-                    //                         ),
-                    //                         base_amount: get_amt(
-                    //                             &inner_td.vault_a,
-                    //                             inner_idx as u32,
-                    //                             &inner_instructions,
-                    //                             &accounts,
-                    //                             &post_token_balances,
-                    //                             inner_td_dapp_address.clone(),
-                    //                             pre_balances.clone(),
-                    //                             post_balances.clone(),
-                    //                         ),
-                    //                         quote_amount: get_amt(
-                    //                             &inner_td.vault_b,
-                    //                             inner_idx as u32,
-                    //                             &inner_instructions,
-                    //                             &accounts,
-                    //                             &post_token_balances,
-                    //                             "".to_string(),
-                    //                             pre_balances.clone(),
-                    //                             post_balances.clone(),
-                    //                         ),
-                    //                         trader: trader.clone(),
-                    //                         base_vault: inner_td.vault_a,
-                    //                         quote_vault: inner_td.vault_b,
-                    //                         is_inner_instruction: true,
-                    //                         instruction_index: idx as u32,
-                    //                         instruction_type: inner_td_name.clone(),
-                    //                         inner_instruxtion_index: inner_idx as u32,
-                    //                         outer_program: program.to_string(),
-                    //                         inner_program: inner_td_dapp_address.clone(),
-                    //                         txn_fee_lamports: meta.fee,
-                    //                         signer_lamports_change: get_signer_balance_change(
-                    //                             &pre_balances,
-                    //                             &post_balances,
-                    //                         ),
-                    //                         outer_executing_accounts: get_outer_executing_accounts(
-                    //                             &msg.instructions,
-                    //                             &accounts,
-                    //                         ),
-                    //                         trader_lamports_change: get_trader_balance_change(
-                    //                             accounts.get(0).unwrap().to_string(),
-                    //                             trader.clone(),
-                    //                             &pre_balances,
-                    //                             &post_balances,
-                    //                             &accounts,
-                    //                         ),
-                    //                         trader_token_balance_changes:
-                    //                             get_trader_token_balance_changes(
-                    //                                 &accounts.get(0).unwrap().to_string(),
-                    //                                 &trader,
-                    //                                 &pre_token_balances,
-                    //                                 &post_token_balances,
-                    //                             ),
-                    //                     });
-                    //                 }
-                    //             },
-                    //         )
-                    //     });
+                                        let mut buy_mint = "".to_string();
+                                        let mut sell_mint = "".to_string();
+                                        let mut buy_amount = 0.0;
+                                        let mut sell_amount = 0.0;
+
+                                        if (trader_token_balance_changes.len() == 1) {
+                                            let trader_token_balance_change =
+                                                trader_token_balance_changes.get(0).unwrap();
+                                            let amt = trader_token_balance_change.amount;
+                                            if (amt >= 0.0) {
+                                                buy_mint = trader_token_balance_change.mint.clone();
+                                                buy_amount = trader_token_balance_change.amount;
+                                                sell_mint =
+                                                    "So11111111111111111111111111111111111111112"
+                                                        .to_string();
+                                                sell_amount = get_trader_balance_change(
+                                                    &trader,
+                                                    &pre_balances,
+                                                    &post_balances,
+                                                    &accounts,
+                                                );
+                                            } else {
+                                                sell_mint =
+                                                    trader_token_balance_change.mint.clone();
+                                                sell_amount = trader_token_balance_change.amount;
+                                                buy_mint =
+                                                    "So11111111111111111111111111111111111111112"
+                                                        .to_string();
+                                                buy_amount = get_trader_balance_change(
+                                                    &trader,
+                                                    &pre_balances,
+                                                    &post_balances,
+                                                    &accounts,
+                                                );
+                                            }
+                                        }
+
+                                        if (trader_token_balance_changes.len() == 2) {
+                                            for trader_token_balance_change in
+                                                trader_token_balance_changes.iter()
+                                            {
+                                                if (trader_token_balance_change.amount >= 0.0) {
+                                                    buy_mint =
+                                                        trader_token_balance_change.mint.clone();
+                                                    buy_amount = trader_token_balance_change.amount;
+                                                } else {
+                                                    sell_mint =
+                                                        trader_token_balance_change.mint.clone();
+                                                    sell_amount =
+                                                        trader_token_balance_change.amount;
+                                                }
+                                            }
+                                        }
+
+                                        data.push(WalletPositionDexTradeData {
+                                            block_date: convert_to_date(timestamp),
+                                            block_time: timestamp,
+                                            block_slot: slot,
+                                            tx_id: bs58::encode(&transaction.signatures[0])
+                                                .into_string(),
+                                            trader: trader.clone(),
+                                            trader_sol_change: get_trader_balance_change(
+                                                &trader,
+                                                &pre_balances,
+                                                &post_balances,
+                                                &accounts,
+                                            ),
+                                            txn_fee_lamports: meta.fee,
+                                            buy_mint: buy_mint,
+                                            sell_mint: sell_mint,
+                                            buy_amount: buy_amount,
+                                            sell_amount: sell_amount,
+                                        });
+                                    }
+                                },
+                            )
+                        });
                 }
             }
         }
@@ -597,7 +588,7 @@ fn get_trader_balance_change(
     let unwapped_index = accounts.iter().position(|r| r == address);
     if unwapped_index.is_some() {
         let index = unwapped_index.unwrap();
-        result = (post_balances[index] - pre_balances[index]) as f64 / 1e9;
+        result = (post_balances[index] as f64 - pre_balances[index] as f64) / 1e9;
     } else {
         result = 0 as f64;
     }
