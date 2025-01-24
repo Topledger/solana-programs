@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_dex_pool_creations_1_0_2'
-  version: v1.0.2
+  name: 'tl_solana_dex_pool_creations_1_0_3'
+  version: v1.0.3
 
 protobuf:
   files:

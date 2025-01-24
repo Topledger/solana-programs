@@ -18,7 +18,7 @@ pub fn parse_trade_instruction(
     match discriminator {
         Create => {
             td.dapp = "MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG".to_string();
-            td.pool = input_accounts.get(2).unwrap().to_string();
+            td.pool = input_accounts.get(2).unwrap_or(&"".to_string()).to_string();
             td.associated_account = input_accounts.get(5).unwrap_or(&"".to_string()).to_string();
             td.base_mint = input_accounts.get(3).unwrap_or(&"".to_string()).to_string();
             td.quote_mint = "So11111111111111111111111111111111111111112".to_string();
