@@ -28,4 +28,7 @@ message TradeData {
   required uint32 inner_instruction_index = 25;
   required string position = 26;
   required string liquidity_index = 27;
+  required int32 tick_lower_index = 28;
+  required int32 tick_upper_index = 29;
+  required string bundled_position = 30;
 }

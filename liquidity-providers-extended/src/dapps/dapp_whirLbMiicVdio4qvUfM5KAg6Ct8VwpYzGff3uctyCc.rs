@@ -1,3 +1,4 @@
+use borsh::{BorshDeserialize, BorshSerialize};
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
 use crate::{
@@ -14,6 +15,54 @@ const CollectFees: u64 = u64::from_le_bytes([164, 152, 207, 99, 30, 186, 19, 182
 const CollectFeesV2: u64 = u64::from_le_bytes([207, 117, 95, 191, 229, 180, 226, 15]);
 const CollectReward: u64 = u64::from_le_bytes([70, 5, 132, 87, 86, 235, 177, 34]);
 const CollectRewardV2: u64 = u64::from_le_bytes([177, 107, 37, 180, 160, 19, 49, 209]);
+
+const OpenPosition: u64 = u64::from_le_bytes([135, 128, 47, 77, 15, 152, 240, 49]);
+const OpenPositionWithMetadata: u64 = u64::from_le_bytes([242, 29, 134, 48, 58, 110, 14, 60]);
+const OpenBundledPosition: u64 = u64::from_le_bytes([169, 113, 126, 171, 213, 172, 212, 49]);
+const OpenPositionWithTokenExtensions: u64 =
+    u64::from_le_bytes([212, 47, 95, 92, 114, 102, 131, 250]);
+
+const ClosePosition: u64 = u64::from_le_bytes([123, 134, 81, 0, 49, 68, 98, 98]);
+const CloseBundledPosition: u64 = u64::from_le_bytes([41, 36, 216, 245, 27, 85, 103, 67]);
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct OpenPositionBumpsLayout {
+    positionBump: u8,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct OpenPositionLayout {
+    openPositionBumps: OpenPositionBumpsLayout,
+    tickLowerIndex: i32,
+    tickUpperIndex: i32,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct OpenPositionWithMetadataBumpsLayout {
+    positionBump: u8,
+    metadataBump: u8,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct OpenPositionWithMetadataLayout {
+    openPositionWithMetadataBumps: OpenPositionWithMetadataBumpsLayout,
+    tickLowerIndex: i32,
+    tickUpperIndex: i32,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct OpenBundledPositionLayout {
+    bundleIndex: u16,
+    tickLowerIndex: i32,
+    tickUpperIndex: i32,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct OpenPositionWithTokenExtensionsLayout {
+    tickLowerIndex: i32,
+    tickUpperIndex: i32,
+    withTokenMetadataExtension: bool,
+}
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -274,6 +323,71 @@ pub fn parse_trade_instruction(
                 "source".to_string(),
             );
             td.position = input_accounts.get(2).unwrap().to_string();
+
+            result = Some(td);
+        }
+        OpenPosition => {
+            td.instruction_type = "OpenPosition".to_string();
+            td.pool = input_accounts.get(5).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(2).unwrap().to_string();
+
+            let data = OpenPositionLayout::deserialize(&mut rest.clone()).unwrap();
+            td.tick_lower_index = data.tickLowerIndex;
+            td.tick_upper_index = data.tickUpperIndex;
+
+            result = Some(td);
+        }
+        OpenPositionWithMetadata => {
+            td.instruction_type = "OpenPositionWithMetadata".to_string();
+            td.pool = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(2).unwrap().to_string();
+
+            let data = OpenPositionWithMetadataLayout::deserialize(&mut rest.clone()).unwrap();
+            td.tick_lower_index = data.tickLowerIndex;
+            td.tick_upper_index = data.tickUpperIndex;
+
+            result = Some(td);
+        }
+        OpenBundledPosition => {
+            td.instruction_type = "OpenBundledPosition".to_string();
+            td.pool = input_accounts.get(4).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(1).unwrap().to_string();
+            td.bundled_position = input_accounts.get(0).unwrap().to_string();
+
+            let data = OpenBundledPositionLayout::deserialize(&mut rest.clone()).unwrap();
+            td.tick_lower_index = data.tickLowerIndex;
+            td.tick_upper_index = data.tickUpperIndex;
+
+            result = Some(td);
+        }
+        OpenPositionWithTokenExtensions => {
+            td.instruction_type = "OpenPositionWithTokenExtensions".to_string();
+            td.pool = input_accounts.get(5).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(2).unwrap().to_string();
+
+            let data =
+                OpenPositionWithTokenExtensionsLayout::deserialize(&mut rest.clone()).unwrap();
+            td.tick_lower_index = data.tickLowerIndex;
+            td.tick_upper_index = data.tickUpperIndex;
+
+            result = Some(td);
+        }
+        ClosePosition => {
+            td.instruction_type = "ClosePosition".to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(2).unwrap().to_string();
+
+            result = Some(td);
+        }
+        CloseBundledPosition => {
+            td.instruction_type = "CloseBundledPosition".to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(1).unwrap().to_string();
+            td.bundled_position = input_accounts.get(0).unwrap().to_string();
 
             result = Some(td);
         }

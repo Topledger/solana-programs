@@ -50,5 +50,11 @@ pub struct TradeData {
     pub position: ::prost::alloc::string::String,
     #[prost(string, required, tag="27")]
     pub liquidity_index: ::prost::alloc::string::String,
+    #[prost(int32, required, tag="28")]
+    pub tick_lower_index: i32,
+    #[prost(int32, required, tag="29")]
+    pub tick_upper_index: i32,
+    #[prost(string, required, tag="30")]
+    pub bundled_position: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)
