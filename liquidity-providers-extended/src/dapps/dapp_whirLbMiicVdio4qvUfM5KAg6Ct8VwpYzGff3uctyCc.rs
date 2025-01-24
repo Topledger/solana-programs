@@ -24,6 +24,7 @@ const OpenPositionWithTokenExtensions: u64 =
 
 const ClosePosition: u64 = u64::from_le_bytes([123, 134, 81, 0, 49, 68, 98, 98]);
 const CloseBundledPosition: u64 = u64::from_le_bytes([41, 36, 216, 245, 27, 85, 103, 67]);
+const ClosePositionWithTokenExtensions: u64 = u64::from_le_bytes([1, 182, 135, 59, 155, 25, 99, 223]);
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 struct OpenPositionBumpsLayout {
@@ -388,6 +389,13 @@ pub fn parse_trade_instruction(
             td.lp_wallet = signer.to_string();
             td.position = input_accounts.get(1).unwrap().to_string();
             td.bundled_position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        ClosePositionWithTokenExtensions => {
+            td.instruction_type = "ClosePositionWithTokenExtensions".to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(2).unwrap().to_string();
 
             result = Some(td);
         }
