@@ -1,0 +1,28 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_wallet_positions_dex_trades_1_0_1'
+  version: v1.0.1
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - map: sol:blocks_without_votes
+    output:
+      type: proto:sf.solana.wallet.positions.dex.trades.v1.Output
+
+network: solana
