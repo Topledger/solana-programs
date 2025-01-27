@@ -19,6 +19,8 @@ message TradeData {
   required string account_b = 12;
   required double token_a_amount = 15;
   required double token_b_amount = 16;
+  required double raw_token_a_amount = 17;
+  required double raw_token_b_amount = 18;
   required string lp_wallet = 19;
   required string instruction_type = 20;
   required bool is_inner_instruction = 21;

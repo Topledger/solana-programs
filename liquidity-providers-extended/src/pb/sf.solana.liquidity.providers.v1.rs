@@ -32,6 +32,10 @@ pub struct TradeData {
     pub token_a_amount: f64,
     #[prost(double, required, tag="16")]
     pub token_b_amount: f64,
+    #[prost(double, required, tag="17")]
+    pub raw_token_a_amount: f64,
+    #[prost(double, required, tag="18")]
+    pub raw_token_b_amount: f64,
     #[prost(string, required, tag="19")]
     pub lp_wallet: ::prost::alloc::string::String,
     #[prost(string, required, tag="20")]

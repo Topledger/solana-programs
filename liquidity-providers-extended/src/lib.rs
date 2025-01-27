@@ -290,11 +290,13 @@ fn get_trade_data(
         _result.instruction_index = instruction_index as u32;
         _result.inner_program = inner_program.to_string();
         _result.inner_instruction_index = inner_instruction_index as u32;
+        _result.raw_token_a_amount = _result.token_a_amount;
         _result.token_a_amount = _result.token_a_amount
             / (u64::pow(
                 10,
                 get_decimals(post_token_balances, &_result.account_a, accounts),
             )) as f64;
+        _result.raw_token_b_amount = _result.token_b_amount;
         _result.token_b_amount = _result.token_b_amount
             / (u64::pow(
                 10,
