@@ -1,16 +1,17 @@
 mod pb;
 mod utils;
 
-use pb::sf::solana::raw::blocks::v1::{BlockStat, Reward, Output} ;
+use pb::sf::solana::raw::blocks::v1::{BlockStat, Output};
 
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
-use substreams_solana::pb::sf::solana::r#type::v1::RewardType;
 use utils::convert_to_date;
+
+const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
 
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let result = process_block(block);
-    Ok(Output{ data: vec![result]})
+    Ok(Output { data: vec![result] })
 }
 
 fn process_block(block: Block) -> BlockStat {
@@ -29,28 +30,57 @@ fn process_block(block: Block) -> BlockStat {
     block_stat.parent_slot = block.parent_slot;
     block_stat.previous_block_hash = block.previous_blockhash;
 
-    block_stat.rewards = block
-        .rewards
-        .iter()
-        .map(|reward| Reward {
-            pubkey: reward.pubkey.to_string(),
-            lamports: reward.lamports as u64,
-            post_balance: reward.post_balance,
-            reward_type: reward_type_name(reward.reward_type).to_string(),
-            commission: reward.commission.to_string(),
-        })
-        .collect();
-    block_stat
-}
+    // Initialize transaction-related stats
+    block_stat.total_transactions = 0;
+    block_stat.successful_transactions = 0;
+    block_stat.failed_transactions = 0;
+    block_stat.total_vote_transactions = 0;
+    block_stat.total_non_vote_transactions = 0;
+    block_stat.successful_vote_transactions = 0;
+    block_stat.successful_non_vote_transactions = 0;
+    block_stat.failed_vote_transactions = 0;
+    block_stat.failed_non_vote_transactions = 0;
 
+    let decoded_vote_account = bs58::decode(VOTE_ACCOUNT)
+        .into_vec()
+        .expect("Failed to decode vote account");
 
-fn reward_type_name(value: i32) -> &'static str {
-    match RewardType::from_i32(value) {
-        Some(RewardType::Unspecified) => "UNSPECIFIED",
-        Some(RewardType::Fee)         => "FEE",
-        Some(RewardType::Rent)        => "RENT",
-        Some(RewardType::Staking)     => "STAKING",
-        Some(RewardType::Voting)      => "VOTING",
-        None                          => "UNKNOWN", // handle invalid values
+    for trx in block.transactions.iter() {
+        let transaction = match trx.transaction.as_ref() {
+            Some(transaction) => transaction,
+            None => continue,
+        };
+        let message = transaction.message.as_ref().expect("Message is missing");
+        let is_vote_transaction = message.account_keys.contains(&decoded_vote_account);
+
+        block_stat.total_transactions += 1;
+
+        if is_vote_transaction {
+            block_stat.total_vote_transactions += 1;
+        } else {
+            block_stat.total_non_vote_transactions += 1;
+        }
+
+        if let Some(meta) = trx.meta.as_ref() {
+            if meta.err.is_none() {
+                // Successful transaction
+                block_stat.successful_transactions += 1;
+                if is_vote_transaction {
+                    block_stat.successful_vote_transactions += 1;
+                } else {
+                    block_stat.successful_non_vote_transactions += 1;
+                }
+            } else {
+                // Failed transaction
+                block_stat.failed_transactions += 1;
+                if is_vote_transaction {
+                    block_stat.failed_vote_transactions += 1;
+                } else {
+                    block_stat.failed_non_vote_transactions += 1;
+                }
+            }
+        }
     }
+
+    block_stat
 }
