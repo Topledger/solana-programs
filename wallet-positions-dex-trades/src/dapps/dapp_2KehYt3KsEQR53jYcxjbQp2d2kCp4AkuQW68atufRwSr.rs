@@ -1,5 +1,3 @@
-use crate::trade_instruction::TradeInstruction;
-
 const SWAP_FUND_TOKENS_DISCRIMINATOR: u64 =
     u64::from_le_bytes([112, 246, 21, 136, 172, 62, 27, 20]);
 

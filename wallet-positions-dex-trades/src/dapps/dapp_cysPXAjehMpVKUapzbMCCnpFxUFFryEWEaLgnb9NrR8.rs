@@ -1,5 +1,3 @@
-use crate::trade_instruction::TradeInstruction;
-
 const SWAP_DISCRIMINATOR: u64 = u64::from_le_bytes([23, 113, 90, 161, 237, 143, 153, 13]);
 
 pub fn is_trade_instruction(bytes_stream: Vec<u8>) -> bool {

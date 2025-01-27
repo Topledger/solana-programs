@@ -48,19 +48,19 @@ pub fn get_trader_account_v2(
     post_token_balances: &Vec<TokenBalance>,
     accounts: &Vec<String>,
 ) -> String {
-    if (signatures_count == 1) {
+    if signatures_count == 1 {
         return accounts[0].to_string().clone();
     }
 
-    let mut signers: Vec<String> = Vec::new();
+    let signers: Vec<String> = Vec::new();
     for x in 0..signatures_count as usize {
-        let mut signer = accounts.get(x).unwrap().to_string();
+        let signer = accounts.get(x).unwrap().to_string();
         let is_owner = is_owner(
             signer.to_string().clone(),
             pre_token_balances,
             post_token_balances,
         );
-        if (is_owner) {
+        if is_owner {
             return signer;
         }
     }
@@ -80,7 +80,7 @@ pub fn is_owner(
             found = true;
         });
 
-    if (found) {
+    if found {
         return found;
     }
 

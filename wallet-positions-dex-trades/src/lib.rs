@@ -14,8 +14,8 @@ use pb::sf::solana::wallet::positions::dex::trades::v1::{
 use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::InnerInstructions;
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, TokenBalance};
-use utils::{convert_to_date, get_amt, get_outer_executing_accounts};
-use utils::{get_mint, get_trader_account, get_trader_account_v2};
+use utils::convert_to_date;
+use utils::get_trader_account_v2;
 mod trade_instruction;
 
 #[substreams::handlers::map]
@@ -68,11 +68,11 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         let mut buy_amount = 0.0;
                         let mut sell_amount = 0.0;
 
-                        if (trader_token_balance_changes.len() == 1) {
+                        if trader_token_balance_changes.len() == 1 {
                             let trader_token_balance_change =
                                 trader_token_balance_changes.get(0).unwrap();
                             let amt = trader_token_balance_change.amount;
-                            if (amt >= 0.0) {
+                            if amt >= 0.0 {
                                 buy_mint = trader_token_balance_change.mint.clone();
                                 buy_amount = trader_token_balance_change.amount;
                                 sell_mint =
@@ -97,9 +97,9 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             }
                         }
 
-                        if (trader_token_balance_changes.len() == 2) {
+                        if trader_token_balance_changes.len() == 2 {
                             for trader_token_balance_change in trader_token_balance_changes.iter() {
-                                if (trader_token_balance_change.amount >= 0.0) {
+                                if trader_token_balance_change.amount >= 0.0 {
                                     buy_mint = trader_token_balance_change.mint.clone();
                                     buy_amount = trader_token_balance_change.amount;
                                 } else {
@@ -114,6 +114,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             block_time: timestamp,
                             block_slot: slot,
                             tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
+                            signer: accounts.get(0).unwrap().to_string(),
                             trader: trader.clone(),
                             trader_sol_change: get_trader_balance_change(
                                 &trader,
@@ -163,11 +164,11 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         let mut buy_amount = 0.0;
                                         let mut sell_amount = 0.0;
 
-                                        if (trader_token_balance_changes.len() == 1) {
+                                        if trader_token_balance_changes.len() == 1 {
                                             let trader_token_balance_change =
                                                 trader_token_balance_changes.get(0).unwrap();
                                             let amt = trader_token_balance_change.amount;
-                                            if (amt >= 0.0) {
+                                            if amt >= 0.0 {
                                                 buy_mint = trader_token_balance_change.mint.clone();
                                                 buy_amount = trader_token_balance_change.amount;
                                                 sell_mint =
@@ -195,11 +196,11 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             }
                                         }
 
-                                        if (trader_token_balance_changes.len() == 2) {
+                                        if trader_token_balance_changes.len() == 2 {
                                             for trader_token_balance_change in
                                                 trader_token_balance_changes.iter()
                                             {
-                                                if (trader_token_balance_change.amount >= 0.0) {
+                                                if trader_token_balance_change.amount >= 0.0 {
                                                     buy_mint =
                                                         trader_token_balance_change.mint.clone();
                                                     buy_amount = trader_token_balance_change.amount;
@@ -218,6 +219,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             block_slot: slot,
                                             tx_id: bs58::encode(&transaction.signatures[0])
                                                 .into_string(),
+                                            signer: accounts.get(0).unwrap().to_string(),
                                             trader: trader.clone(),
                                             trader_sol_change: get_trader_balance_change(
                                                 &trader,
@@ -252,322 +254,191 @@ fn is_trade_instruction(dapp_address: &String, instruction_data: Vec<u8>) -> boo
                 instruction_data,
             );
         }
-        // "Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j" => {
-        //     result =
-        //         dapps::dapp_Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB" => {
-        //     result =
-        //         dapps::dapp_Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY" => {
-        //     result =
-        //         dapps::dapp_PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr" => {
-        //     result =
-        //         dapps::dapp_SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX" => {
-        //     let jupiter_dapps = vec![
-        //         "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
-        //         "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB".to_string(),
-        //         "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph".to_string(),
-        //         "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4".to_string(),
-        //         "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk".to_string(),
-        //         "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow".to_string(),
-        //         "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8".to_string(),
-        //     ];
-
-        //     if is_inner & jupiter_dapps.contains(outer_program) {
-        //         result =
-        //         dapps::dapp_srmqPvymJeFKQ4zGQed1GFppgkRHL9kaELCbyksJtPX::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        //     }
-        // }
-        // "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
-        //     result =
-        //         dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {
-        //     result =
-        //         dapps::dapp_whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S" => {
-        //     result =
-        //         dapps::dapp_EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c" => {
-        //     result =
-        //         dapps::dapp_2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ" => {
-        //     result =
-        //         dapps::dapp_SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK" => {
-        //     result =
-        //         dapps::dapp_CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP" => {
-        //     result =
-        //         dapps::dapp_9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "AMM55ShdkoGRB5jVYPjWziwk8m5MpwyDgsMWHaMSQWH6" => {
-        //     result =
-        //         dapps::dapp_AMM55ShdkoGRB5jVYPjWziwk8m5MpwyDgsMWHaMSQWH6::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4" => {
-        //     result =
-        //         dapps::dapp_CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "cysPXAjehMpVKUapzbMCCnpFxUFFryEWEaLgnb9NrR8" => {
-        //     result =
-        //         dapps::dapp_cysPXAjehMpVKUapzbMCCnpFxUFFryEWEaLgnb9NrR8::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "7WduLbRfYhTJktjLw5FDEyrqoEv61aTTCuGAetgLjzN5" => {
-        //     result =
-        //         dapps::dapp_7WduLbRfYhTJktjLw5FDEyrqoEv61aTTCuGAetgLjzN5::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin" => {
-        //     let jupiter_dapps = vec![
-        //         "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
-        //         "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB".to_string(),
-        //         "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph".to_string(),
-        //         "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4".to_string(),
-        //         "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk".to_string(),
-        //         "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow".to_string(),
-        //         "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8".to_string(),
-        //     ];
-
-        //     if is_inner & jupiter_dapps.contains(outer_program) {
-        //         result =
-        //         dapps::dapp_9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        //     }
-        // }
-        // "SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1" => {
-        //     result =
-        //         dapps::dapp_SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "SCHAtsf8mbjyjiv4LkhLKutTf6JnZAbdJKFkXQNMFHZ" => {
-        //     result =
-        //         dapps::dapp_SCHAtsf8mbjyjiv4LkhLKutTf6JnZAbdJKFkXQNMFHZ::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "dp2waEWSBy5yKmq65ergoU3G6qRLmqa6K7We4rZSKph" => {
-        //     result =
-        //         dapps::dapp_dp2waEWSBy5yKmq65ergoU3G6qRLmqa6K7We4rZSKph::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh" => {
-        //     result =
-        //         dapps::dapp_CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP" => {
-        //     result =
-        //         dapps::dapp_PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag" => {
-        //     result =
-        //         dapps::dapp_D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "2KehYt3KsEQR53jYcxjbQp2d2kCp4AkuQW68atufRwSr" => {
-        //     result =
-        //         dapps::dapp_2KehYt3KsEQR53jYcxjbQp2d2kCp4AkuQW68atufRwSr::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
+        "Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j" => {
+            result = dapps::dapp_Dooar9JkhdZ7J3LHN3A7YCuoGRUggXhQaG4kijfLGU2j::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB" => {
+            result = dapps::dapp_Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY" => {
+            result = dapps::dapp_PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr" => {
+            result = dapps::dapp_SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
+            result = dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {
+            result = dapps::dapp_whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S" => {
+            result = dapps::dapp_EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c" => {
+            result = dapps::dapp_2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ" => {
+            result = dapps::dapp_SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK" => {
+            result = dapps::dapp_CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP" => {
+            result = dapps::dapp_9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "AMM55ShdkoGRB5jVYPjWziwk8m5MpwyDgsMWHaMSQWH6" => {
+            result = dapps::dapp_AMM55ShdkoGRB5jVYPjWziwk8m5MpwyDgsMWHaMSQWH6::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4" => {
+            result = dapps::dapp_CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "cysPXAjehMpVKUapzbMCCnpFxUFFryEWEaLgnb9NrR8" => {
+            result = dapps::dapp_cysPXAjehMpVKUapzbMCCnpFxUFFryEWEaLgnb9NrR8::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "7WduLbRfYhTJktjLw5FDEyrqoEv61aTTCuGAetgLjzN5" => {
+            result = dapps::dapp_7WduLbRfYhTJktjLw5FDEyrqoEv61aTTCuGAetgLjzN5::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1" => {
+            result = dapps::dapp_SSwpMgqNDsyV7mAgN9ady4bDVu5ySjmmXejXvy2vLt1::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "SCHAtsf8mbjyjiv4LkhLKutTf6JnZAbdJKFkXQNMFHZ" => {
+            result = dapps::dapp_SCHAtsf8mbjyjiv4LkhLKutTf6JnZAbdJKFkXQNMFHZ::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "dp2waEWSBy5yKmq65ergoU3G6qRLmqa6K7We4rZSKph" => {
+            result = dapps::dapp_dp2waEWSBy5yKmq65ergoU3G6qRLmqa6K7We4rZSKph::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh" => {
+            result = dapps::dapp_CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP" => {
+            result = dapps::dapp_PSwapMdSai8tjrEXcxFeQth87xC4rRsa4VA5mhGhXkP::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag" => {
+            result = dapps::dapp_D3BBjqUdCYuP18fNvvMbPAZ8DpcRi4io2EsYHQawJDag::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "2KehYt3KsEQR53jYcxjbQp2d2kCp4AkuQW68atufRwSr" => {
+            result = dapps::dapp_2KehYt3KsEQR53jYcxjbQp2d2kCp4AkuQW68atufRwSr::is_trade_instruction(
+                instruction_data,
+            );
+        }
         "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8" => {
             result = dapps::dapp_675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8::is_trade_instruction(
                 instruction_data,
             );
         }
-        // "27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv" => {
-        //     result =
-        //         dapps::dapp_27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //             &post_token_balances,
-        //             accounts,
-        //         );
-        // }
-        // "BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p" => {
-        //     result =
-        //         dapps::dapp_BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X" => {
-        //     result =
-        //         dapps::dapp_FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "9tKE7Mbmj4mxDjWatikzGAtkoWosiiZX9y6J4Hfm2R8H" => {
-        //     result =
-        //         dapps::dapp_9tKE7Mbmj4mxDjWatikzGAtkoWosiiZX9y6J4Hfm2R8H::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1" => {
-        //     result =
-        //         dapps::dapp_DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319" => {
-        //     result =
-        //         dapps::dapp_6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo" => {
-        //     result =
-        //         dapps::dapp_LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C" => {
-        //     result =
-        //         dapps::dapp_CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb" => {
-        //     let jupiter_dapps = vec![
-        //         "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
-        //         "JUP3c2Uh3WA4Ng34tw6kPd2G4C5BB21Xo36Je1s32Ph".to_string(),
-        //         "JUP4Fb2cqiRUcaTHdrPC8h2gNsA2ETXiPDD33WcGuJB".to_string(),
-        //         "JUP5cHjnnCx2DppVsufsLrXs8EBZeEZzGtEK9Gdz6ow".to_string(),
-        //         "JUP5pEAZeHdHrLxh5UCwAbpjGwYKKoquCpda2hfP4u8".to_string(),
-        //         "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4".to_string(),
-        //         "JUP6i4ozu5ydDCnLiMogSckDPpbtr7BJ4FtzYWkb5Rk".to_string(),
-        //     ];
-
-        //     if is_inner & jupiter_dapps.contains(outer_program) {
-        //         result =
-        //         dapps::dapp_opnb2LAfJYbRMAHHvqjCwQxanZn7ReEHp1k81EohpZb::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        //     }
-        // }
-        // "DEXYosS6oEGvk8uCDayvwEZz4qEyDJRf9nFgYCaqPMTm" => {
-        //     result =
-        //         dapps::dapp_DEXYosS6oEGvk8uCDayvwEZz4qEyDJRf9nFgYCaqPMTm::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "H8W3ctz92svYg6mkn1UtGfu2aQr2fnUFHM1RhScEtQDt" => {
-        //     result =
-        //         dapps::dapp_H8W3ctz92svYg6mkn1UtGfu2aQr2fnUFHM1RhScEtQDt::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y" => {
-        //     result =
-        //         dapps::dapp_obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe" => {
-        //     result =
-        //         dapps::dapp_SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ" => {
-        //     result =
-        //         dapps::dapp_swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
-        // "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P" => {
-        //     result =
-        //         dapps::dapp_6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P::parse_trade_instruction(
-        //             instruction_data,
-        //             input_accounts,
-        //         );
-        // }
+        "27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv" => {
+            result = dapps::dapp_27haf8L6oxUeXrHrgEgsexjSY5hbVUWEmvv9Nyxg8vQv::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p" => {
+            result = dapps::dapp_BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X" => {
+            result = dapps::dapp_FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "9tKE7Mbmj4mxDjWatikzGAtkoWosiiZX9y6J4Hfm2R8H" => {
+            result = dapps::dapp_9tKE7Mbmj4mxDjWatikzGAtkoWosiiZX9y6J4Hfm2R8H::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1" => {
+            result = dapps::dapp_DjVE6JNiYqPL2QXyCUUh8rNjHrbz9hXHNYt99MQ59qw1::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319" => {
+            result = dapps::dapp_6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo" => {
+            result = dapps::dapp_LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C" => {
+            result = dapps::dapp_CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "DEXYosS6oEGvk8uCDayvwEZz4qEyDJRf9nFgYCaqPMTm" => {
+            result = dapps::dapp_DEXYosS6oEGvk8uCDayvwEZz4qEyDJRf9nFgYCaqPMTm::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "H8W3ctz92svYg6mkn1UtGfu2aQr2fnUFHM1RhScEtQDt" => {
+            result = dapps::dapp_H8W3ctz92svYg6mkn1UtGfu2aQr2fnUFHM1RhScEtQDt::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y" => {
+            result = dapps::dapp_obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe" => {
+            result = dapps::dapp_SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ" => {
+            result = dapps::dapp_swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ::is_trade_instruction(
+                instruction_data,
+            );
+        }
+        "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P" => {
+            result = dapps::dapp_6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P::is_trade_instruction(
+                instruction_data,
+            );
+        }
         _ => {}
     }
 
@@ -584,7 +455,7 @@ fn get_trader_balance_change(
     post_balances: &Vec<u64>,
     accounts: &Vec<String>,
 ) -> f64 {
-    let mut result: f64 = 0.0;
+    let result: f64;
     let unwapped_index = accounts.iter().position(|r| r == address);
     if unwapped_index.is_some() {
         let index = unwapped_index.unwrap();
@@ -640,10 +511,13 @@ fn get_trader_token_balance_changes(
             }
         });
     mint_map.iter().for_each(|(key, value)| {
-        result.push(TraderTokenBalanceChange {
-            mint: key.to_string(),
-            amount: value[0] - value[1],
-        });
+        let amount = value[0] - value[1];
+        if amount != 0.0 {
+            result.push(TraderTokenBalanceChange {
+                mint: key.to_string(),
+                amount: amount,
+            });
+        }
     });
 
     result

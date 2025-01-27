@@ -1,5 +1,3 @@
-use crate::trade_instruction::TradeInstruction;
-
 const SWAP_DISCRIMINATOR: u64 = u64::from_le_bytes([248, 198, 158, 145, 225, 117, 135, 200]);
 const SWAP_V2_DISCRIMINATOR: u64 = u64::from_le_bytes([43, 4, 237, 11, 26, 201, 30, 98]);
 
