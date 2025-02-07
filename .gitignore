@@ -12,3 +12,5 @@ buf.gen.yaml
 target/
 
 # Ignore '.spkg' files in any subdirectory
+utils/convert
+/utils/wasm_bytes.js

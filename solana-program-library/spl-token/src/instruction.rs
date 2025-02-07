@@ -1,13 +1,14 @@
 extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt;
+use serde::{Deserialize, Serialize};
 
-#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy)]
+#[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy, Serialize)]
 pub struct PubkeyLayout {
     pub value: [u8; 32],
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeMintLayout {
     pub decimals: u8,
     pub mint_authority: PubkeyLayout,
@@ -15,28 +16,28 @@ pub struct InitializeMintLayout {
     pub freeze_authority: PubkeyLayout,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeAccountLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeMultisigLayout {
     pub status: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct TransferLayout {
     pub amount: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ApproveLayout {
     pub amount: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct RevokeLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 #[repr(u8)]
 pub enum AuthorityTypeLayout {
     #[default]
@@ -65,126 +66,126 @@ impl fmt::Display for AuthorityTypeLayout {
     }
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct SetAuthorityLayout {
     pub authority_type: AuthorityTypeLayout,
     pub new_authority_option: u8,
     pub new_authority: PubkeyLayout,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct MintToLayout {
     pub amount: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct BurnLayout {
     pub amount: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct CloseAccountLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct FreezeAccountLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ThawAccountLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct TransferCheckedLayout {
     pub amount: u64,
     pub decimals: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ApproveCheckedLayout {
     pub amount: u64,
     pub decimals: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct MintToCheckedLayout {
     pub amount: u64,
     pub decimals: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct BurnCheckedLayout {
     pub amount: u64,
     pub decimals: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeAccount2Layout {
     pub owner: PubkeyLayout,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct SyncNativeLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeAccount3Layout {
     pub owner: PubkeyLayout,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeMultisig2Layout {
     pub status: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeMint2Layout {
     pub decimals: u8,
     pub mint_authority: PubkeyLayout,
     pub freeze_authority: PubkeyLayout,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct GetAccountDataSizeLayout {
     pub extension_type: u8,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeImmutableOwnerLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct AmountToUiAmountLayout {
     pub amount: u64,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct UiAmountToAmountLayout {
     pub ui_amount: String,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeMintCloseAuthorityLayout {
     pub owner: PubkeyLayout,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct TransferFeeExtensionLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ConfidentialTransferExtensionLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct DefaultAccountStateExtensionLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ReallocateLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct MemoTransferExtensionLayout {}
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct CreateNativeMintLayout {}
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InitializeNonTransferableMintLayout {}
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InterestBearingMintExtensionLayout {}
 
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct InstructionAccounts {
     pub mint: String,
     pub rent_sysvar: String,
@@ -201,8 +202,9 @@ pub struct InstructionAccounts {
     pub mint_funding_sys_program: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Instruction {
+    pub joinKey: String,
     pub name: String,
     pub instruction_accounts: InstructionAccounts,
     pub initializeMintArgs: InitializeMintLayout,
@@ -621,6 +623,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
     }
 
     let result: Instruction = Instruction {
+        joinKey: "".to_string(),
         name: instruction_name,
         instruction_accounts: instruction_accounts,
         initializeMintArgs: initializeMintArgs,
