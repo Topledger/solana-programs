@@ -60,5 +60,7 @@ pub struct TradeData {
     pub tick_upper_index: i32,
     #[prost(string, required, tag="30")]
     pub bundled_position: ::prost::alloc::string::String,
+    #[prost(string, required, tag="31")]
+    pub strategy_type: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)

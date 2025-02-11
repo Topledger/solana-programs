@@ -33,4 +33,5 @@ message TradeData {
   required int32 tick_lower_index = 28;
   required int32 tick_upper_index = 29;
   required string bundled_position = 30;
+  required string strategy_type = 31;
 }
