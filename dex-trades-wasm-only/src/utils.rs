@@ -28,12 +28,11 @@ pub fn get_mint(
         return "So11111111111111111111111111111111111111112".to_string();
     }
 
-    let index = accounts.iter().position(|r| r == address).unwrap();
     let mut result: String = String::new();
 
     token_balances
         .iter()
-        .filter(|token_balance| token_balance.account.to_string().eq(address))
+        .filter(|token_balance| token_balance.account.eq(address))
         .for_each(|token_balance| {
             result = token_balance.mint.clone();
         });
@@ -81,11 +80,12 @@ pub fn get_amt(
     }
 
     if result != 0.0 {
-        let index = accounts.iter().position(|r| r == address).unwrap();
         post_token_balances
             .iter()
+            .filter(|token_balance| token_balance.mint.eq(address))
             .for_each(|token_balance: &TokenBalance| {
-                result = token_balance.amount;
+                // TODO: uncomment if decimals is available in token_balance
+                // result = result / (u64::pow(10, decimals)) as f64;
             });
     }
 
@@ -126,7 +126,10 @@ pub fn get_token_transfer(
                 .as_str()
                 .eq("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
             {
-                let (discriminator_bytes, rest) = inner_instruction.data.as_bytes().split_at(1);
+                let b58_data = bs58::decode(inner_instruction.data.clone())
+                    .into_vec()
+                    .unwrap();
+                let (discriminator_bytes, rest) = b58_data.split_at(1);
                 let discriminator: u8 = u8::from(discriminator_bytes[0]);
 
                 match discriminator {
@@ -227,7 +230,10 @@ pub fn get_token_22_transfer(
                 .as_str()
                 .eq("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")
             {
-                let (discriminator_bytes, rest) = inner_instruction.data.as_bytes().split_at(1);
+                let b58_data = bs58::decode(inner_instruction.data.clone())
+                    .into_vec()
+                    .unwrap();
+                let (discriminator_bytes, rest) = b58_data.split_at(1);
                 let discriminator: u8 = u8::from(discriminator_bytes[0]);
 
                 match discriminator {
@@ -317,7 +323,10 @@ fn get_system_program_transfer(
                 .as_str()
                 .eq("11111111111111111111111111111111")
             {
-                let (discriminator_bytes, rest) = inner_instruction.data.as_bytes().split_at(4);
+                let b58_data = bs58::decode(inner_instruction.data.clone())
+                    .into_vec()
+                    .unwrap();
+                let (discriminator_bytes, rest) = b58_data.split_at(4);
 
                 let disc_bytes_arr: [u8; 4] = discriminator_bytes.to_vec().try_into().unwrap();
                 let discriminator: u32 = u32::from_le_bytes(disc_bytes_arr);
@@ -366,12 +375,4 @@ fn get_system_program_transfer(
     }
 
     result
-}
-
-fn prepare_input_accounts(account_indices: &Vec<u8>, accounts: &Vec<String>) -> Vec<String> {
-    let mut instruction_accounts: Vec<String> = vec![];
-    for (index, &el) in account_indices.iter().enumerate() {
-        instruction_accounts.push(accounts.as_slice()[el as usize].to_string());
-    }
-    return instruction_accounts;
 }

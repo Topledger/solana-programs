@@ -20,7 +20,6 @@ use wasm_bindgen::prelude::*;
 
 #[derive(Serialize, Default)]
 pub struct TradeData {
-    pub join_key: String,
     pub block_slot: u64,
     pub block_date: String,
     pub block_time: i64,
@@ -45,12 +44,12 @@ pub struct TradeData {
 }
 
 #[wasm_bindgen]
-pub fn parse(join_key: &str, transaction: &JsValue) -> JsValue {
-    let data = parse_transaction(join_key, transaction);
+pub fn parse(transaction: &JsValue) -> JsValue {
+    let data = parse_transaction(transaction);
     serde_wasm_bindgen::to_value(&data).unwrap()
 }
 
-fn parse_transaction(join_key: &str, transaction_js: &JsValue) -> Vec<TradeData> {
+fn parse_transaction(transaction_js: &JsValue) -> Vec<TradeData> {
     let mut result: Vec<TradeData> = vec![];
 
     let transaction_stat: TransactionStat = match transaction_js.into_serde() {
@@ -99,7 +98,7 @@ fn parse_transaction(join_key: &str, transaction_js: &JsValue) -> Vec<TradeData>
 
         if trade_instruction.is_some() {
             let ti = trade_instruction.unwrap();
-            let mut trade_data = default_trade_data(&transaction_stat, join_key);
+            let mut trade_data = default_trade_data(&transaction_stat);
             trade_data.pool_address = ti.amm;
             trade_data.base_mint = get_mint(
                 &ti.vault_a,
@@ -121,6 +120,7 @@ fn parse_transaction(join_key: &str, transaction_js: &JsValue) -> Vec<TradeData>
                 pre_balances.clone(),
                 post_balances.clone(),
             );
+
             trade_data.quote_amount = get_amt(
                 &ti.vault_b.clone(),
                 0 as u32,
@@ -140,7 +140,7 @@ fn parse_transaction(join_key: &str, transaction_js: &JsValue) -> Vec<TradeData>
             result.push(trade_data);
 
             if ti.second_swap_amm.clone().unwrap_or_default() != "" {
-                let mut trade_data = default_trade_data(&transaction_stat, join_key);
+                let mut trade_data = default_trade_data(&transaction_stat);
                 trade_data.pool_address = ti.second_swap_amm.unwrap();
                 trade_data.base_mint = get_mint(
                     &ti.second_swap_vault_a.clone().unwrap(),
@@ -206,7 +206,7 @@ fn parse_transaction(join_key: &str, transaction_js: &JsValue) -> Vec<TradeData>
 
                 if inner_trade_instruction.is_some() {
                     let inner_ti = inner_trade_instruction.unwrap();
-                    let mut inner_trade_data = default_trade_data(&transaction_stat, join_key);
+                    let mut inner_trade_data = default_trade_data(&transaction_stat);
                     inner_trade_data.pool_address = inner_ti.amm;
                     inner_trade_data.base_mint = get_mint(
                         &inner_ti.vault_a,
@@ -251,7 +251,7 @@ fn parse_transaction(join_key: &str, transaction_js: &JsValue) -> Vec<TradeData>
                     result.push(inner_trade_data);
 
                     if inner_ti.second_swap_amm.clone().unwrap_or_default() != "" {
-                        let mut inner_trade_data = default_trade_data(&transaction_stat, join_key);
+                        let mut inner_trade_data = default_trade_data(&transaction_stat);
                         inner_trade_data.pool_address = inner_ti.second_swap_amm.unwrap();
                         inner_trade_data.base_mint = get_mint(
                             &inner_ti.second_swap_vault_a.clone().unwrap(),
@@ -666,21 +666,7 @@ fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) 
     }
 }
 
-fn filter_inner_instructions(
-    meta_inner_instructions: &Vec<InnerInstructions>,
-    idx: u32,
-) -> Vec<InnerInstructions> {
-    let mut inner_instructions: Vec<InnerInstructions> = vec![];
-    let mut iterator = meta_inner_instructions.iter();
-    while let Some(inner_inst) = iterator.next() {
-        if inner_inst.index == idx as u32 {
-            inner_instructions.push(inner_inst.clone());
-        }
-    }
-    return inner_instructions;
-}
-
-fn default_trade_data(transaction_stat: &TransactionStat, join_key: &str) -> TradeData {
+fn default_trade_data(transaction_stat: &TransactionStat) -> TradeData {
     let mut trade_data = TradeData::default();
     let _transaction_stat = transaction_stat.clone();
     trade_data.tx_id = _transaction_stat.id.clone();
@@ -694,6 +680,5 @@ fn default_trade_data(transaction_stat: &TransactionStat, join_key: &str) -> Tra
         &_transaction_stat.post_balances,
     );
     trade_data.error = "".to_string();
-    trade_data.join_key = join_key.to_string();
     trade_data
 }

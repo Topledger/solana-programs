@@ -18,7 +18,10 @@ fn parse_vault_a(
             .as_str()
             .eq("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
         {
-            let (discriminator_bytes, rest) = inner_instruction.data.as_bytes().split_at(1);
+            let b58_data = bs58::decode(inner_instruction.data.clone())
+                .into_vec()
+                .unwrap();
+            let (discriminator_bytes, rest) = b58_data.split_at(1);
             let discriminator: u8 = u8::from(discriminator_bytes[0]);
             match discriminator {
                 3 => {
@@ -52,7 +55,10 @@ fn parse_vault_b(
             .as_str()
             .eq("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
         {
-            let (discriminator_bytes, rest) = inner_instruction.data.as_bytes().split_at(1);
+            let b58_data = bs58::decode(inner_instruction.data.clone())
+                .into_vec()
+                .unwrap();
+            let (discriminator_bytes, rest) = b58_data.split_at(1);
             let discriminator: u8 = u8::from(discriminator_bytes[0]);
             match discriminator {
                 3 => {
