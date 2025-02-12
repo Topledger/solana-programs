@@ -118,6 +118,7 @@ fn populate_transaction_stats(
         .map(|sig| bs58::encode(sig).into_string())
         .collect();
     transaction_stats.signer = accounts[0].clone();
+    transaction_stats.compute_units_consumed = meta.compute_units_consumed.unwrap_or_default();
     transaction_stats.version = if message.versioned {
         "0".into()
     } else {
@@ -134,6 +135,7 @@ fn populate_transaction_stats(
     update_transaction_stats_instructions(transaction_stats, accounts, meta, message);
     update_transaction_stats_token_balances(transaction_stats, meta, accounts);
     update_transaction_stats_executing_accounts(transaction_stats);
+    update_transaction_stats_return_data(transaction_stats, meta);
 }
 
 fn get_unique_program_ids(instructions: &Vec<transactions::v1::Instruction>) -> HashSet<String> {
@@ -238,6 +240,7 @@ fn process_inner_instruction(
         account_arguments,
         data,
         executing_account: executing_account.to_string(),
+        stack_height: inner_inst.stack_height.unwrap_or_default(),
         ..Default::default()
     };
 }
@@ -295,4 +298,12 @@ fn contains_substring(log_messages: &Vec<String>, sub_str: &str) -> bool {
     log_messages
         .iter()
         .any(|message| message.to_lowercase().contains(&sub_str_lower))
+}
+
+fn update_transaction_stats_return_data(transaction_stats: &mut TransactionStats, meta: &TransactionStatusMeta) {
+    if meta.return_data.is_some() {
+        log::info!("{:?}", meta.return_data.clone().unwrap().program_id.to_ascii_lowercase());
+        transaction_stats.return_data.program_id =  bs58::encode(meta.return_data.clone().unwrap().program_id).into_string();
+        transaction_stats.return_data.data =  bs58::encode(meta.return_data.clone().unwrap().data).into_string();
+    }
 }

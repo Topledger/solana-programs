@@ -51,6 +51,10 @@ pub struct TransactionStats {
     pub logs_truncated: bool,
     #[prost(string, repeated, tag="21")]
     pub log_messages: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+    #[prost(uint64, required, tag="22")]
+    pub compute_units_consumed: u64,
+    #[prost(message, required, tag="23")]
+    pub return_data: ReturnData,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -73,6 +77,8 @@ pub struct InnerInstruction {
     pub account_arguments: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
     #[prost(string, required, tag="3")]
     pub data: ::prost::alloc::string::String,
+    #[prost(uint32, required, tag="4")]
+    pub stack_height: u32,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -87,5 +93,13 @@ pub struct TokenBalance {
     pub owner: ::prost::alloc::string::String,
     #[prost(string, required, tag="5")]
     pub program: ::prost::alloc::string::String,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ReturnData {
+    #[prost(string, required, tag="1")]
+    pub program_id: ::prost::alloc::string::String,
+    #[prost(string, required, tag="2")]
+    pub data: ::prost::alloc::string::String,
 }
 // @@protoc_insertion_point(module)

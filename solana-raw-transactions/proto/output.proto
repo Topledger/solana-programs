@@ -28,6 +28,8 @@ message TransactionStats {
   repeated string executing_accounts = 19;
   required bool logs_truncated = 20;
   repeated string log_messages = 21;
+  required uint64 compute_units_consumed = 22;
+  required ReturnData return_data=23;
 
 }
 
@@ -44,6 +46,7 @@ message InnerInstruction {
   required string executing_account = 1;
   repeated string account_arguments = 2;
   required string data = 3;
+  required uint32 stack_height = 4;
    
 }
 
@@ -54,6 +57,11 @@ message TokenBalance {
   required string owner = 4;
   required string program = 5;
 
+}
+
+message ReturnData {
+  required string program_id = 1;
+  required string data = 2;
 }
 
 
