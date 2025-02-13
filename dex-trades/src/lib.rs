@@ -88,6 +88,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 td_dapp_address.clone(),
                                 pre_balances.clone(),
                                 post_balances.clone(),
+                                td.fee_account.clone(),
                             ),
                             quote_amount: get_amt(
                                 &td.vault_b,
@@ -98,6 +99,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 "".to_string(),
                                 pre_balances.clone(),
                                 post_balances.clone(),
+                                td.fee_account.clone(),
                             ),
                             base_vault: td.vault_a,
                             quote_vault: td.vault_b,
@@ -143,6 +145,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     "".to_string(),
                                     pre_balances.clone(),
                                     post_balances.clone(),
+                                    td.fee_account.clone(),
                                 ),
                                 quote_amount: get_amt(
                                     &td.second_swap_vault_b.clone().unwrap(),
@@ -153,6 +156,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     "".to_string(),
                                     pre_balances.clone(),
                                     post_balances.clone(),
+                                    td.fee_account.clone(),
                                 ),
                                 base_vault: td.second_swap_vault_a.clone().unwrap(),
                                 quote_vault: td.second_swap_vault_b.clone().unwrap(),
@@ -227,6 +231,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 inner_td_dapp_address.clone(),
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
+                                                inner_td.fee_account.clone(),
                                             ),
                                             quote_amount: get_amt(
                                                 &inner_td.vault_b,
@@ -237,6 +242,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 "".to_string(),
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
+                                                inner_td.fee_account.clone(),
                                             ),
                                             base_vault: inner_td.vault_a,
                                             quote_vault: inner_td.vault_b,
@@ -288,6 +294,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     "".to_string(),
                                                     pre_balances.clone(),
                                                     post_balances.clone(),
+                                                    inner_td.fee_account.clone(),
                                                 ),
                                                 quote_amount: get_amt(
                                                     &inner_td.second_swap_vault_b.clone().unwrap(),
@@ -298,6 +305,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     "".to_string(),
                                                     pre_balances.clone(),
                                                     post_balances.clone(),
+                                                    inner_td.fee_account.clone(),
                                                 ),
                                                 base_vault: inner_td
                                                     .second_swap_vault_a

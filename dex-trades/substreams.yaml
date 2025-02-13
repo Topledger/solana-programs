@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_dex_trades_2_0_4'
-  version: v2.0.4
+  name: 'tl_solana_dex_trades_2_0_5'
+  version: v2.0.5
 
 protobuf:
   files:

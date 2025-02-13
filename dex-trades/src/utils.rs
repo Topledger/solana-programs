@@ -48,6 +48,7 @@ pub fn get_amt(
     dapp_address: String,
     pre_balances: Vec<u64>,
     post_balances: Vec<u64>,
+    fee_account: Option<String>,
 ) -> f64 {
     let mut result: f64 = 0.0;
 
@@ -60,6 +61,7 @@ pub fn get_amt(
         dapp_address.clone(),
         pre_balances.clone(),
         post_balances.clone(),
+        fee_account.clone(),
     );
 
     let destination_transfer_amt = get_token_transfer(
@@ -71,6 +73,7 @@ pub fn get_amt(
         dapp_address.clone(),
         pre_balances.clone(),
         post_balances.clone(),
+        fee_account.clone(),
     );
 
     if source_transfer_amt != 0.0 {
@@ -102,6 +105,7 @@ pub fn get_token_transfer(
     dapp_address: String,
     pre_balances: Vec<u64>,
     post_balances: Vec<u64>,
+    fee_account: Option<String>,
 ) -> f64 {
     if dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P") {
         return get_system_program_transfer(
@@ -141,6 +145,13 @@ pub fn get_token_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
 
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
+
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
@@ -169,6 +180,13 @@ pub fn get_token_transfer(
 
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(2).unwrap().to_string();
+
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
 
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx

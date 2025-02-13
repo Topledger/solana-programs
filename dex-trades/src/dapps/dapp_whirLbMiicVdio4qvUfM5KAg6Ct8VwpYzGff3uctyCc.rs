@@ -46,6 +46,7 @@ pub fn parse_trade_instruction(
                 second_swap_amm: Some(accounts.get(3).unwrap().to_string()),
                 second_swap_vault_a: Some(accounts.get(9).unwrap().to_string()),
                 second_swap_vault_b: Some(accounts.get(11).unwrap().to_string()),
+                ..Default::default()
             });
         }
         TWO_HOP_SWAP_V2_DISCRIMINATOR => {
@@ -58,6 +59,7 @@ pub fn parse_trade_instruction(
                 second_swap_amm: Some(accounts.get(1).unwrap().to_string()),
                 second_swap_vault_a: Some(accounts.get(11).unwrap().to_string()),
                 second_swap_vault_b: Some(accounts.get(12).unwrap().to_string()),
+                ..Default::default()
             });
         }
         _ => {}
