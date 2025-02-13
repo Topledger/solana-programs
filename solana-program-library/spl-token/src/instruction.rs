@@ -1,7 +1,15 @@
 extern crate bs58;
 use borsh::{BorshDeserialize, BorshSerialize};
 use core::fmt;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
+use std::error::Error;
+
+fn u64_to_string<S>(num: &u64, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(&num.to_string())
+}
 
 #[derive(BorshDeserialize, BorshSerialize, Debug, Clone, Default, Copy, Serialize)]
 pub struct PubkeyLayout {
@@ -26,6 +34,7 @@ pub struct InitializeMultisigLayout {
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct TransferLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
 }
 
@@ -302,7 +311,8 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             instruction_accounts.mint = accounts.get(0).unwrap().to_string();
             instruction_accounts.rent_sysvar = accounts.get(1).unwrap().to_string();
 
-            initializeMintArgs = InitializeMintLayout::try_from_slice(rest).unwrap_or_default();
+            initializeMintArgs =
+                InitializeMintLayout::deserialize(&mut rest.clone()).unwrap_or_default();
         }
         1 => {
             instruction_name = String::from("InitializeAccount");
@@ -323,7 +333,8 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(2).1.to_vec();
             }
 
-            initializeMultisigArgs = InitializeMultisigLayout::try_from_slice(rest).unwrap();
+            initializeMultisigArgs =
+                InitializeMultisigLayout::deserialize(&mut rest.clone()).unwrap();
         }
         3 => {
             instruction_name = String::from("Transfer");
@@ -337,9 +348,9 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             if rest.len() > 8 {
                 let (rest_split, _) = rest.split_at(8);
-                transferArgs = TransferLayout::try_from_slice(rest_split).unwrap();
+                transferArgs = TransferLayout::deserialize(&mut rest_split.clone()).unwrap();
             } else {
-                transferArgs = TransferLayout::try_from_slice(rest).unwrap();
+                transferArgs = TransferLayout::deserialize(&mut rest.clone()).unwrap();
             }
         }
         4 => {
@@ -354,9 +365,9 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             if rest.len() > 8 {
                 let (rest_split, _) = rest.split_at(8);
-                approveArgs = ApproveLayout::try_from_slice(rest_split).unwrap();
+                approveArgs = ApproveLayout::deserialize(&mut rest_split.clone()).unwrap();
             } else {
-                approveArgs = ApproveLayout::try_from_slice(rest).unwrap();
+                approveArgs = ApproveLayout::deserialize(&mut rest.clone()).unwrap();
             }
         }
         5 => {
@@ -377,7 +388,8 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(2).1.to_vec();
             }
 
-            setAuthorityArgs = SetAuthorityLayout::try_from_slice(rest).unwrap_or_default();
+            setAuthorityArgs =
+                SetAuthorityLayout::deserialize(&mut rest.clone()).unwrap_or_default();
         }
         7 => {
             instruction_name = String::from("MintTo");
@@ -391,9 +403,9 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             if rest.len() > 8 {
                 let (rest_split, _) = rest.split_at(8);
-                mintToArgs = MintToLayout::try_from_slice(rest_split).unwrap();
+                mintToArgs = MintToLayout::deserialize(&mut rest_split.clone()).unwrap();
             } else {
-                mintToArgs = MintToLayout::try_from_slice(rest).unwrap();
+                mintToArgs = MintToLayout::deserialize(&mut rest.clone()).unwrap();
             }
         }
         8 => {
@@ -463,7 +475,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(4).1.to_vec();
             }
 
-            approveCheckedArgs = ApproveCheckedLayout::try_from_slice(rest).unwrap();
+            approveCheckedArgs = ApproveCheckedLayout::deserialize(&mut rest.clone()).unwrap();
         }
         14 => {
             instruction_name = String::from("MintToChecked");
@@ -475,7 +487,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
             }
 
-            mintToCheckedArgs = MintToCheckedLayout::try_from_slice(rest).unwrap();
+            mintToCheckedArgs = MintToCheckedLayout::deserialize(&mut rest.clone()).unwrap();
         }
         15 => {
             instruction_name = String::from("BurnChecked");
@@ -487,7 +499,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(3).1.to_vec();
             }
 
-            burnCheckedArgs = BurnCheckedLayout::try_from_slice(rest).unwrap();
+            burnCheckedArgs = BurnCheckedLayout::deserialize(&mut rest.clone()).unwrap();
         }
         16 => {
             instruction_name = String::from("InitializeAccount2");
@@ -496,7 +508,8 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             instruction_accounts.mint = accounts.get(1).unwrap().to_string();
             instruction_accounts.rent_sysvar = accounts.get(2).unwrap().to_string();
 
-            initializeAccount2Args = InitializeAccount2Layout::try_from_slice(rest).unwrap();
+            initializeAccount2Args =
+                InitializeAccount2Layout::deserialize(&mut rest.clone()).unwrap();
         }
         17 => {
             instruction_name = String::from("SyncNative");
@@ -505,9 +518,9 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
 
             if rest.len() > 0 {
                 let (rest_split, _) = rest.split_at(0);
-                syncNativeArgs = SyncNativeLayout::try_from_slice(rest_split).unwrap();
+                syncNativeArgs = SyncNativeLayout::deserialize(&mut rest_split.clone()).unwrap();
             } else {
-                syncNativeArgs = SyncNativeLayout::try_from_slice(rest).unwrap();
+                syncNativeArgs = SyncNativeLayout::deserialize(&mut rest.clone()).unwrap();
             }
         }
         18 => {
@@ -527,14 +540,16 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
                 instruction_accounts.signer_accounts = accounts.split_at(1).1.to_vec();
             }
 
-            initializeMultisig2Args = InitializeMultisig2Layout::try_from_slice(rest).unwrap();
+            initializeMultisig2Args =
+                InitializeMultisig2Layout::deserialize(&mut rest.clone()).unwrap();
         }
         20 => {
             instruction_name = String::from("InitializeMint2");
 
             instruction_accounts.mint = accounts.get(0).unwrap().to_string();
 
-            initializeMint2Args = InitializeMint2Layout::try_from_slice(rest).unwrap_or_default();
+            initializeMint2Args =
+                InitializeMint2Layout::deserialize(&mut rest.clone()).unwrap_or_default();
         }
         21 => {
             instruction_name = String::from("GetAccountDataSize");
@@ -544,11 +559,12 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             if rest.len() > 1 {
                 let (rest_split, _) = rest.split_at(1);
                 getAccountDataSizeArgs =
-                    GetAccountDataSizeLayout::try_from_slice(rest_split).unwrap();
+                    GetAccountDataSizeLayout::deserialize(&mut rest_split.clone()).unwrap();
             } else if rest.len() == 0 {
                 getAccountDataSizeArgs = GetAccountDataSizeLayout::default();
             } else {
-                getAccountDataSizeArgs = GetAccountDataSizeLayout::try_from_slice(rest).unwrap();
+                getAccountDataSizeArgs =
+                    GetAccountDataSizeLayout::deserialize(&mut rest.clone()).unwrap();
             }
         }
         22 => {
@@ -557,21 +573,21 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             instruction_accounts.account = accounts.get(0).unwrap().to_string();
 
             initializeImmutableOwnerArgs =
-                InitializeImmutableOwnerLayout::try_from_slice(rest).unwrap();
+                InitializeImmutableOwnerLayout::deserialize(&mut rest.clone()).unwrap();
         }
         23 => {
             instruction_name = String::from("AmountToUiAmount");
 
             instruction_accounts.mint = accounts.get(0).unwrap().to_string();
 
-            amountToUiAmountArgs = AmountToUiAmountLayout::try_from_slice(rest).unwrap();
+            amountToUiAmountArgs = AmountToUiAmountLayout::deserialize(&mut rest.clone()).unwrap();
         }
         24 => {
             instruction_name = String::from("UiAmountToAmount");
 
             instruction_accounts.mint = accounts.get(0).unwrap().to_string();
 
-            uiAmountToAmountArgs = UiAmountToAmountLayout::try_from_slice(rest).unwrap();
+            uiAmountToAmountArgs = UiAmountToAmountLayout::deserialize(&mut rest.clone()).unwrap();
         }
         25 => {
             instruction_name = String::from("InitializeMintCloseAuthority");
@@ -579,7 +595,7 @@ pub fn parse_instruction(bytes_stream: Vec<u8>, accounts: Vec<String>) -> Instru
             instruction_accounts.mint = accounts.get(0).unwrap().to_string();
 
             initializeMintCloseAuthorityArgs =
-                InitializeMintCloseAuthorityLayout::try_from_slice(rest).unwrap();
+                InitializeMintCloseAuthorityLayout::deserialize(&mut rest.clone()).unwrap();
         }
         26 => {
             instruction_name = String::from("TransferFeeExtension");

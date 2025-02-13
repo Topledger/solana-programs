@@ -14,24 +14,26 @@ use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
 use utils::convert_to_date;
 
-// For WASM Building
-// 1. Comment out #[substreams::handlers::map]
-// 2. Uncomment following lines to enable WASM building
+use serde_json::json;
+use serde_wasm_bindgen;
+use std::panic;
+use wasm_bindgen::prelude::*;
 
-// use serde_json::json;
-// use serde_wasm_bindgen;
-// use wasm_bindgen::prelude::*;
+#[wasm_bindgen(start)]
+pub fn run() {
+    panic::set_hook(Box::new(console_error_panic_hook::hook));
+}
 
-// #[wasm_bindgen]
-// pub fn parse(join_key: &str, base58_str: &str, accounts_js: JsValue) -> JsValue {
-//     let accounts: Vec<String> = accounts_js.into_serde().unwrap();
-//     let decoded_bytes: Vec<u8> = bs58::decode(base58_str).into_vec().unwrap();
-//     let mut data = parse_instruction(decoded_bytes, accounts);
-//     data.joinKey = join_key.to_string();
-//     serde_wasm_bindgen::to_value(&data).unwrap()
-// }
+#[wasm_bindgen]
+pub fn parse(join_key: &str, base58_str: &str, accounts_js: JsValue) -> JsValue {
+    let accounts: Vec<String> = accounts_js.into_serde().unwrap();
+    let decoded_bytes: Vec<u8> = bs58::decode(base58_str).into_vec().unwrap();
+    let mut data = parse_instruction(decoded_bytes, accounts);
+    data.joinKey = join_key.to_string();
+    serde_wasm_bindgen::to_value(&data).unwrap()
+}
 
-#[substreams::handlers::map]
+// #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let slot = block.slot;
     let parent_slot = block.parent_slot;
