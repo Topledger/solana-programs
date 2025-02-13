@@ -40,6 +40,7 @@ pub struct TransferLayout {
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ApproveLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
 }
 
@@ -84,11 +85,13 @@ pub struct SetAuthorityLayout {
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct MintToLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct BurnLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
 }
 
@@ -103,24 +106,28 @@ pub struct ThawAccountLayout {}
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct TransferCheckedLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
     pub decimals: u8,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct ApproveCheckedLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
     pub decimals: u8,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct MintToCheckedLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
     pub decimals: u8,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct BurnCheckedLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
     pub decimals: u8,
 }
@@ -160,6 +167,7 @@ pub struct InitializeImmutableOwnerLayout {}
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
 pub struct AmountToUiAmountLayout {
+    #[serde(serialize_with = "u64_to_string")]
     pub amount: u64,
 }
 
