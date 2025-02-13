@@ -111,8 +111,11 @@ pub fn parse_trade_instruction(
         }
         Initialize2 => {
             td.instruction_type = "Initialize2".to_string();
-            td.pool = input_accounts.get(4).unwrap().to_string();
-            td.account_a = input_accounts.get(10).unwrap().to_string();
+            td.pool = input_accounts.get(4).unwrap_or(&"".to_string()).to_string();
+            td.account_a = input_accounts
+                .get(10)
+                .unwrap_or(&"".to_string())
+                .to_string();
 
             if input_accounts.get(11).is_some() {
                 td.account_b = input_accounts.get(11).unwrap().to_string();
