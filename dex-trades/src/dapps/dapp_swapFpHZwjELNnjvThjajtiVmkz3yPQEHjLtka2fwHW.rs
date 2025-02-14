@@ -16,7 +16,7 @@ pub fn parse_trade_instruction(
     match discriminator {
         SWAP_DISCRIMINATOR => {
             result = Some(TradeInstruction {
-                dapp_address: String::from("swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ"),
+                dapp_address: String::from("swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW"),
                 name: String::from("Swap"),
                 amm: accounts.get(6).unwrap().to_string(),
                 vault_a: accounts.get(3).unwrap().to_string(),
@@ -27,7 +27,7 @@ pub fn parse_trade_instruction(
         }
         SWAP_V2_DISCRIMINATOR => {
             result = Some(TradeInstruction {
-                dapp_address: String::from("swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ"),
+                dapp_address: String::from("swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW"),
                 name: String::from("SwapV2"),
                 amm: accounts.get(8).unwrap().to_string(),
                 vault_a: accounts.get(5).unwrap().to_string(),
