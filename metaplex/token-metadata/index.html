@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en-US">
+
+<head>
+    <meta charset="utf-8" />
+    <title>hello-wasm example</title>
+</head>
+
+<body>
+    <script type="module">
+        import init, { parse } from "./pkg/metaplex_token_metadata.js";
+        init().then(() => {
+            let join_key = "jk";
+            let data = "4peKxifw3i1yYGGqsikm4z7z9MnTzwiXX5cH7G8Nh12ErcsnLiEAx4JHXiVwCNERkAj6fpwS4Xf6wLMfZY6nmYGK5ykp1J84RfMkgDQmZJJnBJspjM3SvTc3pfaUn43W9NVC3H";
+            let accs = ["BpHuL7HNTJDDGiw4ELpnYQdhTNNgZ53ennhtkQjGawGS", "9RFqA8EbTTqH3ct1fTGiGgqFAg2hziUdtyGgg1w69LJP", "F2f14Nw7kqBeGwgFymm7sEPcZrKWWN56hvN5yx2vc6sE"];
+            console.log(parse(join_key, data, accs));
+        });
+    </script>
+</body>
+
+</html>
