@@ -121,6 +121,13 @@ struct InitializePositionByOperatorLayout {
     owner: [u8; 32],
 }
 
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct RemoveLiquidityByRangeLayout {
+    fromBinId: i32,
+    toBinId: i32,
+    bpsToRemove: u16,
+}
+
 pub fn parse_trade_instruction(
     signer: &String,
     bytes_stream: Vec<u8>,
@@ -281,6 +288,8 @@ pub fn parse_trade_instruction(
             let data: AddLiquidityByStrategyLayout =
                 AddLiquidityByStrategyLayout::deserialize(&mut rest.clone()).unwrap();
             td.strategy_type = data.strategyParameters.strategyType.to_proto_struct();
+            td.tick_lower_index = data.strategyParameters.minBinId;
+            td.tick_upper_index = data.strategyParameters.maxBinId;
 
             result = Some(td);
         }
@@ -313,6 +322,8 @@ pub fn parse_trade_instruction(
             let data: AddLiquidityByStrategyOneSideLayout =
                 AddLiquidityByStrategyOneSideLayout::deserialize(&mut rest.clone()).unwrap();
             td.strategy_type = data.strategyParameters.strategyType.to_proto_struct();
+            td.tick_lower_index = data.strategyParameters.minBinId;
+            td.tick_upper_index = data.strategyParameters.maxBinId;
 
             result = Some(td);
         }
@@ -369,6 +380,10 @@ pub fn parse_trade_instruction(
                 "source".to_string(),
             );
             td.position = input_accounts.get(0).unwrap().to_string();
+            let data: RemoveLiquidityByRangeLayout =
+                RemoveLiquidityByRangeLayout::deserialize(&mut rest.clone()).unwrap();
+            td.tick_lower_index = data.fromBinId;
+            td.tick_upper_index = data.toBinId;
 
             result = Some(td);
         }
