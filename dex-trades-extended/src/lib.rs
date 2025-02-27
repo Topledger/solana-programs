@@ -103,6 +103,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 td_dapp_address.clone(),
                                 pre_balances.clone(),
                                 post_balances.clone(),
+                                td.fee_account.clone(),
                             ),
                             quote_amount: get_amt(
                                 &td.vault_b,
@@ -113,6 +114,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 "".to_string(),
                                 pre_balances.clone(),
                                 post_balances.clone(),
+                                td.fee_account.clone(),
                             ),
                             trader: trader.clone(),
                             base_vault: td.vault_a,
@@ -188,6 +190,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     "".to_string(),
                                     pre_balances.clone(),
                                     post_balances.clone(),
+                                    td.fee_account.clone(),
                                 ),
                                 quote_amount: get_amt(
                                     &td.second_swap_vault_b.clone().unwrap(),
@@ -198,6 +201,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                     "".to_string(),
                                     pre_balances.clone(),
                                     post_balances.clone(),
+                                    td.fee_account.clone(),
                                 ),
                                 trader: trader.clone(),
                                 base_vault: td.second_swap_vault_a.clone().unwrap(),
@@ -302,6 +306,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 inner_td_dapp_address.clone(),
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
+                                                inner_td.fee_account.clone(),
                                             ),
                                             quote_amount: get_amt(
                                                 &inner_td.vault_b,
@@ -312,6 +317,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 "".to_string(),
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
+                                                inner_td.fee_account.clone(),
                                             ),
                                             trader: trader.clone(),
                                             base_vault: inner_td.vault_a,
@@ -394,6 +400,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     "".to_string(),
                                                     pre_balances.clone(),
                                                     post_balances.clone(),
+                                                    inner_td.fee_account.clone(),
                                                 ),
                                                 quote_amount: get_amt(
                                                     &inner_td.second_swap_vault_b.clone().unwrap(),
@@ -404,6 +411,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                     "".to_string(),
                                                     pre_balances.clone(),
                                                     post_balances.clone(),
+                                                    inner_td.fee_account.clone(),
                                                 ),
                                                 trader: trader.clone(),
                                                 base_vault: inner_td
@@ -811,6 +819,20 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "2NZ9rBZtrMdJhwCDYbHjTqAjTQ4bcHxYXFAjsj6NECue" => {
+            result =
+                dapps::dapp_2NZ9rBZtrMdJhwCDYbHjTqAjTQ4bcHxYXFAjsj6NECue::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW" => {
+            result =
+                dapps::dapp_swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
         _ => {}
     }
 
@@ -834,7 +856,7 @@ fn get_trader_balance_change(
         if unwapped_index.is_some() {
             let index = unwapped_index.unwrap();
             result = (post_balances[index] - pre_balances[index]) as i64;
-        } else{
+        } else {
             result = 0 as i64;
         }
     }

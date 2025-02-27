@@ -8,6 +8,7 @@ pub struct TradeInstruction {
     pub second_swap_amm: Option<String>,
     pub second_swap_vault_a: Option<String>,
     pub second_swap_vault_b: Option<String>,
+    pub fee_account: Option<String>,
 }
 
 impl Default for TradeInstruction {
@@ -21,6 +22,7 @@ impl Default for TradeInstruction {
             second_swap_amm: None,
             second_swap_vault_a: None,
             second_swap_vault_b: None,
+            fee_account: None,
         }
     }
 }

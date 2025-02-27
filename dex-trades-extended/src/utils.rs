@@ -26,6 +26,7 @@ pub fn get_mint(
 ) -> String {
     if dapp_address.eq("MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG")
         || dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P")
+        || dapp_address.eq("2NZ9rBZtrMdJhwCDYbHjTqAjTQ4bcHxYXFAjsj6NECue")
     {
         return "So11111111111111111111111111111111111111112".to_string();
     }
@@ -62,6 +63,7 @@ pub fn get_trader_account(
         dapp_address.clone(),
         pre_balances.clone(),
         post_balances.clone(),
+        None,
     );
 
     let (_, source_token_account) = get_token_transfer(
@@ -73,6 +75,7 @@ pub fn get_trader_account(
         dapp_address.clone(),
         pre_balances.clone(),
         post_balances.clone(),
+        None,
     );
 
     let mut owner_destination_token_account: String = String::new();
@@ -127,6 +130,7 @@ pub fn get_amt(
     dapp_address: String,
     pre_balances: Vec<u64>,
     post_balances: Vec<u64>,
+    fee_account: Option<String>,
 ) -> f64 {
     let mut result: f64 = 0.0;
 
@@ -139,6 +143,7 @@ pub fn get_amt(
         dapp_address.clone(),
         pre_balances.clone(),
         post_balances.clone(),
+        fee_account.clone(),
     );
 
     let (destination_transfer_amt, _) = get_token_transfer(
@@ -150,6 +155,7 @@ pub fn get_amt(
         dapp_address.clone(),
         pre_balances.clone(),
         post_balances.clone(),
+        fee_account.clone(),
     );
 
     if source_transfer_amt != 0.0 {
@@ -181,8 +187,11 @@ pub fn get_token_transfer(
     dapp_address: String,
     pre_balances: Vec<u64>,
     post_balances: Vec<u64>,
+    fee_account: Option<String>,
 ) -> (f64, String) {
-    if dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P") {
+    if dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P")
+        || dapp_address.eq("2NZ9rBZtrMdJhwCDYbHjTqAjTQ4bcHxYXFAjsj6NECue")
+    {
         return get_system_program_transfer(
             address,
             input_inner_idx,
@@ -221,6 +230,13 @@ pub fn get_token_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
 
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
+
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
@@ -251,6 +267,13 @@ pub fn get_token_transfer(
 
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(2).unwrap().to_string();
+
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
 
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
