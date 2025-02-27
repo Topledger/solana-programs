@@ -174,11 +174,14 @@ fn get_outer_arg(
             arg.decimals = Some(i32::from(instruction.initializeMintArgs.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMintArgs.mint_authority.value);
-            arg.freeze_authority_option = Some(i32::from(
-                instruction.initializeMintArgs.freeze_authority_option,
-            ));
-            arg.freeze_authority =
-                get_b58_string(instruction.initializeMintArgs.freeze_authority.value);
+
+            arg.freeze_authority = get_b58_string(
+                instruction
+                    .initializeMintArgs
+                    .freeze_authority
+                    .unwrap_or_default()
+                    .value,
+            );
         }
         "InitializeAccount" => {
             outerArg.instruction_type = String::from("InitializeAccount");

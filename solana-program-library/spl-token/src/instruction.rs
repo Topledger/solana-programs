@@ -20,8 +20,7 @@ pub struct PubkeyLayout {
 pub struct InitializeMintLayout {
     pub decimals: u8,
     pub mint_authority: PubkeyLayout,
-    pub freeze_authority_option: u8,
-    pub freeze_authority: PubkeyLayout,
+    pub freeze_authority: Option<PubkeyLayout>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]
