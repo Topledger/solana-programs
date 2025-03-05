@@ -74,15 +74,25 @@ fn process_block(block: Block) -> BlockStat {
                 } else {
                     block_stat.successful_non_vote_transactions += 1;
                     block_stat.successful_non_vote_transactions_fee += meta.fee;
-                    block_stat.successful_non_vote_transactions_priority_fee += (meta.fee
-                        - 5000
-                            * transaction
-                                .message
-                                .clone()
-                                .unwrap()
-                                .header
-                                .unwrap()
-                                .num_required_signatures as u64);
+
+                    let mut num_required_signatures = 0;
+                    if transaction.message.is_some()
+                        && transaction.message.as_ref().unwrap().header.is_some()
+                    {
+                        num_required_signatures = transaction
+                            .message
+                            .as_ref()
+                            .unwrap()
+                            .header
+                            .as_ref()
+                            .unwrap()
+                            .num_required_signatures;
+                    }
+
+                    if num_required_signatures > 0 {
+                        block_stat.successful_non_vote_transactions_priority_fee +=
+                            (meta.fee - (5000 * num_required_signatures as u64));
+                    }
                 }
             } else {
                 // Failed transaction
