@@ -4,6 +4,7 @@ mod utils;
 use pb::sf::solana::raw::blocks::v1::{BlockStat, Output};
 
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
+use substreams_solana::pb::sf::solana::r#type::v1::Transaction;
 use utils::convert_to_date;
 
 const VOTE_ACCOUNT: &str = "Vote111111111111111111111111111111111111111";
@@ -75,23 +76,10 @@ fn process_block(block: Block) -> BlockStat {
                     block_stat.successful_non_vote_transactions += 1;
                     block_stat.successful_non_vote_transactions_fee += meta.fee;
 
-                    let mut num_required_signatures = 0;
-                    if transaction.message.is_some()
-                        && transaction.message.as_ref().unwrap().header.is_some()
-                    {
-                        num_required_signatures = transaction
-                            .message
-                            .as_ref()
-                            .unwrap()
-                            .header
-                            .as_ref()
-                            .unwrap()
-                            .num_required_signatures;
-                    }
-
-                    if num_required_signatures > 0 {
+                    let priority_fee = get_priority_fee(meta.fee, transaction);
+                    if priority_fee.is_some() {
                         block_stat.successful_non_vote_transactions_priority_fee +=
-                            (meta.fee - (5000 * num_required_signatures as u64));
+                            priority_fee.unwrap();
                     }
                 }
             } else {
@@ -104,10 +92,37 @@ fn process_block(block: Block) -> BlockStat {
                 } else {
                     block_stat.failed_non_vote_transactions += 1;
                     block_stat.failed_non_vote_transactions_fee += meta.fee;
+
+                    let priority_fee = get_priority_fee(meta.fee, transaction);
+                    if priority_fee.is_some() {
+                        block_stat.failed_non_vote_transactions_priority_fee +=
+                            priority_fee.unwrap();
+                    }
                 }
             }
         }
     }
 
     block_stat
+}
+
+pub fn get_priority_fee(tx_fee: u64, transaction: &Transaction) -> Option<u64> {
+    let mut result: Option<u64> = None;
+    let mut num_required_signatures = 0;
+    if transaction.message.is_some() && transaction.message.as_ref().unwrap().header.is_some() {
+        num_required_signatures = transaction
+            .message
+            .as_ref()
+            .unwrap()
+            .header
+            .as_ref()
+            .unwrap()
+            .num_required_signatures;
+    }
+
+    if num_required_signatures > 0 {
+        result = Some(tx_fee - (5000 * num_required_signatures as u64));
+    }
+
+    result
 }

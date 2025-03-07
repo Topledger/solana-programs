@@ -29,4 +29,5 @@ message BlockStat {
   required uint64 failed_vote_transactions_fee=21;
   required uint64 failed_non_vote_transactions=22;
   required uint64 failed_non_vote_transactions_fee=23;
+  required uint64 failed_non_vote_transactions_priority_fee=24;
 }

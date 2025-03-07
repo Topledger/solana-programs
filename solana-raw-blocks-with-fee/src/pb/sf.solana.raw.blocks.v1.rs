@@ -52,5 +52,7 @@ pub struct BlockStat {
     pub failed_non_vote_transactions: u64,
     #[prost(uint64, required, tag="23")]
     pub failed_non_vote_transactions_fee: u64,
+    #[prost(uint64, required, tag="24")]
+    pub failed_non_vote_transactions_priority_fee: u64,
 }
 // @@protoc_insertion_point(module)
