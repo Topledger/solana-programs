@@ -1,0 +1,26 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_failed_transactions_stats_1_0_0'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+imports:
+  solana: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - map: solana:blocks_without_votes
+    output:
+      type: proto:sf.solana.transaction_stats.v1.Output
