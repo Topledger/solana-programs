@@ -8,7 +8,7 @@ message PbApproveUseAuthorityArgsLayout {
 
 message PbBurnArgsLayout {
   required string name = 1;
-  required uint64 amount = 2;
+  required string amount = 2;
 }
 
 message PbCreatorLayout {
@@ -134,7 +134,7 @@ message PbAuthorizationDataLayout {
 message PbDelegateArgsLayout {
   required string name = 1;
   optional PbAuthorizationDataLayout authorization_data = 2;
-  optional uint64 amount = 3;
+  optional string amount = 3;
   optional string locked_address = 4;
 }
 
@@ -155,7 +155,7 @@ message PbMigrateArgsLayout {
 
 message PbMintArgsLayout {
   required string name = 1;
-  optional uint64 amount = 2;
+  optional string amount = 2;
   optional PbAuthorizationDataLayout authorization_data = 3;
 }
 
@@ -190,12 +190,12 @@ message PbSetReservationListArgsLayout {
 
 message PbTransferArgsLayout {
   required string name = 1;
-  optional uint64 amount = 2;
+  optional string amount = 2;
   optional PbAuthorizationDataLayout authorization_data = 3;
 }
 
 message PbTransferOutOfEscrowArgsLayout {
-  required uint64 amount = 1;
+  required string amount = 1;
 }
 
 message PbUnlockArgsLayout {

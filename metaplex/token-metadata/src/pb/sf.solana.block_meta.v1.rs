@@ -12,8 +12,8 @@ pub struct PbApproveUseAuthorityArgsLayout {
 pub struct PbBurnArgsLayout {
     #[prost(string, required, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag = "2")]
-    pub amount: u64,
+    #[prost(string, required, tag = "2")]
+    pub amount: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -222,8 +222,8 @@ pub struct PbDelegateArgsLayout {
     pub name: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub authorization_data: ::core::option::Option<PbAuthorizationDataLayout>,
-    #[prost(uint64, optional, tag = "3")]
-    pub amount: ::core::option::Option<u64>,
+    #[prost(string, optional, tag = "3")]
+    pub amount: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(string, optional, tag = "4")]
     pub locked_address: ::core::option::Option<::prost::alloc::string::String>,
 }
@@ -256,8 +256,8 @@ pub struct PbMigrateArgsLayout {
 pub struct PbMintArgsLayout {
     #[prost(string, required, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(uint64, optional, tag = "2")]
-    pub amount: ::core::option::Option<u64>,
+    #[prost(string, optional, tag = "2")]
+    pub amount: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub authorization_data: ::core::option::Option<PbAuthorizationDataLayout>,
 }
@@ -312,16 +312,16 @@ pub struct PbSetReservationListArgsLayout {
 pub struct PbTransferArgsLayout {
     #[prost(string, required, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(uint64, optional, tag = "2")]
-    pub amount: ::core::option::Option<u64>,
+    #[prost(string, optional, tag = "2")]
+    pub amount: ::core::option::Option<::prost::alloc::string::String>,
     #[prost(message, optional, tag = "3")]
     pub authorization_data: ::core::option::Option<PbAuthorizationDataLayout>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbTransferOutOfEscrowArgsLayout {
-    #[prost(uint64, required, tag = "1")]
-    pub amount: u64,
+    #[prost(string, required, tag = "1")]
+    pub amount: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]

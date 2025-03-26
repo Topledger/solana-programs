@@ -902,7 +902,7 @@ pub struct TransferOutOfEscrowArgsLayout {
 impl TransferOutOfEscrowArgsLayout {
     pub fn to_proto_struct(&self) -> PbTransferOutOfEscrowArgsLayout {
         PbTransferOutOfEscrowArgsLayout {
-            amount: self.amount,
+            amount: self.amount.to_string(),
         }
     }
 }
@@ -937,7 +937,7 @@ impl BurnArgsLayout {
 
         PbBurnArgsLayout {
             name: name,
-            amount: amount.unwrap(),
+            amount: amount.unwrap_or_default().to_string(),
         }
     }
 }
@@ -996,7 +996,7 @@ pub struct MintArgsLayout {
 impl MintArgsLayout {
     pub fn to_proto_struct(&self) -> PbMintArgsLayout {
         let mut name = "".to_string();
-        let mut amount: Option<u64> = None;
+        let mut amount: Option<String> = None;
         let mut authorization_data = None;
 
         match &self.name {
@@ -1005,7 +1005,7 @@ impl MintArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "V1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1086,7 +1086,7 @@ impl DelegateArgsLayout {
     pub fn to_proto_struct(&self) -> PbDelegateArgsLayout {
         let mut name = "".to_string();
         let mut authorization_data = None;
-        let mut amount: Option<u64> = None;
+        let mut amount: Option<String> = None;
         let mut locked_address = None;
 
         match &self.name {
@@ -1103,7 +1103,7 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "SaleV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1113,7 +1113,7 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "TransferV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1131,7 +1131,7 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "UtilityV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1141,14 +1141,14 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "StakingV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
             }
             DelegateArgsLayoutName::StandardV1 { amount: amt } => {
                 name = "StandardV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
             }
             DelegateArgsLayoutName::LockedTransferV1 {
                 amount: amt,
@@ -1474,7 +1474,7 @@ pub struct TransferArgsLayout {
 impl TransferArgsLayout {
     pub fn to_proto_struct(&self) -> PbTransferArgsLayout {
         let mut name = "".to_string();
-        let mut amount: Option<u64> = None;
+        let mut amount: Option<String> = None;
         let mut authorization_data = None;
 
         match &self.name {
@@ -1483,7 +1483,7 @@ impl TransferArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "V1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
