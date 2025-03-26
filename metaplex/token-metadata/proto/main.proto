@@ -3,7 +3,7 @@ syntax = "proto2";
 package sf.solana.block_meta.v1;
 
 message PbApproveUseAuthorityArgsLayout {
-  required uint64 numberOfUses = 1;
+  required string numberOfUses = 1;
 }
 
 message PbBurnArgsLayout {
@@ -24,13 +24,13 @@ message PbCollectionLayout {
 
 message PbUsesLayout {
   required string useMethod = 1;
-  required uint64 remaining = 2;
-  required uint64 total = 3;
+  required string remaining = 2;
+  required string total = 3;
 }
 
 message PbCollectionDetailsLayout {
   required string name = 1;
-  required uint64 size = 2;
+  required string size = 2;
 }
 
 message PbAssetDataLayout {
@@ -50,7 +50,7 @@ message PbAssetDataLayout {
 
 message PbPrintSupplyLayout {
   required string name = 1;
-  optional uint64 val = 2;
+  optional string val = 2;
 }
 
 message PbCreateArgsLayout {
@@ -61,7 +61,7 @@ message PbCreateArgsLayout {
 }
 
 message PbCreateMasterEditionArgsLayout {
-  optional uint64 maxSupply = 1;
+  optional string maxSupply = 1;
 }
 
 message PbDataLayout {
@@ -115,7 +115,7 @@ message PbPayloadTypeLayout {
   optional string valPubKey = 2;
   optional PbSeedsVecLayout valSeedsVec = 3;
   optional PbLeafInfoLayout valLeafInfo = 4;
-  optional uint64 valInt64 = 5; 
+  optional string valInt64 = 5; 
 }
 
 message PbMapItemLayout {
@@ -160,11 +160,11 @@ message PbMintArgsLayout {
 }
 
 message PbMintNewEditionFromMasterEditionViaTokenArgsLayout {
-  required uint64 edition = 1;
+  required string edition = 1;
 }
 
 message PbMintPrintingTokensViaTokenArgsLayout {
-  required uint64 supply = 1;
+  required string supply = 1;
 }
 
 message PbRevokeArgsLayout {
@@ -172,20 +172,20 @@ message PbRevokeArgsLayout {
 }
 
 message PbSetCollectionSizeArgsLayout {
-  required uint64 size = 1;
+  required string size = 1;
 }
 
 message PbReservationLayout {
   required string address = 1;
-  required uint64 spotsRemaining = 2;
-  required uint64 totalSpots = 3;
+  required string spotsRemaining = 2;
+  required string totalSpots = 3;
 }
 
 message PbSetReservationListArgsLayout {
   repeated PbReservationLayout reservations = 1;
-  optional uint64 totalReservationSpots = 2;
-  required uint64 offset = 3;
-  required uint64 totalSpotOffset = 4;
+  optional string totalReservationSpots = 2;
+  required string offset = 3;
+  required string totalSpotOffset = 4;
 }
 
 message PbTransferArgsLayout {
@@ -256,7 +256,7 @@ message PbUseArgsLayout {
 }
 
 message PbUtilizeArgsLayout {
-  required uint64 numberOfUses = 1;
+  required string numberOfUses = 1;
 }
 
 message PbVerificationArgsLayout {

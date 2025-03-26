@@ -4,8 +4,8 @@ use serde::Serialize;
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbApproveUseAuthorityArgsLayout {
-    #[prost(uint64, required, tag = "1")]
-    pub number_of_uses: u64,
+    #[prost(string, required, tag = "1")]
+    pub number_of_uses: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -38,18 +38,18 @@ pub struct PbCollectionLayout {
 pub struct PbUsesLayout {
     #[prost(string, required, tag = "1")]
     pub use_method: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag = "2")]
-    pub remaining: u64,
-    #[prost(uint64, required, tag = "3")]
-    pub total: u64,
+    #[prost(string, required, tag = "2")]
+    pub remaining: ::prost::alloc::string::String,
+    #[prost(string, required, tag = "3")]
+    pub total: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbCollectionDetailsLayout {
     #[prost(string, required, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag = "2")]
-    pub size: u64,
+    #[prost(string, required, tag = "2")]
+    pub size: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -84,8 +84,8 @@ pub struct PbAssetDataLayout {
 pub struct PbPrintSupplyLayout {
     #[prost(string, required, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(uint64, optional, tag = "2")]
-    pub val: ::core::option::Option<u64>,
+    #[prost(string, optional, tag = "2")]
+    pub val: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -102,8 +102,8 @@ pub struct PbCreateArgsLayout {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbCreateMasterEditionArgsLayout {
-    #[prost(uint64, optional, tag = "1")]
-    pub max_supply: ::core::option::Option<u64>,
+    #[prost(string, optional, tag = "1")]
+    pub max_supply: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -192,8 +192,8 @@ pub struct PbPayloadTypeLayout {
     pub val_seeds_vec: ::core::option::Option<PbSeedsVecLayout>,
     #[prost(message, optional, tag = "4")]
     pub val_leaf_info: ::core::option::Option<PbLeafInfoLayout>,
-    #[prost(uint64, optional, tag = "5")]
-    pub val_int64: ::core::option::Option<u64>,
+    #[prost(string, optional, tag = "5")]
+    pub val_int64: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -264,14 +264,14 @@ pub struct PbMintArgsLayout {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbMintNewEditionFromMasterEditionViaTokenArgsLayout {
-    #[prost(uint64, required, tag = "1")]
-    pub edition: u64,
+    #[prost(string, required, tag = "1")]
+    pub edition: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbMintPrintingTokensViaTokenArgsLayout {
-    #[prost(uint64, required, tag = "1")]
-    pub supply: u64,
+    #[prost(string, required, tag = "1")]
+    pub supply: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -282,30 +282,30 @@ pub struct PbRevokeArgsLayout {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbSetCollectionSizeArgsLayout {
-    #[prost(uint64, required, tag = "1")]
-    pub size: u64,
+    #[prost(string, required, tag = "1")]
+    pub size: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbReservationLayout {
     #[prost(string, required, tag = "1")]
     pub address: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag = "2")]
-    pub spots_remaining: u64,
-    #[prost(uint64, required, tag = "3")]
-    pub total_spots: u64,
+    #[prost(string, required, tag = "2")]
+    pub spots_remaining: ::prost::alloc::string::String,
+    #[prost(string, required, tag = "3")]
+    pub total_spots: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbSetReservationListArgsLayout {
     #[prost(message, repeated, tag = "1")]
     pub reservations: ::prost::alloc::vec::Vec<PbReservationLayout>,
-    #[prost(uint64, optional, tag = "2")]
-    pub total_reservation_spots: ::core::option::Option<u64>,
-    #[prost(uint64, required, tag = "3")]
-    pub offset: u64,
-    #[prost(uint64, required, tag = "4")]
-    pub total_spot_offset: u64,
+    #[prost(string, optional, tag = "2")]
+    pub total_reservation_spots: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, required, tag = "3")]
+    pub offset: ::prost::alloc::string::String,
+    #[prost(string, required, tag = "4")]
+    pub total_spot_offset: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
@@ -422,8 +422,8 @@ pub struct PbUseArgsLayout {
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
 pub struct PbUtilizeArgsLayout {
-    #[prost(uint64, required, tag = "1")]
-    pub number_of_uses: u64,
+    #[prost(string, required, tag = "1")]
+    pub number_of_uses: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
