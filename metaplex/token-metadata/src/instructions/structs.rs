@@ -57,6 +57,7 @@ pub enum TokenStandardLayout {
     Fungible,
     NonFungibleEdition,
     ProgrammableNonFungible,
+    ProgrammableNonFungibleEdition,
 }
 
 impl TokenStandardLayout {
@@ -78,6 +79,9 @@ impl TokenStandardLayout {
             }
             TokenStandardLayout::ProgrammableNonFungible => {
                 result = "ProgrammableNonFungible".to_string();
+            }
+            TokenStandardLayout::ProgrammableNonFungibleEdition => {
+                result = "ProgrammableNonFungibleEdition".to_string();
             }
         }
 
@@ -140,37 +144,39 @@ impl UsesLayout {
     }
 }
 
-#[derive(BorshDeserialize, Debug, Default)]
-pub enum CollectionDetailsLayoutName {
-    #[default]
-    V1,
+#[derive(BorshDeserialize, Debug)]
+pub enum CollectionDetailsLayout {
+    V1 { size: u64 },
+    V2 { padding: [u8; 8] },
 }
 
-impl CollectionDetailsLayoutName {
-    pub fn to_proto_struct(&self) -> String {
-        let mut result = "".to_string();
-
-        match self {
-            CollectionDetailsLayoutName::V1 => {
-                result = "V1".to_string();
-            }
-        }
-
-        result
+impl Default for CollectionDetailsLayout {
+    fn default() -> Self {
+        CollectionDetailsLayout::V1 { size: 0 }
     }
-}
-
-#[derive(BorshDeserialize, Debug, Default)]
-pub struct CollectionDetailsLayout {
-    pub name: CollectionDetailsLayoutName,
-    pub size: u64,
 }
 
 impl CollectionDetailsLayout {
     pub fn to_proto_struct(&self) -> PbCollectionDetailsLayout {
+        let mut name: String = "".to_string();
+        let mut size: Option<String> = None;
+        let mut padding: Vec<u32> = vec![];
+
+        match self {
+            CollectionDetailsLayout::V1 { size: _size } => {
+                name = "V1".to_string();
+                size = Some(_size.to_string());
+            }
+            CollectionDetailsLayout::V2 { padding: _padding } => {
+                name = "V2".to_string();
+                padding = _padding.iter().map(|x| *x as u32).collect();
+            }
+        }
+
         PbCollectionDetailsLayout {
-            name: self.name.to_proto_struct(),
-            size: self.size.to_string(),
+            name: name,
+            size: size,
+            padding: padding.to_vec(),
         }
     }
 }

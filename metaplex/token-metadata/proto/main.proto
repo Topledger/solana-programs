@@ -30,7 +30,8 @@ message PbUsesLayout {
 
 message PbCollectionDetailsLayout {
   required string name = 1;
-  required string size = 2;
+  optional string size = 2;
+  repeated uint32 padding = 3;
 }
 
 message PbAssetDataLayout {

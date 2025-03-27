@@ -48,8 +48,10 @@ pub struct PbUsesLayout {
 pub struct PbCollectionDetailsLayout {
     #[prost(string, required, tag = "1")]
     pub name: ::prost::alloc::string::String,
-    #[prost(string, required, tag = "2")]
-    pub size: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "2")]
+    pub size: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(uint32, repeated, packed = "false", tag = "3")]
+    pub padding: ::prost::alloc::vec::Vec<u32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message, Serialize)]
