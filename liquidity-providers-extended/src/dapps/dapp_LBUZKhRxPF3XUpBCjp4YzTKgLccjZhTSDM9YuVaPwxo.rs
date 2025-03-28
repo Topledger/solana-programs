@@ -1,6 +1,3 @@
-use borsh::{BorshDeserialize, BorshSerialize};
-use core::str;
-
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
 use crate::{
@@ -18,115 +15,14 @@ const RemoveAllLiquidity: u64 = u64::from_le_bytes([10, 51, 61, 35, 112, 105, 24
 const RemoveLiquidityByRange: u64 = u64::from_le_bytes([26, 82, 102, 152, 240, 74, 105, 26]);
 const ClaimFee: u64 = u64::from_le_bytes([169, 32, 79, 137, 136, 232, 70, 137]);
 const ClaimReward: u64 = u64::from_le_bytes([149, 95, 181, 242, 94, 90, 158, 162]);
-const InitializePosition: u64 = u64::from_le_bytes([219, 192, 234, 71, 190, 191, 102, 80]);
-const InitializePositionPda: u64 = u64::from_le_bytes([46, 82, 125, 146, 85, 141, 228, 153]);
-const InitializePositionByOperator: u64 =
-    u64::from_le_bytes([251, 189, 190, 244, 117, 254, 35, 148]);
-const ClosePosition: u64 = u64::from_le_bytes([123, 134, 81, 0, 49, 68, 98, 98]);
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-#[repr(u8)]
-enum StrategyTypeLayout {
-    #[default]
-    Spot,
-    Curve,
-    BidAsk,
-    SpotBalanced,
-    CurveBalanced,
-    BidAskBalanced,
-    SpotImBalanced,
-    CurveImBalanced,
-    BidAskImBalanced,
-}
-
-impl StrategyTypeLayout {
-    pub fn to_proto_struct(&self) -> String {
-        let mut result = "Spot".to_string();
-
-        match self {
-            StrategyTypeLayout::Spot => {
-                result = "Spot".to_string();
-            }
-            StrategyTypeLayout::Curve => {
-                result = "Curve".to_string();
-            }
-            StrategyTypeLayout::BidAsk => {
-                result = "BidAsk".to_string();
-            }
-            StrategyTypeLayout::SpotBalanced => {
-                result = "SpotBalanced".to_string();
-            }
-            StrategyTypeLayout::CurveBalanced => {
-                result = "CurveBalanced".to_string();
-            }
-            StrategyTypeLayout::BidAskBalanced => {
-                result = "BidAskBalanced".to_string();
-            }
-            StrategyTypeLayout::SpotImBalanced => {
-                result = "SpotImBalanced".to_string();
-            }
-            StrategyTypeLayout::CurveImBalanced => {
-                result = "CurveImBalanced".to_string();
-            }
-            StrategyTypeLayout::BidAskImBalanced => {
-                result = "BidAskImBalanced".to_string();
-            }
-        }
-
-        return result;
-    }
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct StrategyParametersLayout {
-    minBinId: i32,
-    maxBinId: i32,
-    strategyType: StrategyTypeLayout,
-    // parameteres: [u8; 64],
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct AddLiquidityByStrategyLayout {
-    amountX: u64,
-    amountY: u64,
-    activeId: i32,
-    maxActiveBinSlippage: i32,
-    strategyParameters: StrategyParametersLayout,
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct AddLiquidityByStrategyOneSideLayout {
-    amount: u64,
-    activeId: i32,
-    maxActiveBinSlippage: i32,
-    strategyParameters: StrategyParametersLayout,
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct InitializePositionLayout {
-    lowerBinId: i32,
-    width: i32,
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct InitializePositionPdaLayout {
-    lowerBinId: i32,
-    width: i32,
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct InitializePositionByOperatorLayout {
-    lowerBinId: i32,
-    width: i32,
-    owner: [u8; 32],
-}
-
-#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
-struct RemoveLiquidityByRangeLayout {
-    fromBinId: i32,
-    toBinId: i32,
-    bpsToRemove: u16,
-}
+const AddLiquidityOneSidePrecise: u64 = u64::from_le_bytes([161, 194, 103, 84, 171, 71, 250, 154]);
+const AddLiquidityByStrategy2: u64 = u64::from_le_bytes([3, 221, 149, 218, 111, 141, 118, 213]);
+const ClaimFee2: u64 = u64::from_le_bytes([112, 191, 101, 171, 28, 144, 127, 187]);
+const ClaimReward2: u64 = u64::from_le_bytes([190, 3, 127, 119, 178, 87, 157, 183]);
+const AddLiquidity2: u64 = u64::from_le_bytes([228, 162, 78, 28, 70, 219, 116, 115]);
+const AddLiquidityOneSidePrecise2: u64 = u64::from_le_bytes([33, 51, 163, 201, 117, 98, 125, 231]);
+const RemoveLiquidity2: u64 = u64::from_le_bytes([230, 215, 82, 127, 241, 101, 227, 146]);
+const RemoveLiquidityByRange2: u64 = u64::from_le_bytes([204, 2, 195, 145, 53, 145, 145, 205]);
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -285,12 +181,6 @@ pub fn parse_trade_instruction(
             );
             td.position = input_accounts.get(0).unwrap().to_string();
 
-            let data: AddLiquidityByStrategyLayout =
-                AddLiquidityByStrategyLayout::deserialize(&mut rest.clone()).unwrap();
-            td.strategy_type = data.strategyParameters.strategyType.to_proto_struct();
-            td.tick_lower_index = data.strategyParameters.minBinId;
-            td.tick_upper_index = data.strategyParameters.maxBinId;
-
             result = Some(td);
         }
         AddLiquidityByStrategyOneSide => {
@@ -318,12 +208,6 @@ pub fn parse_trade_instruction(
                 "destination".to_string(),
             );
             td.position = input_accounts.get(0).unwrap().to_string();
-
-            let data: AddLiquidityByStrategyOneSideLayout =
-                AddLiquidityByStrategyOneSideLayout::deserialize(&mut rest.clone()).unwrap();
-            td.strategy_type = data.strategyParameters.strategyType.to_proto_struct();
-            td.tick_lower_index = data.strategyParameters.minBinId;
-            td.tick_upper_index = data.strategyParameters.maxBinId;
 
             result = Some(td);
         }
@@ -380,10 +264,6 @@ pub fn parse_trade_instruction(
                 "source".to_string(),
             );
             td.position = input_accounts.get(0).unwrap().to_string();
-            let data: RemoveLiquidityByRangeLayout =
-                RemoveLiquidityByRangeLayout::deserialize(&mut rest.clone()).unwrap();
-            td.tick_lower_index = data.fromBinId;
-            td.tick_upper_index = data.toBinId;
 
             result = Some(td);
         }
@@ -443,48 +323,226 @@ pub fn parse_trade_instruction(
 
             result = Some(td);
         }
-        InitializePosition => {
-            td.instruction_type = "InitializePosition".to_string();
-            td.pool = input_accounts.get(2).unwrap().to_string();
+        AddLiquidityOneSidePrecise => {
+            td.instruction_type = "AddLiquidityOneSidePrecise".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(4).unwrap().to_string();
+            td.account_b = "".to_string();
             td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        AddLiquidityByStrategy2 => {
+            td.instruction_type = "AddLiquidityByStrategy2".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        ClaimFee2 => {
+            td.instruction_type = "ClaimFee2".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(3).unwrap().to_string();
+            td.account_b = input_accounts.get(4).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
             td.position = input_accounts.get(1).unwrap().to_string();
 
-            let data = InitializePositionLayout::deserialize(&mut rest.clone()).unwrap();
-            td.tick_lower_index = data.lowerBinId;
-            td.tick_upper_index = data.lowerBinId + data.width;
-
             result = Some(td);
         }
-        InitializePositionPda => {
-            td.instruction_type = "InitializePositionPda".to_string();
-            td.pool = input_accounts.get(3).unwrap().to_string();
+        ClaimReward2 => {
+            td.instruction_type = "ClaimReward2".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(3).unwrap().to_string();
+            td.account_b = "".to_string();
             td.lp_wallet = signer.to_string();
-            td.position = input_accounts.get(2).unwrap().to_string();
 
-            let data: InitializePositionPdaLayout =
-                InitializePositionPdaLayout::deserialize(&mut rest.clone()).unwrap();
-            td.tick_lower_index = data.lowerBinId;
-            td.tick_upper_index = data.lowerBinId + data.width;
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.position = input_accounts.get(1).unwrap().to_string();
 
             result = Some(td);
         }
-        InitializePositionByOperator => {
-            td.instruction_type = "InitializePositionByOperator".to_string();
-            td.pool = input_accounts.get(3).unwrap().to_string();
-            td.lp_wallet = signer.to_string();
-            td.position = input_accounts.get(2).unwrap().to_string();
-
-            let data: InitializePositionByOperatorLayout =
-                InitializePositionByOperatorLayout::deserialize(&mut rest.clone()).unwrap();
-            td.tick_lower_index = data.lowerBinId;
-            td.tick_upper_index = data.lowerBinId + data.width;
-
-            result = Some(td);
-        }
-        ClosePosition => {
-            td.instruction_type = "ClosePosition".to_string();
+        AddLiquidity2 => {
+            td.instruction_type = "AddLiquidity2".to_string();
             td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
             td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        AddLiquidityByStrategy2 => {
+            td.instruction_type = "AddLiquidityByStrategy2".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        RemoveLiquidity2 => {
+            td.instruction_type = "RemoveLiquidity2".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        RemoveLiquidityByRange2 => {
+            td.instruction_type = "RemoveLiquidityByRange2".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(6).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
             td.position = input_accounts.get(0).unwrap().to_string();
 
             result = Some(td);
