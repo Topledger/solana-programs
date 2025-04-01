@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_nft_trades_1_0_13'
-  version: v1.0.13
+  name: 'tl_solana_nft_trades_1_0_14'
+  version: v1.0.14
 
 protobuf:
   files:
