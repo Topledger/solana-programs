@@ -1,0 +1,30 @@
+specVersion: v0.1.0
+package:
+  name: orca_whirlpool_instructions
+  version: v1.0.0
+
+protobuf:
+  files:
+    - main.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams_solana_orca_whirlpool.wasm
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+modules:
+  - name: map_block
+    kind: map
+    binary: default
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.orca_whirlpool.v1.Output
+
+network: solana
+# endpoint: mainnet.sol.streamingfast.io:443 # Example endpoint
