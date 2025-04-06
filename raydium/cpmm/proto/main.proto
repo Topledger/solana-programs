@@ -1,0 +1,224 @@
+syntax = "proto3";
+
+package sf.solana.raydium_cpmm.v1;
+
+// Core Messages
+// ------------- 
+
+message Instructions {
+    repeated Meta instructions = 1;
+}
+
+message Meta {
+    string blockDate = 1;
+    int64 blockTime = 2;
+    uint64 blockSlot = 3;
+    string txId = 4;
+    optional uint32 instructionIndex = 5;
+    optional bool isInnerInstruction = 6;
+    optional uint32 innerInstructionIndex = 7;
+    string dapp = 8;
+    string instructionType = 9;
+    FlatArg args = 10;
+    map<string, string> inputAccounts = 11;
+    string signer = 12;
+    string outerProgram = 13;
+}
+
+message FlatArg {
+    // CreateAmmConfig
+    optional uint32 index = 1;
+    optional uint64 tradeFeeRate = 2;
+    optional uint64 protocolFeeRate = 3;
+    optional uint64 fundFeeRate = 4;
+    optional uint64 createPoolFee = 5;
+    
+    // UpdateAmmConfig
+    optional uint32 param = 6;
+    optional uint64 value = 7;
+    
+    // UpdatePoolStatus
+    optional uint32 status = 8;
+    
+    // CollectProtocolFee, CollectFundFee
+    optional string amount0Requested = 9;
+    optional string amount1Requested = 10;
+    
+    // Initialize
+    optional uint64 initAmount0 = 11;
+    optional uint64 initAmount1 = 12;
+    optional uint64 openTime = 13;
+    
+    // Deposit
+    optional uint64 lpTokenAmount = 14;
+    optional uint64 maximumToken0Amount = 15;
+    optional uint64 maximumToken1Amount = 16;
+    
+    // Withdraw
+    optional uint64 minimumToken0Amount = 17;
+    optional uint64 minimumToken1Amount = 18;
+    
+    // SwapBaseInput
+    optional uint64 amountIn = 19;
+    optional uint64 minimumAmountOut = 20;
+    
+    // SwapBaseOutput
+    optional uint64 maxAmountIn = 21;
+    optional uint64 amountOut = 22;
+}
+
+message InputAccounts {
+    // CreateAmmConfig accounts
+    optional InputAccount owner = 1;
+    optional InputAccount ammConfig = 2;
+    optional InputAccount systemProgram = 3;
+    
+    // UpdateAmmConfig additional accounts
+    // (reusing owner, ammConfig)
+    
+    // UpdatePoolStatus accounts
+    optional InputAccount authority = 4;
+    optional InputAccount poolState = 5;
+    
+    // CollectProtocolFee and CollectFundFee accounts
+    // (reusing owner, authority, poolState, ammConfig)
+    optional InputAccount token0Vault = 6;
+    optional InputAccount token1Vault = 7;
+    optional InputAccount vault0Mint = 8;
+    optional InputAccount vault1Mint = 9;
+    optional InputAccount recipientToken0Account = 10;
+    optional InputAccount recipientToken1Account = 11;
+    optional InputAccount tokenProgram = 12;
+    optional InputAccount tokenProgram2022 = 13;
+    
+    // Initialize accounts
+    // (reusing some accounts from above)
+    optional InputAccount creator = 14;
+    optional InputAccount token0Mint = 15;
+    optional InputAccount token1Mint = 16;
+    optional InputAccount lpMint = 17;
+    optional InputAccount creatorToken0 = 18;
+    optional InputAccount creatorToken1 = 19;
+    optional InputAccount creatorLpToken = 20;
+    optional InputAccount createPoolFee = 21;
+    optional InputAccount observationState = 22;
+    optional InputAccount token0Program = 23;
+    optional InputAccount token1Program = 24;
+    optional InputAccount associatedTokenProgram = 25;
+    optional InputAccount rent = 26;
+    
+    // Deposit accounts
+    // (reusing several from above)
+    optional InputAccount ownerLpToken = 27;
+    optional InputAccount token0Account = 28;
+    optional InputAccount token1Account = 29;
+    
+    // Withdraw accounts
+    // (reusing several from above)
+    optional InputAccount memoProgram = 30;
+    
+    // SwapBaseInput and SwapBaseOutput accounts
+    // (reusing several from above)
+    optional InputAccount payer = 31;
+    optional InputAccount inputTokenAccount = 32;
+    optional InputAccount outputTokenAccount = 33;
+    optional InputAccount inputVault = 34;
+    optional InputAccount outputVault = 35;
+    optional InputAccount inputTokenProgram = 36;
+    optional InputAccount outputTokenProgram = 37;
+    optional InputAccount inputTokenMint = 38;
+    optional InputAccount outputTokenMint = 39;
+}
+
+message InputAccount {
+    string address = 1;
+    bool is_signer = 2;
+    bool is_writable = 3;
+}
+
+// Reusable Types
+// --------------
+
+message PbPubKey {
+    bytes value = 1; // 32 bytes
+}
+
+message PbInt128 {
+    string value = 1; // Representing u128 as string
+}
+
+// Instruction Arguments
+// --------------------
+
+message InstructionArgs {
+    oneof instruction_args {
+        DefaultInstructionLayout default_instruction = 1;
+        PbCreateAmmConfigLayout create_amm_config = 2;
+        PbUpdateAmmConfigLayout update_amm_config = 3;
+        PbUpdatePoolStatusLayout update_pool_status = 4;
+        PbCollectProtocolFeeLayout collect_protocol_fee = 5;
+        PbCollectFundFeeLayout collect_fund_fee = 6;
+        PbInitializeLayout initialize = 7;
+        PbDepositLayout deposit = 8;
+        PbWithdrawLayout withdraw = 9;
+        PbSwapBaseInputLayout swap_base_input = 10;
+        PbSwapBaseOutputLayout swap_base_output = 11;
+    }
+}
+
+message DefaultInstructionLayout {}
+
+message PbCreateAmmConfigLayout {
+    uint32 index = 1;
+    uint64 tradeFeeRate = 2;
+    uint64 protocolFeeRate = 3;
+    uint64 fundFeeRate = 4;
+    uint64 createPoolFee = 5;
+}
+
+message PbUpdateAmmConfigLayout {
+    uint32 param = 1;
+    uint64 value = 2;
+}
+
+message PbUpdatePoolStatusLayout {
+    uint32 status = 1;
+}
+
+message PbCollectProtocolFeeLayout {
+    uint64 amount0Requested = 1;
+    uint64 amount1Requested = 2;
+}
+
+message PbCollectFundFeeLayout {
+    uint64 amount0Requested = 1;
+    uint64 amount1Requested = 2;
+}
+
+message PbInitializeLayout {
+    uint64 initAmount0 = 1;
+    uint64 initAmount1 = 2;
+    uint64 openTime = 3;
+}
+
+message PbDepositLayout {
+    uint64 lpTokenAmount = 1;
+    uint64 maximumToken0Amount = 2;
+    uint64 maximumToken1Amount = 3;
+}
+
+message PbWithdrawLayout {
+    uint64 lpTokenAmount = 1;
+    uint64 minimumToken0Amount = 2;
+    uint64 minimumToken1Amount = 3;
+}
+
+message PbSwapBaseInputLayout {
+    uint64 amountIn = 1;
+    uint64 minimumAmountOut = 2;
+}
+
+message PbSwapBaseOutputLayout {
+    uint64 maxAmountIn = 1;
+    uint64 amountOut = 2;
+} 

@@ -1,0 +1,111 @@
+TraceID: 1a964142c77bacfc804300dee0eb8116
+{
+  "@module": "raydium_cpmm_instructions",
+  "@block": 331717454,
+  "@type": "sf.solana.raydium_cpmm.v1.Instructions",
+  "@data": {
+    "instructions": [
+      {
+        "blockDate": "2025-04-06",
+        "blockTime": "1743960376",
+        "blockSlot": "331717454",
+        "txId": "4SPFsSV5X3ynWCUR3k6ATVuqB8kY9jgd3QUj9c7DCGeT2QuC7ziUUcFRmSrNvS7bmkSCYTCp3rcCxupencXTSg5N",
+        "instructionIndex": 3,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 0,
+        "dapp": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+        "instructionType": "SwapBaseInput",
+        "args": {
+          "amountIn": "222000000000",
+          "minimumAmountOut": "0"
+        },
+        "inputAccounts": {
+          "ammConfig": "D4FPEruKEHrG5TenZ2mpDGEfu1iUvTiqBxvpU8HLBvC2",
+          "authority": "GpMZbSM2GgvTKHJirzeGfMFoaZ8UR2X7F4v8vHTvxFbL",
+          "inputTokenAccount": "7vKbSWkQUFcfSzJAjVSjEsRGbCJSREehHJ1wtG6Dv2Qu",
+          "inputTokenMint": "23rtGaZjRTLjWstcSEdaJqC919k6WvHiedwnnfw9ZNEn",
+          "inputTokenProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "inputVault": "9DDKzjascUis7Jhx6TFia4Y9zDCkTtge1L5T1BrrJgro",
+          "observationState": "9odFoFNyhzBnX69mAX3X1VQ2fA23MabHkRGJbyEsQePz",
+          "outputTokenAccount": "4dVXyCYnUkqTqZDknMUWcynTrXuon39WhPxi1diBiqT3",
+          "outputTokenMint": "So11111111111111111111111111111111111111112",
+          "outputTokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "outputVault": "Durx6KePc1qWB7ydqWvanzUheYbqaGzgjqRmV3RMjiPw",
+          "payer": "2yBpYyjP6kw68LCEmJZkXTyRLx34jUoZoomsbvkoo91V",
+          "poolState": "5a18S9dWshpccyv8eqYn1CgwA41kK4F3SmiV5RTus9kK"
+        },
+        "signer": "2yBpYyjP6kw68LCEmJZkXTyRLx34jUoZoomsbvkoo91V",
+        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+      },
+      {
+        "blockDate": "2025-04-06",
+        "blockTime": "1743960376",
+        "blockSlot": "331717454",
+        "txId": "4taLnp36ocynGzYZ3JQZAatpqryCuCBKmGWNVZGcQyPASJovNUJ2mfcwD9iHekYzGsTBpHNVYZjQzxqVT4Pg4XBW",
+        "instructionIndex": 3,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 0,
+        "dapp": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+        "instructionType": "SwapBaseInput",
+        "args": {
+          "amountIn": "2607",
+          "minimumAmountOut": "0"
+        },
+        "inputAccounts": {
+          "ammConfig": "D4FPEruKEHrG5TenZ2mpDGEfu1iUvTiqBxvpU8HLBvC2",
+          "authority": "GpMZbSM2GgvTKHJirzeGfMFoaZ8UR2X7F4v8vHTvxFbL",
+          "inputTokenAccount": "CygWLt9Ckfcc9XmvYUbqdH4R9imJE4WQkECQ3drFfRga",
+          "inputTokenMint": "ARSyZMD1nNexsRLc7KpwQGpsD1HcaqMcCGJFa4Gne4bs",
+          "inputTokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "inputVault": "3E6o7xD1HcANC73rYL4i1MD8eqL7UeNidJadgnnVhcYA",
+          "observationState": "4rhWbeWKR6utFAK4w6fdNynDDRUyMG4kcb1oK889wchh",
+          "outputTokenAccount": "jfke3tKKhLuR5X6rJ2HpogQnZfcCxsoQnDLCFvb8HpP",
+          "outputTokenMint": "So11111111111111111111111111111111111111112",
+          "outputTokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "outputVault": "8DUFG9XhdMTW5uaCCtLtUB68YW1vTxFdg5beX7gp69pE",
+          "payer": "9P23LsbdBRX2nndLSRwiiBkpStEZPxJpRZknH29XHMed",
+          "poolState": "7pjWCgJ2zb66xTztYRBrP3G5onb61vKdWzxAK3a2Vr4h"
+        },
+        "signer": "9P23LsbdBRX2nndLSRwiiBkpStEZPxJpRZknH29XHMed",
+        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+      },
+      {
+        "blockDate": "2025-04-06",
+        "blockTime": "1743960376",
+        "blockSlot": "331717454",
+        "txId": "3qJ82HQztJ8bNuSkUVeSUWueUqJTZUbSxtbodxK482yfAYF5vJ8qT3CDTMJJV41aJUGbN56dgmDkvoWK1TcjDX9c",
+        "instructionIndex": 4,
+        "isInnerInstruction": false,
+        "innerInstructionIndex": 0,
+        "dapp": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C",
+        "instructionType": "Withdraw",
+        "args": {
+          "lpTokenAmount": "31923329556497",
+          "minimumToken0Amount": "95299692665",
+          "minimumToken1Amount": "10815425361426564"
+        },
+        "inputAccounts": {
+          "authority": "GpMZbSM2GgvTKHJirzeGfMFoaZ8UR2X7F4v8vHTvxFbL",
+          "lpMint": "G2CQAmj8Qpu2WGU2Ero31a5dRcknxZiNdRwRbiJTEuKq",
+          "memoProgram": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+          "owner": "91HXtbMnnccLtfxHn95NK5Zm1WD8fKyxrdxMeRK9fUG5",
+          "ownerLpToken": "2NdNYF2hWuUT6U7B5SQLtekfdH7r5AnYGxDjhQK9E2kA",
+          "poolState": "3zECpZPNhvK38iXQUMtooAnJgbsUH8MXWfpUoPoa72t6",
+          "token0Account": "6QhmJvgQ6brkskvmxY8fwyLYTF7G6fA7Y2T3g55drpVX",
+          "token0Vault": "HdM88AyCvKi12d1eyLNAR6Jm7Rs6jmFF4WzztPd4uQGV",
+          "token1Account": "AV9iPL6wRKEPk7pGgp1QXYa1BWCXnxk9YjgkFnz2ADaN",
+          "token1Vault": "5neu7MKyzyYQZdipAeUKD6B722n8ksSBLDuiRTQgJQbt",
+          "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenProgram2022": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "vault0Mint": "So11111111111111111111111111111111111111112",
+          "vault1Mint": "Dg16ERQ3kH7TQ14cSy8mzasZ6V9sH4QkrZn3nqzmKYjq"
+        },
+        "signer": "91HXtbMnnccLtfxHn95NK5Zm1WD8fKyxrdxMeRK9fUG5",
+        "outerProgram": "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C"
+      }
+    ]
+  }
+}
+
+Total Read Bytes (server-side consumption): 6507243
+all done

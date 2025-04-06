@@ -1,0 +1,38 @@
+[package]
+name = "substreams-solana-raydium-cpmm"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "substreams_solana_raydium_cpmm"
+
+[dependencies]
+substreams = "^0.6.0"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+substreams-solana-program-instructions = "0.1"
+bytes = "1.1.0"
+prost = "0.13"
+prost-types = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+num-bigint = "0.4"
+bs58 = "0.5.0"
+base64 = "0.21.5"
+borsh = "0.10.3"
+chrono = { version = "0.4", features = [ "std" ], default-features = false }
+anchor-lang = "0.28.0"
+tokio = "=1.25.0"
+anyhow = "1.0.75"
+hex = "0.4.3"
+log = "0.4.20"
+num-traits = "0.2"
+sha2 = "0.10.7"
+
+[build-dependencies]
+prost-build = "0.13" # Matching prost version
+
+[profile.release]
+lto = true
+opt-level = 's'
+strip = "debuginfo" 
