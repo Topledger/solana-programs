@@ -1,0 +1,320 @@
+syntax = "proto3";
+
+package sf.solana.raydium_clmm.v1;
+
+// Core Messages
+// ------------- 
+
+message Instructions {
+    repeated Meta instructions = 1;
+}
+
+message Meta {
+    string blockDate = 1;
+    int64 blockTime = 2;
+    uint64 blockSlot = 3;
+    string txId = 4;
+    optional uint32 instructionIndex = 5;
+    optional bool isInnerInstruction = 6;
+    optional uint32 innerInstructionIndex = 7;
+    string dapp = 8;
+    string instructionType = 9;
+    FlatArg args = 10;
+    map<string, string> inputAccounts = 11;
+    string signer = 12;
+    string outerProgram = 13;
+}
+
+message FlatArg {
+    optional uint32 index = 1;
+    optional uint32 tick_spacing = 2;
+    optional uint32 trade_fee_rate = 3;
+    optional uint32 protocol_fee_rate = 4;
+    optional uint32 fund_fee_rate = 5;
+    optional uint32 param = 6;
+    optional uint32 value = 7;
+    optional PbInt128 sqrt_price_x64 = 8;
+    optional int64 open_time = 9;
+    optional uint32 status = 10;
+    repeated PbPubKey keys = 11;
+    optional PbPubKey new_owner = 12;
+    optional PbInitializeRewardParam params = 13;
+    optional uint32 reward_index = 14;
+    optional PbInt128 emissions_per_second_x64 = 15;
+    optional int64 end_time = 16;
+    optional string amount0_requested = 17;
+    optional string amount1_requested = 18;
+    optional int32 tick_lower_index = 19;
+    optional int32 tick_upper_index = 20;
+    optional int32 tick_array_lower_start_index = 21;
+    optional int32 tick_array_upper_start_index = 22;
+    optional PbInt128 liquidity = 23;
+    optional int64 amount0_max = 24;
+    optional int64 amount1_max = 25;
+    optional bool with_metadata = 26;
+    optional bool base_flag = 27;
+    optional int64 amount0_min = 28;
+    optional int64 amount1_min = 29;
+    optional int64 amount = 30;
+    optional int64 other_amount_threshold = 31;
+    optional PbInt128 sqrt_price_limit_x64 = 32;
+    optional bool is_base_input = 33;
+    optional int64 amount_in = 34;
+    optional int64 amount_out_minimum = 35;
+}
+
+message InputAccounts {
+    optional InputAccount owner = 1;
+    optional InputAccount amm_config = 2;
+    optional InputAccount system_program = 3;
+    optional InputAccount pool_creator = 4;
+    optional InputAccount pool_state = 5;
+    optional InputAccount token_mint0 = 6;
+    optional InputAccount token_mint1 = 7;
+    optional InputAccount token_vault0 = 8;
+    optional InputAccount token_vault1 = 9;
+    optional InputAccount observation_state = 10;
+    optional InputAccount tick_array_bitmap = 11;
+    optional InputAccount token_program0 = 12;
+    optional InputAccount token_program1 = 13;
+    optional InputAccount rent = 14;
+    optional InputAccount authority = 15;
+    optional InputAccount operation_state = 16;
+    optional InputAccount reward_funder = 17;
+    optional InputAccount funder_token_account = 18;
+    optional InputAccount reward_token_mint = 19;
+    optional InputAccount reward_token_vault = 20;
+    optional InputAccount reward_token_program = 21;
+    optional InputAccount reward_vault_mint = 22;
+    optional InputAccount token_program = 23;
+    optional InputAccount token_program2022 = 24;
+    optional InputAccount memo_program = 25;
+    optional InputAccount vault0_mint = 26;
+    optional InputAccount vault1_mint = 27;
+    optional InputAccount recipient_token_account0 = 28;
+    optional InputAccount recipient_token_account1 = 29;
+    optional InputAccount payer = 30;
+    optional InputAccount position_nft_owner = 31;
+    optional InputAccount position_nft_mint = 32;
+    optional InputAccount position_nft_account = 33;
+    optional InputAccount metadata_account = 34;
+    optional InputAccount protocol_position = 35;
+    optional InputAccount tick_array_lower = 36;
+    optional InputAccount tick_array_upper = 37;
+    optional InputAccount personal_position = 38;
+    optional InputAccount token_account0 = 39;
+    optional InputAccount token_account1 = 40;
+    optional InputAccount associated_token_program = 41;
+    optional InputAccount metadata_program = 42;
+    optional InputAccount nft_owner = 43;
+    optional InputAccount nft_account = 44;
+    optional InputAccount input_token_account = 45;
+    optional InputAccount output_token_account = 46;
+    optional InputAccount input_vault = 47;
+    optional InputAccount output_vault = 48;
+    optional InputAccount tick_array = 49;
+    optional InputAccount input_token_mint = 50;
+    optional InputAccount input_vault_mint = 51;
+    optional InputAccount output_vault_mint = 52;
+}
+
+message InputAccount {
+    string address = 1;
+    bool is_signer = 2;
+    bool is_writable = 3;
+}
+
+// Reusable Types
+// --------------
+
+message PbPubKey {
+    bytes value = 1; // 32 bytes
+}
+
+message PbInt128 {
+    string value = 1; // Representing u128 as string
+}
+
+// Instruction Argument Layouts
+// ----------------------------
+
+message PbCreateAmmConfigLayout {
+    uint32 index = 1;
+    uint32 tick_spacing = 2;
+    uint32 trade_fee_rate = 3;
+    uint32 protocol_fee_rate = 4;
+    uint32 fund_fee_rate = 5;
+}
+
+message PbUpdateAmmConfigLayout {
+    uint32 param = 1;
+    uint32 value = 2;
+}
+
+message PbCreatePoolLayout {
+    PbInt128 sqrt_price_x64 = 1;
+    optional int64 open_time = 2;
+}
+
+message PbUpdatePoolStatusLayout {
+    uint32 status = 1;
+}
+
+message PbCreateOperationAccountLayout {}
+
+message PbUpdateOperationAccountLayout {
+    uint32 param = 1;
+    repeated PbPubKey keys = 2;
+}
+
+message PbTransferRewardOwnerLayout {
+    PbPubKey new_owner = 1;
+}
+
+message PbInitializeRewardParam {
+    int64 open_time = 1;
+    int64 end_time = 2;
+    PbInt128 emissions_per_second_x64 = 3;
+}
+
+message PbInitializeRewardLayout {
+    PbInitializeRewardParam params = 1;
+}
+
+message PbCollectRemainingRewardsLayout {
+    uint32 reward_index = 1;
+}
+
+message PbUpdateRewardInfosLayout {}
+
+message PbSetRewardParamsLayout {
+    uint32 reward_index = 1;
+    PbInt128 emissions_per_second_x64 = 2;
+    int64 open_time = 3;
+    int64 end_time = 4;
+}
+
+message PbCollectProtocolFeeLayout {
+    uint64 amount0_requested = 1;
+    uint64 amount1_requested = 2;
+}
+
+message PbCollectFundFeeLayout {
+    uint64 amount0_requested = 1;
+    uint64 amount1_requested = 2;
+}
+
+message PbOpenPositionLayout {
+    int32 tick_lower_index = 1;
+    int32 tick_upper_index = 2;
+    int32 tick_array_lower_start_index = 3;
+    int32 tick_array_upper_start_index = 4;
+    PbInt128 liquidity = 5;
+    int64 amount0_max = 6;
+    int64 amount1_max = 7;
+}
+
+message PbOpenPositionV2Layout {
+    int32 tick_lower_index = 1;
+    int32 tick_upper_index = 2;
+    int32 tick_array_lower_start_index = 3;
+    int32 tick_array_upper_start_index = 4;
+    PbInt128 liquidity = 5;
+    int64 amount0_max = 6;
+    int64 amount1_max = 7;
+    bool with_metadata = 8;
+    optional bool base_flag = 9;
+}
+
+message PbOpenPositionWithToken22NftLayout {
+    int32 tick_lower_index = 1;
+    int32 tick_upper_index = 2;
+    int32 tick_array_lower_start_index = 3;
+    int32 tick_array_upper_start_index = 4;
+    PbInt128 liquidity = 5;
+    int64 amount0_max = 6;
+    int64 amount1_max = 7;
+    bool with_metadata = 8;
+    optional bool base_flag = 9;
+}
+
+message PbClosePositionLayout {}
+
+message PbIncreaseLiquidityLayout {
+    PbInt128 liquidity = 1;
+    int64 amount0_max = 2;
+    int64 amount1_max = 3;
+}
+
+message PbIncreaseLiquidityV2Layout {
+    PbInt128 liquidity = 1;
+    int64 amount0_max = 2;
+    int64 amount1_max = 3;
+    optional bool base_flag = 4;
+}
+
+message PbDecreaseLiquidityLayout {
+    PbInt128 liquidity = 1;
+    int64 amount0_min = 2;
+    int64 amount1_min = 3;
+}
+
+message PbDecreaseLiquidityV2Layout {
+    PbInt128 liquidity = 1;
+    int64 amount0_min = 2;
+    int64 amount1_min = 3;
+}
+
+message PbSwapLayout {
+    int64 amount = 1;
+    int64 other_amount_threshold = 2;
+    PbInt128 sqrt_price_limit_x64 = 3;
+    bool is_base_input = 4;
+}
+
+message PbSwapV2Layout {
+    int64 amount = 1;
+    int64 other_amount_threshold = 2;
+    PbInt128 sqrt_price_limit_x64 = 3;
+    bool is_base_input = 4;
+}
+
+message PbSwapRouterBaseInLayout {
+    int64 amount_in = 1;
+    int64 amount_out_minimum = 2;
+}
+
+message DefaultInstructionLayout {} // For the catch-all case
+
+// InstructionArgs Oneof Wrapper
+// -----------------------------
+
+message InstructionArgs {
+    oneof instruction_args {
+        PbCreateAmmConfigLayout create_amm_config = 1;
+        PbUpdateAmmConfigLayout update_amm_config = 2;
+        PbCreatePoolLayout create_pool = 3;
+        PbUpdatePoolStatusLayout update_pool_status = 4;
+        PbCreateOperationAccountLayout create_operation_account = 5;
+        PbUpdateOperationAccountLayout update_operation_account = 6;
+        PbTransferRewardOwnerLayout transfer_reward_owner = 7;
+        PbInitializeRewardLayout initialize_reward = 8;
+        PbCollectRemainingRewardsLayout collect_remaining_rewards = 9;
+        PbUpdateRewardInfosLayout update_reward_infos = 10;
+        PbSetRewardParamsLayout set_reward_params = 11;
+        PbCollectProtocolFeeLayout collect_protocol_fee = 12;
+        PbCollectFundFeeLayout collect_fund_fee = 13;
+        PbOpenPositionLayout open_position = 14;
+        PbOpenPositionV2Layout open_position_v2 = 15;
+        PbOpenPositionWithToken22NftLayout open_position_with_token_22_nft = 16;
+        PbClosePositionLayout close_position = 17;
+        PbIncreaseLiquidityLayout increase_liquidity = 18;
+        PbIncreaseLiquidityV2Layout increase_liquidity_v2 = 19;
+        PbDecreaseLiquidityLayout decrease_liquidity = 20;
+        PbDecreaseLiquidityV2Layout decrease_liquidity_v2 = 21;
+        PbSwapLayout swap = 22;
+        PbSwapV2Layout swap_v2 = 23;
+        PbSwapRouterBaseInLayout swap_router_base_in = 24;
+        DefaultInstructionLayout default_instruction = 25; // Placeholder for unknown/unhandled
+    }
+} 
