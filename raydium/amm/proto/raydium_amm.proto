@@ -1,0 +1,193 @@
+syntax = "proto3";
+
+package sf.solana.raydium_amm.v1;
+
+// Basic Meta structure for output
+message Meta {
+  string blockDate = 1;
+  int64 blockTime = 2;
+  uint64 blockSlot = 3;
+  string txId = 4;
+  uint32 instructionIndex = 5;
+  bool isInnerInstruction = 6;
+  uint32 innerInstructionIndex = 7;
+  string dapp = 8; // Program ID
+  string instructionType = 9;
+  FlatArg args = 10;
+  map<string, string> inputAccounts = 11;
+  string signer = 12;
+  string outerProgram = 13;
+}
+
+message MetaCollection {
+    repeated Meta items = 1;
+}
+
+// Nested structure definitions from IDL
+
+message Fees {
+    uint64 minSeparateNumerator = 1;
+    uint64 minSeparateDenominator = 2;
+    uint64 tradeFeeNumerator = 3;
+    uint64 tradeFeeDenominator = 4;
+    uint64 pnlNumerator = 5;
+    uint64 pnlDenominator = 6;
+    uint64 swapFeeNumerator = 7;
+    uint64 swapFeeDenominator = 8;
+}
+
+message LastOrderDistance {
+    uint64 lastOrderNumerator = 1;
+    uint64 lastOrderDenominator = 2;
+}
+
+message NeedTake {
+    uint64 needTakePnlCoin = 1;
+    uint64 needTakePnlPc = 2;
+}
+
+message SwapInstructionBaseIn {
+    optional uint64 amountIn = 1;
+    optional uint64 minimumAmountOut = 2;
+}
+
+message SwapInstructionBaseOut {
+    optional uint64 maxAmountIn = 1;
+    optional uint64 amountOut = 2;
+}
+
+// Instruction argument layouts based on IDL and Python parser
+
+message PbInitializeLayout {
+    uint32 nonce = 1; // u8 in IDL, matches Python
+    uint64 openTime = 2; // u64 in IDL, matches Python
+}
+
+message PbInitialize2Layout {
+    uint32 nonce = 1; // u8
+    uint64 openTime = 2; // u64
+    uint64 initPcAmount = 3; // u64
+    uint64 initCoinAmount = 4; // u64
+}
+
+message PbMonitorStepLayout {
+    uint32 planOrderLimit = 1; // u16
+    uint32 placeOrderLimit = 2; // u16
+    uint32 cancelOrderLimit = 3; // u16
+}
+
+message PbDepositLayout {
+    uint64 maxCoinAmount = 1; // u64, matches Python
+    uint64 maxPcAmount = 2; // u64, matches Python
+    uint64 baseSide = 3; // u64, matches Python
+}
+
+message PbWithdrawLayout {
+    uint64 amount = 1; // u64, matches Python
+}
+
+message PbMigrateToOpenBookLayout {
+    // No args in IDL
+}
+
+message PbSetParamsLayout {
+    uint32 param = 1; // u8
+    uint64 value = 2; // optional
+    string newPubkey = 3; // optional
+    Fees fees = 4; // optional
+    LastOrderDistance lastOrderDistance = 5; // optional
+    NeedTake needTakeAmounts = 6; // optional
+}
+
+message PbWithdrawPnlLayout {
+    // No args in IDL
+}
+
+message PbWithdrawSrmLayout {
+    uint64 amount = 1; // u64
+}
+
+message PbSwapBaseInLayout {
+    optional uint64 amountIn = 1; // u64, matches Python
+    optional uint64 minimumAmountOut = 2; // u64, matches Python
+}
+
+message PbPreInitializeLayout {
+    uint32 nonce = 1; // u8, matches Python
+}
+
+message PbSwapBaseOutLayout {
+    optional uint64 maxAmountIn = 1; // u64, matches Python
+    optional uint64 amountOut = 2; // u64, matches Python
+}
+
+message PbSimulateInfoLayout {
+    uint32 param = 1; // u8
+    SwapInstructionBaseIn swapBaseInValue = 2; // optional
+    SwapInstructionBaseOut swapBaseOutValue = 3; // optional
+}
+
+message PbAdminCancelOrdersLayout {
+    uint32 limit = 1; // u16
+}
+
+message PbCreateConfigAccountLayout {
+    // No args in IDL
+}
+
+message PbUpdateConfigAccountLayout {
+    uint32 param = 1; // u8
+    string owner = 2; // publicKey
+}
+
+
+// InstructionArgs uses oneof to hold the specific layout
+message InstructionArgs {
+    oneof instruction {
+        PbInitializeLayout initialize = 1;
+        PbInitialize2Layout initialize2 = 2;
+        PbMonitorStepLayout monitorStep = 3;
+        PbDepositLayout deposit = 4;
+        PbWithdrawLayout withdraw = 5;
+        PbMigrateToOpenBookLayout migrateToOpenBook = 6;
+        PbSetParamsLayout setParams = 7;
+        PbWithdrawPnlLayout withdrawPnl = 8;
+        PbWithdrawSrmLayout withdrawSrm = 9;
+        PbSwapBaseInLayout swapBaseIn = 10;
+        PbPreInitializeLayout preInitialize = 11;
+        PbSwapBaseOutLayout swapBaseOut = 12;
+        PbSimulateInfoLayout simulateInfo = 13;
+        PbAdminCancelOrdersLayout adminCancelOrders = 14;
+        PbCreateConfigAccountLayout createConfigAccount = 15;
+        PbUpdateConfigAccountLayout updateConfigAccount = 16;
+    }
+}
+
+// FlatArg combines all possible arguments for consistent output
+message FlatArg {
+    optional uint32 nonce = 1;
+    optional uint64 openTime = 2;
+    optional uint64 initPcAmount = 3;
+    optional uint64 initCoinAmount = 4;
+    optional uint32 planOrderLimit = 5;
+    optional uint32 placeOrderLimit = 6;
+    optional uint32 cancelOrderLimit = 7;
+    optional uint64 maxCoinAmount = 8;
+    optional uint64 maxPcAmount = 9;
+    optional uint64 baseSide = 10;
+    optional uint64 amount = 11;
+    optional uint32 param = 12;
+    optional uint64 value = 13;
+    optional string newPubkey = 14;
+    optional Fees fees = 15;
+    optional LastOrderDistance lastOrderDistance = 16;
+    optional NeedTake needTakeAmounts = 17;
+    optional uint64 amountIn = 18;
+    optional uint64 minimumAmountOut = 19;
+    optional uint64 maxAmountIn = 20;
+    optional uint64 amountOut = 21;
+    optional SwapInstructionBaseIn swapBaseInValue = 22;
+    optional SwapInstructionBaseOut swapBaseOutValue = 23;
+    optional uint32 limit = 24;
+    optional string owner = 25;
+} 

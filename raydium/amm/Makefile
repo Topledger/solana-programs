@@ -1,14 +1,9 @@
 # Default Solana endpoint (can be overridden)
 ENDPOINT ?= mainnet.sol.streamingfast.io:443
 
-# Protobuf generation
-.PHONY: protogen
-protogen:
-	substreams protogen ./substreams.yaml --exclude-paths="sf/substreams,google"
-
 # Build the Rust WASM module for Substreams
 .PHONY: build
-build: protogen # Ensure protos are generated before building
+build:
 	cargo build --target wasm32-unknown-unknown --release
 
 # Package the Substream into an .spkg file
@@ -20,14 +15,10 @@ package: build
 # Adjust block number (-s) as needed
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml raydium_cpmm_instructions -s 331717454 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml raydium_amm_instructions -s 313745267 -t +1 > amm_pools.jsonl
 
 # Clean build artifacts
 .PHONY: clean
 clean:
 	cargo clean
-
-# (Optional) Run verification binary if/when created
-#.PHONY: verify
-#verify:
-#	cargo run --bin verify_discriminators --target=aarch64-apple-darwin -- verify 
+	rm -rf src/pb/*

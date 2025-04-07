@@ -1,0 +1,217 @@
+syntax = "proto3";
+
+package sf.solana.raydium_amm.v1; // Keep the package name the same for now
+
+// ========================================
+// Top Level Message
+// ========================================
+
+message Instructions {
+    repeated Meta instructions = 1;
+}
+
+// ========================================
+// Metadata and Accounts
+// ========================================
+
+// Meta holds block and transaction context for each instruction
+message Meta {
+    optional string blockDate = 1;
+    optional int64 blockTime = 2;
+    optional uint64 blockSlot = 3;
+    optional string txId = 4;
+    optional uint32 instructionIndex = 5;
+    optional bool isInnerInstruction = 6;
+    optional uint32 innerInstructionIndex = 7;
+    optional string dapp = 8;                     // Program ID (Raydium AMM V4)
+    optional string instructionType = 9;          // e.g., "swapBaseIn", "initialize"
+    optional FlatArg args = 10;                   // Unified arguments - This contains optional fields
+    map<string, string> inputAccounts = 11; // Map of account names to addresses from IDL
+    optional string signer = 12;                  // Transaction signer
+    optional string outerProgram = 13;            // Outer program ID if inner instruction
+}
+
+// ========================================
+// Reusable Types defined in IDL
+// ========================================
+
+message Fees {
+    optional uint64 min_separate_numerator = 1;
+    optional uint64 min_separate_denominator = 2;
+    optional uint64 trade_numerator = 3;
+    optional uint64 trade_denominator = 4;
+    optional uint64 pnl_numerator = 5;
+    optional uint64 pnl_denominator = 6;
+    optional uint64 swap_fee_numerator = 7;
+    optional uint64 swap_fee_denominator = 8;
+}
+
+message LastOrderDistance {
+    optional uint64 last_order_numerator = 1;
+    optional uint64 last_order_denominator = 2;
+}
+
+message NeedTake {
+    optional uint64 need_take_coin = 1;
+    optional uint64 need_take_pc = 2;
+}
+
+// Used in SimulateInfo and potentially internally
+message SwapInstructionBaseIn {
+    optional uint64 amount_in = 1;
+    optional uint64 minimum_amount_out = 2;
+}
+
+// Used in SimulateInfo and potentially internally
+message SwapInstructionBaseOut {
+    optional uint64 max_amount_in = 1;
+    optional uint64 amount_out = 2;
+}
+
+// ========================================
+// Specific Instruction Argument Layouts (Based on IDL)
+// ========================================
+
+message PbInitializeLayout {
+    uint32 nonce = 1; // u8 in IDL
+    uint64 openTime = 2;
+}
+
+message PbInitialize2Layout {
+    uint32 nonce = 1; // u8 in IDL
+    uint64 openTime = 2;
+    uint64 initPcAmount = 3;
+    uint64 initCoinAmount = 4;
+}
+
+message PbMonitorStepLayout {
+    uint32 planOrderLimit = 1; // u16 in IDL
+    uint32 placeOrderLimit = 2; // u16 in IDL
+    uint32 cancelOrderLimit = 3; // u16 in IDL
+}
+
+message PbDepositLayout {
+    uint64 maxCoinAmount = 1;
+    uint64 maxPcAmount = 2;
+    uint64 baseSide = 3;
+}
+
+message PbWithdrawLayout {
+    uint64 amount = 1;
+}
+
+message PbMigrateToOpenBookLayout {
+    // No args
+}
+
+message PbSetParamsLayout {
+    uint32 param = 1; // u8 in IDL
+    optional uint64 value = 2;
+    optional string newPubkey = 3;        // publicKey in IDL maps to string
+    optional Fees fees = 4;
+    optional LastOrderDistance lastOrderDistance = 5;
+    optional NeedTake needTakeAmounts = 6;
+}
+
+message PbWithdrawPnlLayout {
+    // No args
+}
+
+message PbWithdrawSrmLayout {
+    uint64 amount = 1;
+}
+
+message PbSwapBaseInLayout {
+    uint64 amountIn = 1;
+    uint64 minimumAmountOut = 2;
+}
+
+message PbPreInitializeLayout {
+    uint32 nonce = 1; // u8 in IDL
+}
+
+message PbSwapBaseOutLayout {
+    uint64 maxAmountIn = 1;
+    uint64 amountOut = 2;
+}
+
+message PbSimulateInfoLayout {
+    uint32 param = 1; // u8 in IDL
+    optional SwapInstructionBaseIn swapBaseInValue = 2;
+    optional SwapInstructionBaseOut swapBaseOutValue = 3;
+}
+
+message PbAdminCancelOrdersLayout {
+    uint32 limit = 1; // u16 in IDL
+}
+
+message PbCreateConfigAccountLayout {
+    // No args
+}
+
+message PbUpdateConfigAccountLayout {
+    uint32 param = 1; // u8 in IDL
+    string owner = 2; // publicKey in IDL maps to string
+}
+
+
+// ========================================
+// Oneof for Specific Instruction Args
+// ========================================
+
+// Mirrors the Switch statement in the Python parser, holding args for one specific instruction type
+message InstructionArgs {
+    oneof instruction {
+        PbInitializeLayout initialize = 1;
+        PbInitialize2Layout initialize2 = 2;
+        PbMonitorStepLayout monitorStep = 3;
+        PbDepositLayout deposit = 4;
+        PbWithdrawLayout withdraw = 5;
+        PbMigrateToOpenBookLayout migrateToOpenBook = 6;
+        PbSetParamsLayout setParams = 7;
+        PbWithdrawPnlLayout withdrawPnl = 8;
+        PbWithdrawSrmLayout withdrawSrm = 9;
+        PbSwapBaseInLayout swapBaseIn = 10;
+        PbPreInitializeLayout preInitialize = 11;
+        PbSwapBaseOutLayout swapBaseOut = 12;
+        PbSimulateInfoLayout simulateInfo = 13;
+        PbAdminCancelOrdersLayout adminCancelOrders = 14;
+        PbCreateConfigAccountLayout createConfigAccount = 15;
+        PbUpdateConfigAccountLayout updateConfigAccount = 16;
+        // Note: Python parser has ReservedX types, omitted here as IDL doesn't define args/accounts for them.
+    }
+}
+
+// ========================================
+// Unified Argument Structure for Output
+// ========================================
+
+// FlatArg combines all possible arguments from all instructions for consistent output structure.
+// Use 'optional' for fields that were missing when zero in the original issue.
+message FlatArg {
+    optional uint32 nonce = 1;
+    optional uint64 openTime = 2;
+    optional uint64 initPcAmount = 3;
+    optional uint64 initCoinAmount = 4;
+    optional uint32 planOrderLimit = 5;
+    optional uint32 placeOrderLimit = 6;
+    optional uint32 cancelOrderLimit = 7;
+    optional uint64 maxCoinAmount = 8;
+    optional uint64 maxPcAmount = 9;
+    optional uint64 baseSide = 10;
+    optional uint64 amount = 11;         // Used by Withdraw, WithdrawSrm
+    optional uint32 param = 12;          // Used by SetParams, SimulateInfo, UpdateConfigAccount
+    optional uint64 value = 13;          // Used by SetParams
+    optional string newPubkey = 14;      // Used by SetParams
+    optional Fees fees = 15;             // Used by SetParams
+    optional LastOrderDistance lastOrderDistance = 16; // Used by SetParams
+    optional NeedTake needTakeAmounts = 17; // Used by SetParams
+    optional uint64 amountIn = 18;       // Used by SwapBaseIn
+    optional uint64 minimumAmountOut = 19;// Used by SwapBaseIn
+    optional uint64 maxAmountIn = 20;    // Used by SwapBaseOut
+    optional uint64 amountOut = 21;      // Used by SwapBaseOut
+    optional SwapInstructionBaseIn swapBaseInValue = 22;  // Used by SimulateInfo
+    optional SwapInstructionBaseOut swapBaseOutValue = 23; // Used by SimulateInfo
+    optional uint32 limit = 24;          // Used by AdminCancelOrders
+    optional string owner = 25;          // Used by UpdateConfigAccount
+} 
