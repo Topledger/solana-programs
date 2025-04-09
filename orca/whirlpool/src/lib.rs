@@ -74,6 +74,11 @@ pub fn map_block(block: Block) -> Result<Output, Error> {
             .map(|acc| bs58::encode(acc).into_string())
             .collect();
 
+        // Calculate signer (first account key in the message)
+        // Same logic as in Raydium AMM lib.rs
+        let signer_opt: Option<String> = message.account_keys.first()
+             .map(|pubkey| bs58::encode(pubkey).into_string());
+
         // Top-level instructions
         for (inst_idx, inst) in message.instructions.iter().enumerate() {
             // Skip instructions with invalid program ID index
@@ -84,6 +89,7 @@ pub fn map_block(block: Block) -> Result<Output, Error> {
             let program_id = &account_keys[inst.program_id_index as usize];
 
             if program_id == ORCA_WHIRLPOOL_PROGRAM_ID {
+                // Outer instructions have None for outer_program
                 if let Some(update) = instructions::process_instruction(
                     inst,
                     &account_keys,
@@ -91,8 +97,10 @@ pub fn map_block(block: Block) -> Result<Output, Error> {
                     block_time,
                     &tx_id,
                     inst_idx as u32,
-                    false,
-                    None,
+                    false, // is_inner_instruction
+                    None, // inner_instruction_index
+                    signer_opt.as_deref(), // Pass signer
+                    None, // outer_program is None for outer instructions
                 ) {
                     metadata_updates.push(update);
                 }
@@ -102,6 +110,11 @@ pub fn map_block(block: Block) -> Result<Output, Error> {
         // Inner instructions - meta.inner_instructions is directly a Vec, not an Option<Vec>
         for inner_insts in &meta.inner_instructions {
             let outer_instruction_index = inner_insts.index as usize;
+
+            // Calculate outer_program ID for this set of inner instructions
+            // Same logic as in Raydium AMM lib.rs
+            let outer_program_opt: Option<String> = message.instructions.get(outer_instruction_index)
+                .and_then(|parent_inst| account_keys.get(parent_inst.program_id_index as usize).cloned());
 
             for (inner_idx, inner_inst) in inner_insts.instructions.iter().enumerate() {
                 // Skip instructions with invalid program ID index
@@ -126,8 +139,10 @@ pub fn map_block(block: Block) -> Result<Output, Error> {
                         block_time,
                         &tx_id,
                         outer_instruction_index as u32,
-                        true,
-                        Some(inner_idx as u32),
+                        true, // is_inner_instruction
+                        Some(inner_idx as u32), // inner_instruction_index
+                        signer_opt.as_deref(), // Pass signer
+                        outer_program_opt.as_deref(), // Pass calculated outer_program
                     ) {
                         metadata_updates.push(update);
                     }

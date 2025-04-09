@@ -506,9 +506,12 @@ message Meta {
   optional uint32 instruction_index = 6;
   optional bool is_inner_instruction = 7;
   optional uint32 inner_instruction_index = 8;
-  optional string instruction_type = 9; // Added - should be optional
-  optional FlatArg args = 10; // Kept optional, renumbered from 9
-  optional InputAccounts input_accounts = 11; // Kept optional, renumbered from 10
+  optional string instruction_type = 9;
+  optional FlatArg args = 10;
+  optional InputAccounts input_accounts = 11;
+  // Add signer and outer_program, matching AMM structure (using snake_case)
+  optional string signer = 12;
+  optional string outer_program = 13;
 }
 
 message Output {

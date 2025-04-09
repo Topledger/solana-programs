@@ -905,15 +905,17 @@ pub struct Meta {
     pub is_inner_instruction: ::core::option::Option<bool>,
     #[prost(uint32, optional, tag = "8")]
     pub inner_instruction_index: ::core::option::Option<u32>,
-    /// Added - should be optional
     #[prost(string, optional, tag = "9")]
     pub instruction_type: ::core::option::Option<::prost::alloc::string::String>,
-    /// Kept optional, renumbered from 9
     #[prost(message, optional, tag = "10")]
     pub args: ::core::option::Option<FlatArg>,
-    /// Kept optional, renumbered from 10
     #[prost(message, optional, tag = "11")]
     pub input_accounts: ::core::option::Option<InputAccounts>,
+    /// Add signer and outer_program, matching AMM structure (using snake_case)
+    #[prost(string, optional, tag = "12")]
+    pub signer: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "13")]
+    pub outer_program: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Output {

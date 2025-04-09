@@ -1,32 +1,68 @@
-// use borsh::BorshDeserialize; // Removed unused import
 use substreams_solana::pb::sf::solana::r#type::v1::CompiledInstruction;
+use chrono; // Needed for DateTime
 
-use bs58;
 use sha2::{Digest, Sha256};
 
 use crate::pb::sf::solana::orca_whirlpool::v1::{
     Meta,
     FlatArg,
-    arg::InstructionArgs,
-    PbSwapLayout,
-    PbInitializePoolV2Layout,
-    PbInitializeRewardV2Layout,
-    PbSetRewardEmissionsV2Layout,
-    PbOpenBundledPositionLayout,
-    PbCloseBundledPositionLayout,
+    arg::InstructionArgs as EnumInstructionArgs, // Alias to avoid conflict
+    PbSwapLayout, // Add other Pb...Layout types as needed for create_flat_arg
+    PbInitializePoolLayout,
+    PbSetRewardEmissionsLayout,
+    PbIncreaseLiquidityLayout,
+    PbDecreaseLiquidityLayout,
+    PbCollectRewardLayout,
+    PbTwoHopSwapLayout,
     PbInitializeConfigLayout,
     PbInitializeTickArrayLayout,
     PbInitializeFeeTierLayout,
     PbOpenPositionLayout,
-    PbOpenPositionBumps,
     PbOpenPositionWithMetadataLayout,
-    PbOpenPositionWithMetadataBumps,
     PbSetDefaultFeeRateLayout,
     PbSetDefaultProtocolFeeRateLayout,
     PbSetFeeRateLayout,
     PbSetProtocolFeeRateLayout,
     PbSetRewardAuthorityLayout,
     PbSetRewardAuthorityBySuperAuthorityLayout,
+    PbOpenBundledPositionLayout,
+    PbCloseBundledPositionLayout,
+    PbInitializeRewardV2Layout,
+    PbSetRewardEmissionsV2Layout,
+    PbInitializePoolV2Layout,
+    PbIncreaseLiquidityV2Layout,
+    PbDecreaseLiquidityV2Layout,
+    PbSwapV2Layout,
+    PbTwoHopSwapV2Layout,
+    PbOpenPositionWithTokenExtensionsLayout,
+    PbUint128, // Import PbUint128 for create_flat_arg
+    InputAccounts, // Import InputAccounts
+    PbOpenPositionBumps,
+    PbOpenPositionWithMetadataBumps,
+    PbInitializeRewardLayout,
+    PbCollectFeesLayout,
+    PbBumps,
+    PbPubKey,
+    // Layouts for manual decoding
+    PbUpdateFeesAndRewardsLayout,
+    PbCollectFeesV2Layout,
+    PbCollectProtocolFeesV2Layout,
+    PbClosePositionLayout,
+    PbSetFeeAuthorityLayout,
+    PbSetCollectProtocolFeesAuthorityLayout,
+    PbSetRewardEmissionsSuperAuthorityLayout,
+    PbInitializePositionBundleLayout,
+    PbInitializePositionBundleWithMetadataLayout,
+    PbDeletePositionBundleLayout,
+    PbInitializeConfigExtensionLayout,
+    PbSetConfigExtensionAuthorityLayout,
+    PbSetTokenBadgeAuthorityLayout,
+    PbInitializeTokenBadgeLayout,
+    PbDeleteTokenBadgeLayout,
+    PbInitializeAccountLayout,
+    PbIdlWriteLayout,
+    PbCollectRewardV2Layout,
+    PbCollectProtocolFeesLayout,
 };
 use crate::prepare_input_accounts;
 
@@ -154,238 +190,243 @@ pub const INSTRUCTION_TYPES: [(&[u8], &str); 48] = [
     (&[43, 4, 237, 11, 26, 201, 30, 98], "SwapV2"),
 ];
 
-/// Process a single instruction into a Meta object
+/// Process a single instruction into a Meta object (Restored Original Logic + Signer/OuterProgram)
 pub fn process_instruction(
     instruction: &CompiledInstruction,
-    account_keys: &[String],
+    account_keys: &[String], // Original name
     block_slot: u64,
-    block_time: i64,
+    block_time: i64, // Original name
     tx_id: &str,
     instruction_index: u32,
     is_inner_instruction: bool,
     inner_instruction_index: Option<u32>,
+    // Added parameters
+    signer: Option<&str>,
+    outer_program: Option<&str>,
 ) -> Option<Meta> {
+    // --- Start of original logic --- 
     let program_id = match account_keys.get(instruction.program_id_index as usize) {
         Some(id) => id,
-        None => {
-            return None;
-        }
+        None => return None,
     };
 
-    // Verify this is actually the Orca Whirlpool program
     if program_id != ORCA_WHIRLPOOL_PROGRAM_ID {
         return None;
     }
 
-    let data = &instruction.data;
-    
-    // Check if instruction data is long enough to contain a discriminator
-    if data.len() < 8 {
-        return None;
-    }
-
-    // Extract the instruction discriminator (first 8 bytes)
-    let discriminator = &data[0..8];
-    let _disc_bs58 = bs58::encode(discriminator).into_string();
-    
-    // Match the discriminator to a known instruction type
-    let _inst_type = match INSTRUCTION_TYPES.iter().find(|(disc, _)| disc == &discriminator) {
-        Some((_, inst_type)) => {
-            let inst_type_str = inst_type.to_string();
-            inst_type_str
-        },
-        None => {
-            return None;
+    let (inst_type, decoded_args) = match decode_instruction_data(&instruction.data) {
+        Ok((t, a)) => (t, a),
+        Err(e) => {
+            // Log decoding error if desired
+            // substreams::log::info!("Decode error: {}", e);
+            return None; 
         }
     };
 
-    // Decode instruction type and args using the modified helper
-    let (inst_type, decoded_args) = match decode_instruction_data(&data) {
-        Ok((t, a)) => (t, a),
-        Err(_) => return None, // Skip if decoding fails
+    // Correct DateTime handling - Option return type
+    let dt_opt = chrono::DateTime::from_timestamp(block_time, 0);
+    let block_date = match dt_opt {
+        Some(t) => t.format("%Y-%m-%d").to_string(),
+        None => "".to_string(), // Or return None if date is critical
     };
+    let block_time_i64 = dt_opt.map_or(0, |t| t.timestamp()); // Use 0 if None
 
-    // Extract timestamp
-    let dt = chrono::DateTime::from_timestamp(block_time, 0).unwrap_or_else(|| chrono::DateTime::from_timestamp(0, 0).unwrap());
-    let block_date = dt.format("%Y-%m-%d").to_string();
-
-    // Populate the FlatArg structure (as before)
     let mut flat_args = FlatArg {
         ..Default::default()
     };
-
-    // Map decoded nested args to the flat structure (as before)
+    
+    // Populate flat_args based on the SPECIFIC decoded instruction type
     match decoded_args {
-        InstructionArgs::Swap(swap) => {
-            if let Some(val) = swap.amount { flat_args.amount = Some(val.to_string()); }
-            if let Some(val) = swap.other_amount_threshold { flat_args.other_amount_threshold = Some(val.to_string()); }
-            if let Some(spl) = swap.sqrt_price_limit {
-                flat_args.sqrt_price_limit = spl.value;
-            }
-            if let Some(val) = swap.amount_specified_is_input { flat_args.amount_specified_is_input = Some(val); }
-            if let Some(val) = swap.a_to_b { flat_args.a_to_b = Some(val); }
+        EnumInstructionArgs::Swap(swap) => {
+            flat_args.amount = swap.amount.map(|v| v.to_string());
+            flat_args.other_amount_threshold = swap.other_amount_threshold.map(|v| v.to_string());
+            flat_args.sqrt_price_limit = swap.sqrt_price_limit.and_then(|p| p.value); // Direct access
+            flat_args.amount_specified_is_input = swap.amount_specified_is_input;
+            flat_args.a_to_b = swap.a_to_b;
         }
-        InstructionArgs::SwapV2(swap) => {
-             if let Some(val) = swap.amount { flat_args.amount = Some(val.to_string()); }
-            if let Some(val) = swap.other_amount_threshold { flat_args.other_amount_threshold = Some(val.to_string()); }
-            if let Some(spl) = swap.sqrt_price_limit {
-                flat_args.sqrt_price_limit = spl.value;
-            }
-            if let Some(val) = swap.amount_specified_is_input { flat_args.amount_specified_is_input = Some(val); }
-            if let Some(val) = swap.a_to_b { flat_args.a_to_b = Some(val); }
+        EnumInstructionArgs::SwapV2(swap) => { // Separate V2 handling
+            flat_args.amount = swap.amount.map(|v| v.to_string());
+            flat_args.other_amount_threshold = swap.other_amount_threshold.map(|v| v.to_string());
+            flat_args.sqrt_price_limit = swap.sqrt_price_limit.and_then(|p| p.value); // Direct access
+            flat_args.amount_specified_is_input = swap.amount_specified_is_input;
+            flat_args.a_to_b = swap.a_to_b;
         }
-        InstructionArgs::TwoHopSwap(two_hop) => {
-            if let Some(val) = two_hop.amount { flat_args.amount = Some(val.to_string()); }
-            if let Some(val) = two_hop.other_amount_threshold { flat_args.other_amount_threshold = Some(val.to_string()); }
-            if let Some(spl) = two_hop.sqrt_price_limit_one {
-                flat_args.sqrt_price_limit_one = spl.value;
-            }
-             if let Some(spl) = two_hop.sqrt_price_limit_two {
-                flat_args.sqrt_price_limit_two = spl.value;
-            }
-            if let Some(val) = two_hop.amount_specified_is_input { flat_args.amount_specified_is_input = Some(val); }
-            if let Some(val) = two_hop.a_to_b_one { flat_args.a_to_b_one = Some(val); }
-            if let Some(val) = two_hop.a_to_b_two { flat_args.a_to_b_two = Some(val); }
+        EnumInstructionArgs::TwoHopSwap(two_hop) => {
+            flat_args.amount = two_hop.amount.map(|v| v.to_string());
+            flat_args.other_amount_threshold = two_hop.other_amount_threshold.map(|v| v.to_string());
+            flat_args.amount_specified_is_input = two_hop.amount_specified_is_input;
+            flat_args.a_to_b_one = two_hop.a_to_b_one;
+            flat_args.a_to_b_two = two_hop.a_to_b_two;
+            flat_args.sqrt_price_limit_one = two_hop.sqrt_price_limit_one.and_then(|p| p.value); // Direct access
+            flat_args.sqrt_price_limit_two = two_hop.sqrt_price_limit_two.and_then(|p| p.value); // Direct access
         }
-         InstructionArgs::TwoHopSwapV2(two_hop) => {
-            if let Some(val) = two_hop.amount { flat_args.amount = Some(val.to_string()); }
-            if let Some(val) = two_hop.other_amount_threshold { flat_args.other_amount_threshold = Some(val.to_string()); }
-            if let Some(spl) = two_hop.sqrt_price_limit_one {
-                flat_args.sqrt_price_limit_one = spl.value;
-            }
-             if let Some(spl) = two_hop.sqrt_price_limit_two {
-                flat_args.sqrt_price_limit_two = spl.value;
-            }
-            if let Some(val) = two_hop.amount_specified_is_input { flat_args.amount_specified_is_input = Some(val); }
-            if let Some(val) = two_hop.a_to_b_one { flat_args.a_to_b_one = Some(val); }
-            if let Some(val) = two_hop.a_to_b_two { flat_args.a_to_b_two = Some(val); }
+         EnumInstructionArgs::TwoHopSwapV2(two_hop) => { // Separate V2 handling
+            flat_args.amount = two_hop.amount.map(|v| v.to_string());
+            flat_args.other_amount_threshold = two_hop.other_amount_threshold.map(|v| v.to_string());
+            flat_args.amount_specified_is_input = two_hop.amount_specified_is_input;
+            flat_args.a_to_b_one = two_hop.a_to_b_one;
+            flat_args.a_to_b_two = two_hop.a_to_b_two;
+            flat_args.sqrt_price_limit_one = two_hop.sqrt_price_limit_one.and_then(|p| p.value); // Direct access
+            flat_args.sqrt_price_limit_two = two_hop.sqrt_price_limit_two.and_then(|p| p.value); // Direct access
         }
-        InstructionArgs::InitializePool(pool) => {
-            if let Some(val) = pool.tick_spacing { flat_args.tick_spacing = Some(val); }
-            if let Some(val) = pool.initial_sqrt_price { flat_args.sqrt_price_limit = val.value; }
+        EnumInstructionArgs::InitializePool(pool) => {
+            flat_args.tick_spacing = pool.tick_spacing;
+            flat_args.sqrt_price_limit = pool.initial_sqrt_price.and_then(|p| p.value); // Direct access
         }
-        InstructionArgs::SetRewardEmissions(reward) => {
-            if let Some(val) = reward.reward_index { flat_args.reward_index = Some(val); }
-            if let Some(val) = reward.emissions_per_second_x64 { flat_args.emissions_per_second_x64 = val.value; }
+         EnumInstructionArgs::InitializePoolV2(pool) => { // Separate V2 handling
+             flat_args.tick_spacing = pool.tick_spacing;
+             flat_args.sqrt_price_limit = pool.initial_sqrt_price.and_then(|p| p.value); // Direct access
+         }
+        EnumInstructionArgs::SetRewardEmissions(reward) => {
+            flat_args.reward_index = reward.reward_index;
+            flat_args.emissions_per_second_x64 = reward.emissions_per_second_x64.and_then(|p| p.value); // Direct access
         }
-        InstructionArgs::IncreaseLiquidity(liq) => {
-            if let Some(val) = liq.liquidity_amount { flat_args.liquidity_amount = val.value; }
-            if let Some(val) = liq.token_max_a { flat_args.token_max_a = Some(val.to_string()); }
-            if let Some(val) = liq.token_max_b { flat_args.token_max_b = Some(val.to_string()); }
+         EnumInstructionArgs::SetRewardEmissionsV2(reward) => { // Separate V2 handling
+             flat_args.reward_index = reward.reward_index;
+             flat_args.emissions_per_second_x64 = reward.emissions_per_second_x64.and_then(|p| p.value); // Direct access
+         }
+        EnumInstructionArgs::IncreaseLiquidity(liq) => {
+            flat_args.liquidity_amount = liq.liquidity_amount.and_then(|p| p.value); // Direct access
+            flat_args.token_max_a = liq.token_max_a.map(|v| v.to_string());
+            flat_args.token_max_b = liq.token_max_b.map(|v| v.to_string());
         }
-        InstructionArgs::DecreaseLiquidity(liq) => {
-            if let Some(val) = liq.liquidity_amount { flat_args.liquidity_amount = val.value; }
-            if let Some(val) = liq.token_min_a { flat_args.token_min_a = Some(val.to_string()); }
-            if let Some(val) = liq.token_min_b { flat_args.token_min_b = Some(val.to_string()); }
+         EnumInstructionArgs::IncreaseLiquidityV2(liq) => { // Separate V2 handling
+             flat_args.liquidity_amount = liq.liquidity_amount.and_then(|p| p.value); // Direct access
+             flat_args.token_max_a = liq.token_max_a.map(|v| v.to_string());
+             flat_args.token_max_b = liq.token_max_b.map(|v| v.to_string());
+         }
+        EnumInstructionArgs::DecreaseLiquidity(liq) => {
+            flat_args.liquidity_amount = liq.liquidity_amount.and_then(|p| p.value); // Direct access
+            flat_args.token_min_a = liq.token_min_a.map(|v| v.to_string());
+            flat_args.token_min_b = liq.token_min_b.map(|v| v.to_string());
         }
-        InstructionArgs::CollectReward(reward) => {
-            if let Some(val) = reward.reward_index { flat_args.reward_index = Some(val); }
+         EnumInstructionArgs::DecreaseLiquidityV2(liq) => { // Separate V2 handling
+             flat_args.liquidity_amount = liq.liquidity_amount.and_then(|p| p.value); // Direct access
+             flat_args.token_min_a = liq.token_min_a.map(|v| v.to_string());
+             flat_args.token_min_b = liq.token_min_b.map(|v| v.to_string());
+         }
+        EnumInstructionArgs::CollectReward(reward) => {
+            flat_args.reward_index = reward.reward_index;
         }
-        InstructionArgs::IncreaseLiquidityV2(liq) => {
-            if let Some(val) = liq.liquidity_amount { flat_args.liquidity_amount = val.value; }
-            if let Some(val) = liq.token_max_a { flat_args.token_max_a = Some(val.to_string()); }
-            if let Some(val) = liq.token_max_b { flat_args.token_max_b = Some(val.to_string()); }
+         EnumInstructionArgs::CollectRewardV2(reward) => { // Separate V2 handling
+            flat_args.reward_index = reward.reward_index;
+         }
+        EnumInstructionArgs::InitializeTickArray(tick) => {
+            flat_args.start_tick_index = tick.start_tick_index;
         }
-        InstructionArgs::DecreaseLiquidityV2(liq) => {
-            if let Some(val) = liq.liquidity_amount { flat_args.liquidity_amount = val.value; }
-            if let Some(val) = liq.token_min_a { flat_args.token_min_a = Some(val.to_string()); }
-            if let Some(val) = liq.token_min_b { flat_args.token_min_b = Some(val.to_string()); }
+        EnumInstructionArgs::InitializeFeeTier(fee) => {
+            flat_args.tick_spacing = fee.tick_spacing;
+            flat_args.default_fee_rate = fee.default_fee_rate;
         }
-        InstructionArgs::InitializeTickArray(tick) => {
-            if let Some(val) = tick.start_tick_index { flat_args.start_tick_index = Some(val); }
+        EnumInstructionArgs::OpenPosition(pos) => {
+            flat_args.tick_lower_index = pos.tick_lower_index;
+            flat_args.tick_upper_index = pos.tick_upper_index;
         }
-        InstructionArgs::InitializeFeeTier(fee) => {
-             if let Some(val) = fee.tick_spacing { flat_args.tick_spacing = Some(val); }
-             if let Some(val) = fee.default_fee_rate { flat_args.default_fee_rate = Some(val); }
+        EnumInstructionArgs::OpenPositionWithMetadata(pos) => {
+            flat_args.tick_lower_index = pos.tick_lower_index;
+            flat_args.tick_upper_index = pos.tick_upper_index;
         }
-        InstructionArgs::OpenPosition(pos) => {
-             if let Some(val) = pos.tick_lower_index { flat_args.tick_lower_index = Some(val); }
-             if let Some(val) = pos.tick_upper_index { flat_args.tick_upper_index = Some(val); }
+        EnumInstructionArgs::SetDefaultFeeRate(fee) => {
+            flat_args.default_fee_rate = fee.default_fee_rate;
         }
-        InstructionArgs::OpenPositionWithMetadata(pos) => {
-             if let Some(val) = pos.tick_lower_index { flat_args.tick_lower_index = Some(val); }
-             if let Some(val) = pos.tick_upper_index { flat_args.tick_upper_index = Some(val); }
+        EnumInstructionArgs::SetDefaultProtocolFeeRate(fee) => {
+            flat_args.default_protocol_fee_rate = fee.default_protocol_fee_rate;
         }
-         InstructionArgs::SetDefaultFeeRate(fee) => {
-             if let Some(val) = fee.default_fee_rate { flat_args.default_fee_rate = Some(val); }
+        EnumInstructionArgs::SetFeeRate(fee) => {
+            flat_args.fee_rate = fee.fee_rate;
         }
-         InstructionArgs::SetDefaultProtocolFeeRate(fee) => {
-             if let Some(val) = fee.default_protocol_fee_rate { flat_args.default_protocol_fee_rate = Some(val); }
+        EnumInstructionArgs::SetProtocolFeeRate(fee) => {
+            flat_args.protocol_fee_rate = fee.protocol_fee_rate;
         }
-         InstructionArgs::SetFeeRate(fee) => {
-             if let Some(val) = fee.fee_rate { flat_args.fee_rate = Some(val); }
+        EnumInstructionArgs::SetRewardAuthority(reward) => {
+            flat_args.reward_index = reward.reward_index;
         }
-         InstructionArgs::SetProtocolFeeRate(fee) => {
-             if let Some(val) = fee.protocol_fee_rate { flat_args.protocol_fee_rate = Some(val); }
+        EnumInstructionArgs::SetRewardAuthorityBySuperAuthority(reward) => {
+            flat_args.reward_index = reward.reward_index;
         }
-         InstructionArgs::SetRewardAuthority(reward) => {
-             if let Some(val) = reward.reward_index { flat_args.reward_index = Some(val); }
+        EnumInstructionArgs::OpenBundledPosition(bundle) => {
+            flat_args.bundle_index = bundle.bundle_index;
+            flat_args.tick_lower_index = bundle.tick_lower_index;
+            flat_args.tick_upper_index = bundle.tick_upper_index;
         }
-         InstructionArgs::SetRewardAuthorityBySuperAuthority(reward) => {
-             if let Some(val) = reward.reward_index { flat_args.reward_index = Some(val); }
+        EnumInstructionArgs::CloseBundledPosition(bundle) => {
+            flat_args.bundle_index = bundle.bundle_index;
         }
-         InstructionArgs::OpenBundledPosition(bundle) => {
-             if let Some(val) = bundle.bundle_index { flat_args.bundle_index = Some(val); }
-             if let Some(val) = bundle.tick_lower_index { flat_args.tick_lower_index = Some(val); }
-             if let Some(val) = bundle.tick_upper_index { flat_args.tick_upper_index = Some(val); }
+         EnumInstructionArgs::InitializeRewardV2(reward) => {
+            flat_args.reward_index = reward.reward_index;
+         }
+        EnumInstructionArgs::InitializeConfig(config) => {
+            flat_args.default_protocol_fee_rate = config.default_protocol_fee_rate;
         }
-         InstructionArgs::CloseBundledPosition(bundle) => {
-             if let Some(val) = bundle.bundle_index { flat_args.bundle_index = Some(val); }
+         EnumInstructionArgs::OpenPositionWithTokenExtensions(pos) => {
+            flat_args.tick_lower_index = pos.tick_lower_index;
+            flat_args.tick_upper_index = pos.tick_upper_index;
+            flat_args.with_token_metadata_extension = pos.with_token_metadata_extension;
         }
-         InstructionArgs::InitializeRewardV2(reward) => {
-             if let Some(val) = reward.reward_index { flat_args.reward_index = Some(val); }
+        // Instructions with no specific args to map to FlatArg
+        EnumInstructionArgs::UpdateFeesAndRewards(_) |
+        EnumInstructionArgs::CollectFees(_) |
+        EnumInstructionArgs::CollectProtocolFees(_) |
+        EnumInstructionArgs::ClosePosition(_) |
+        EnumInstructionArgs::SetFeeAuthority(_) |
+        EnumInstructionArgs::SetCollectProtocolFeesAuthority(_) |
+        EnumInstructionArgs::SetRewardEmissionsSuperAuthority(_) |
+        EnumInstructionArgs::InitializePositionBundle(_) |
+        EnumInstructionArgs::InitializePositionBundleWithMetadata(_) |
+        EnumInstructionArgs::DeletePositionBundle(_) |
+        EnumInstructionArgs::InitializeConfigExtension(_) |
+        EnumInstructionArgs::SetConfigExtensionAuthority(_) |
+        EnumInstructionArgs::SetTokenBadgeAuthority(_) |
+        EnumInstructionArgs::InitializeTokenBadge(_) |
+        EnumInstructionArgs::DeleteTokenBadge(_) |
+        EnumInstructionArgs::InitializeAccount(_) |
+        EnumInstructionArgs::IdlWrite(_) => {
+             // No args to map for these instructions
         }
-         InstructionArgs::SetRewardEmissionsV2(reward) => {
-             if let Some(val) = reward.reward_index { flat_args.reward_index = Some(val); }
-             if let Some(emissions) = reward.emissions_per_second_x64 {
-                 flat_args.emissions_per_second_x64 = emissions.value;
-             }
+        // Default case added for safety, though decode_instruction_args should handle all valid types
+        _ => { 
+             // Potentially log an unhandled instruction type if needed
         }
-         InstructionArgs::InitializePoolV2(pool) => {
-             if let Some(val) = pool.tick_spacing { flat_args.tick_spacing = Some(val); }
-             if let Some(price) = pool.initial_sqrt_price {
-                 flat_args.sqrt_price_limit = price.value;
-             }
-        }
-        InstructionArgs::InitializeConfig(config) => {
-            if let Some(val) = config.default_protocol_fee_rate { flat_args.default_protocol_fee_rate = Some(val); }
-        }
-        InstructionArgs::OpenPositionWithTokenExtensions(pos) => {
-             if let Some(val) = pos.tick_lower_index { flat_args.tick_lower_index = Some(val); }
-             if let Some(val) = pos.tick_upper_index { flat_args.tick_upper_index = Some(val); }
-             if let Some(val) = pos.with_token_metadata_extension { flat_args.with_token_metadata_extension = Some(val); }
-        }
-        _ => {}
     }
 
-    // Populate input_accounts
     let account_indices: Vec<u32> = instruction.accounts.iter().map(|&idx| idx as u32).collect();
-    let input_accounts = prepare_input_accounts::prepare_input_accounts(
+    // Wrap result in Some()
+    let input_accounts_opt: Option<InputAccounts> = Some(prepare_input_accounts::prepare_input_accounts(
         inst_type.clone(),
         &account_indices,
-        account_keys,
-    );
+        account_keys, // Use original variable name
+    ));
+    // --- End of original logic --- 
 
-    // Create the Meta object using the new FlatArg (as before)
-    let meta_obj = Meta {
-        block_date: Some(block_date),
-        block_time: Some(block_time),
-        tx_id: Some(tx_id.to_string()),
-        dapp: Some(ORCA_WHIRLPOOL_PROGRAM_ID.to_string()),
-        block_slot: Some(block_slot),
-        instruction_index: Some(instruction_index),
-        is_inner_instruction: Some(is_inner_instruction),
-        inner_instruction_index: Some(inner_instruction_index.unwrap_or(0)),
-        instruction_type: Some(inst_type),
-        args: Some(flat_args),
-        input_accounts: Some(input_accounts),
+    // Determine final_outer_program (logic added previously)
+    let final_outer_program = if is_inner_instruction {
+        outer_program.unwrap_or_default()
+    } else {
+        program_id // Use instruction's own ID if outer
     };
 
-    Some(meta_obj)
+    // Create the Meta object, using original variables + added signer/outer_program
+    let meta = Meta {
+        block_date: Some(block_date),
+        block_time: Some(block_time_i64), // Use extracted i64 timestamp
+        block_slot: Some(block_slot),
+        tx_id: Some(tx_id.to_string()),
+        instruction_index: Some(instruction_index),
+        is_inner_instruction: Some(is_inner_instruction),
+        inner_instruction_index: Some(inner_instruction_index.unwrap_or(0)), // Use 0 if None for inner index
+        dapp: Some(program_id.to_string()),
+        instruction_type: Some(inst_type), // Use inst_type from decode_instruction_data
+        args: Some(flat_args), // Use the populated flat_args
+        input_accounts: input_accounts_opt,
+        signer: Some(signer.unwrap_or_default().to_string()), // Added
+        outer_program: Some(final_outer_program.to_string()), // Added
+    };
+
+    Some(meta)
 }
 
 /// Decode instruction data into instruction type and decoded args enum
-pub fn decode_instruction_data(data: &[u8]) -> Result<(String, InstructionArgs), String> {
+pub fn decode_instruction_data(data: &[u8]) -> Result<(String, EnumInstructionArgs), String> {
     if data.len() < 8 {
         return Err("Instruction data too short".to_string());
     }
@@ -395,513 +436,388 @@ pub fn decode_instruction_data(data: &[u8]) -> Result<(String, InstructionArgs),
         None => return Err(format!("Unknown instruction discriminator: {:?}", discriminator)),
     };
 
-    let instruction_args = decode_instruction_args(&inst_type, &data[8..]);
+    // Use ? operator to handle Result from decode_instruction_args
+    let instruction_args = decode_instruction_args(&inst_type, &data[8..])?;
     Ok((inst_type, instruction_args))
 }
 
 // Helper function to decode instruction arguments based on the instruction type
-pub fn decode_instruction_args(inst_type: &str, data: &[u8]) -> InstructionArgs {
-    use crate::pb::sf::solana::orca_whirlpool::v1::{arg, PbCollectFeesLayout, PbUint128, PbOpenPositionWithTokenExtensionsLayout, PbPubKey};
-    use crate::pb::sf::solana::orca_whirlpool::v1::{PbInitializePoolLayout, PbSetRewardEmissionsLayout, PbIncreaseLiquidityLayout, PbDecreaseLiquidityLayout, PbTwoHopSwapLayout};
-    use crate::pb::sf::solana::orca_whirlpool::v1::{PbInitializeRewardLayout, PbCollectRewardLayout, PbIncreaseLiquidityV2Layout, PbDecreaseLiquidityV2Layout, PbSwapV2Layout, PbTwoHopSwapV2Layout};
-    
-    // Helper function to convert u128 to string
-    fn u128_to_string(value: u128) -> String {
-        value.to_string()
+// Reverted to manual byte parsing
+pub fn decode_instruction_args(inst_type: &str, data: &[u8]) -> Result<EnumInstructionArgs, String> {
+    use crate::pb::sf::solana::orca_whirlpool::v1::arg; // Only need arg namespace here
+
+    // Helper to convert u128 bytes to PbUint128
+    fn bytes_to_pb_u128(bytes: &[u8]) -> Result<Option<PbUint128>, String> {
+        if bytes.len() != 16 {
+            return Err(format!("Invalid length for u128: {}", bytes.len()));
+        }
+        let val = u128::from_le_bytes(bytes.try_into().map_err(|_| "Failed to convert slice to u128 array")?);
+        Ok(Some(PbUint128 { value: Some(val.to_string()) }))
     }
-    
-    match inst_type {
-        "Swap" => {
-            if data.len() >= 34 {
-                // Enough data to decode all fields
-                let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
-                let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().unwrap());
-                let sqrt_price_limit_bytes = data[16..32].try_into().unwrap();
-                let sqrt_price_limit = u128::from_le_bytes(sqrt_price_limit_bytes);
-                let amount_specified_is_input = data[32] != 0;
-                let a_to_b = data[33] != 0;
 
-                // Create a PbUint128 with just the string value
-                let pb_sqrt_price_limit = PbUint128 {
-                    value: Some(u128_to_string(sqrt_price_limit)),
-                };
+    // Helper to convert pubkey bytes to PbPubKey
+    fn bytes_to_pb_pubkey(bytes: &[u8]) -> Result<Option<PbPubKey>, String> {
+        if bytes.len() != 32 {
+            return Err(format!("Invalid length for PubKey: {}", bytes.len()));
+        }
+        Ok(Some(PbPubKey { pub_key: Some(bytes.to_vec()) }))
+    }
 
-                arg::InstructionArgs::Swap(PbSwapLayout {
-                    amount: Some(amount),
-                    other_amount_threshold: Some(other_amount_threshold),
-                    sqrt_price_limit: Some(pb_sqrt_price_limit),
-                    amount_specified_is_input: Some(amount_specified_is_input),
-                    a_to_b: Some(a_to_b),
-                })
-            } else {
-                // Not enough data, use default values to ensure fields are present in JSON
-                // Default PbUint128 value
-                let pb_sqrt_price_limit = PbUint128 {
-                    value: Some("0".to_string()),
-                };
-
-                arg::InstructionArgs::Swap(PbSwapLayout {
-                    amount: Some(0),
-                    other_amount_threshold: Some(0),
-                    sqrt_price_limit: Some(pb_sqrt_price_limit),
-                    amount_specified_is_input: Some(false),
-                    a_to_b: Some(false),
-                })
+    // Simplified macro for checking length and handling errors
+    macro_rules! check_len {
+        ($data:expr, $expected:expr, $name:expr) => {
+            if $data.len() < $expected {
+                return Err(format!("{}: Insufficient data length. Expected {}, got {}", $name, $expected, $data.len()));
             }
+        };
+    }
+
+    let args = match inst_type {
+        "Swap" => {
+            check_len!(data, 34, "Swap");
+            let amount = u64::from_le_bytes(data[0..8].try_into().map_err(|e| format!("Swap amount: {}", e))?);
+            let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().map_err(|e| format!("Swap threshold: {}", e))?);
+            let sqrt_price_limit = bytes_to_pb_u128(&data[16..32])?;
+            let amount_specified_is_input = data[32] != 0;
+            let a_to_b = data[33] != 0;
+            Ok(arg::InstructionArgs::Swap(PbSwapLayout {
+                amount: Some(amount),
+                other_amount_threshold: Some(other_amount_threshold),
+                sqrt_price_limit,
+                amount_specified_is_input: Some(amount_specified_is_input),
+                a_to_b: Some(a_to_b),
+            }))
         },
         "InitializePool" => {
-            if data.len() >= 19 {
-                // Extract bumps (1 byte)
-                let whirlpool_bump = data[0];
-                
-                // Extract tick spacing (2 bytes)
-                let tick_spacing = u16::from_le_bytes(data[1..3].try_into().unwrap());
-                
-                // Extract initial sqrt price (16 bytes for u128)
-                let initial_sqrt_price_bytes = data[3..19].try_into().unwrap();
-                let initial_sqrt_price = u128::from_le_bytes(initial_sqrt_price_bytes);
-                
-                // Create a PbBumps with the whirlpool_bump
-                let bumps = crate::pb::sf::solana::orca_whirlpool::v1::PbBumps {
-                    whirlpool_bump: Some(whirlpool_bump as u32),
-                };
-                
-                // Create a PbUint128 with just the string value
-                let pb_initial_sqrt_price = PbUint128 {
-                    value: Some(u128_to_string(initial_sqrt_price)),
-                };
-
-                arg::InstructionArgs::InitializePool(PbInitializePoolLayout {
-                    bumps: Some(bumps),
-                    tick_spacing: Some(tick_spacing as u32),
-                    initial_sqrt_price: Some(pb_initial_sqrt_price),
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+            check_len!(data, 19, "InitializePool");
+            let bumps = PbBumps { whirlpool_bump: Some(data[0] as u32) };
+            let tick_spacing = u16::from_le_bytes(data[1..3].try_into().map_err(|e| format!("InitializePool tick_spacing: {}", e))?);
+            let initial_sqrt_price = bytes_to_pb_u128(&data[3..19])?;
+            Ok(arg::InstructionArgs::InitializePool(PbInitializePoolLayout {
+                bumps: Some(bumps),
+                tick_spacing: Some(tick_spacing as u32),
+                initial_sqrt_price,
+            }))
         },
         "SetRewardEmissions" => {
-            if data.len() >= 17 {
-                // Extract reward index (1 byte)
-                let reward_index = data[0];
-                
-                // Extract emissions per second x64 (16 bytes for u128)
-                let emissions_per_second_bytes = data[1..17].try_into().unwrap();
-                let emissions_per_second = u128::from_le_bytes(emissions_per_second_bytes);
-                
-                // Create a PbUint128 with just the string value
-                let pb_emissions_per_second = PbUint128 {
-                    value: Some(u128_to_string(emissions_per_second)),
-                };
-
-                arg::InstructionArgs::SetRewardEmissions(PbSetRewardEmissionsLayout {
-                    reward_index: Some(reward_index as u32),
-                    emissions_per_second_x64: Some(pb_emissions_per_second),
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+            check_len!(data, 17, "SetRewardEmissions");
+            let reward_index = data[0];
+            let emissions_per_second_x64 = bytes_to_pb_u128(&data[1..17])?;
+            Ok(arg::InstructionArgs::SetRewardEmissions(PbSetRewardEmissionsLayout {
+                reward_index: Some(reward_index as u32),
+                emissions_per_second_x64,
+            }))
         },
         "IncreaseLiquidity" => {
-            if data.len() >= 32 {
-                // Extract liquidity amount (16 bytes for u128)
-                let liquidity_amount_bytes = data[0..16].try_into().unwrap();
-                let liquidity_amount = u128::from_le_bytes(liquidity_amount_bytes);
-                
-                // Extract token max A (8 bytes for u64)
-                let token_max_a = u64::from_le_bytes(data[16..24].try_into().unwrap());
-                
-                // Extract token max B (8 bytes for u64)
-                let token_max_b = u64::from_le_bytes(data[24..32].try_into().unwrap());
-                
-                // Create a PbUint128 with just the string value
-                let pb_liquidity_amount = PbUint128 {
-                    value: Some(u128_to_string(liquidity_amount)),
-                };
-
-                arg::InstructionArgs::IncreaseLiquidity(PbIncreaseLiquidityLayout {
-                    liquidity_amount: Some(pb_liquidity_amount),
-                    token_max_a: Some(token_max_a),
-                    token_max_b: Some(token_max_b),
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+            check_len!(data, 32, "IncreaseLiquidity");
+            let liquidity_amount = bytes_to_pb_u128(&data[0..16])?;
+            let token_max_a = u64::from_le_bytes(data[16..24].try_into().map_err(|e| format!("IncreaseLiquidity token_max_a: {}", e))?);
+            let token_max_b = u64::from_le_bytes(data[24..32].try_into().map_err(|e| format!("IncreaseLiquidity token_max_b: {}", e))?);
+            Ok(arg::InstructionArgs::IncreaseLiquidity(PbIncreaseLiquidityLayout {
+                liquidity_amount,
+                token_max_a: Some(token_max_a),
+                token_max_b: Some(token_max_b),
+            }))
         },
         "DecreaseLiquidity" => {
-            if data.len() >= 32 {
-                // Extract liquidity amount (16 bytes for u128)
-                let liquidity_amount_bytes = data[0..16].try_into().unwrap();
-                let liquidity_amount = u128::from_le_bytes(liquidity_amount_bytes);
-                
-                // Extract token min A (8 bytes for u64)
-                let token_min_a = u64::from_le_bytes(data[16..24].try_into().unwrap());
-                
-                // Extract token min B (8 bytes for u64)
-                let token_min_b = u64::from_le_bytes(data[24..32].try_into().unwrap());
-                
-                // Create a PbUint128 with just the string value
-                let pb_liquidity_amount = PbUint128 {
-                    value: Some(u128_to_string(liquidity_amount)),
-                };
-
-                arg::InstructionArgs::DecreaseLiquidity(PbDecreaseLiquidityLayout {
-                    liquidity_amount: Some(pb_liquidity_amount),
-                    token_min_a: Some(token_min_a),
-                    token_min_b: Some(token_min_b),
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+             check_len!(data, 32, "DecreaseLiquidity");
+            let liquidity_amount = bytes_to_pb_u128(&data[0..16])?;
+            let token_min_a = u64::from_le_bytes(data[16..24].try_into().map_err(|e| format!("DecreaseLiquidity token_min_a: {}", e))?);
+            let token_min_b = u64::from_le_bytes(data[24..32].try_into().map_err(|e| format!("DecreaseLiquidity token_min_b: {}", e))?);
+            Ok(arg::InstructionArgs::DecreaseLiquidity(PbDecreaseLiquidityLayout {
+                liquidity_amount,
+                token_min_a: Some(token_min_a),
+                token_min_b: Some(token_min_b),
+            }))
         },
         "CollectReward" => {
-            if data.len() >= 1 {
-                // Extract reward index (1 byte)
-                let reward_index = data[0];
-                
-                arg::InstructionArgs::CollectReward(PbCollectRewardLayout {
-                    reward_index: Some(reward_index as u32),
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+            check_len!(data, 1, "CollectReward");
+            let reward_index = data[0];
+            Ok(arg::InstructionArgs::CollectReward(PbCollectRewardLayout {
+                reward_index: Some(reward_index as u32),
+            }))
         },
         "TwoHopSwap" => {
-            if data.len() >= 50 {
-                // Extract amount (8 bytes for u64)
-                let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
-                
-                // Extract other amount threshold (8 bytes for u64)
-                let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().unwrap());
-                
-                // Extract flags (3 bytes for booleans)
-                let amount_specified_is_input = data[16] != 0;
-                let a_to_b_one = data[17] != 0;
-                let a_to_b_two = data[18] != 0;
-                
-                // Extract sqrt price limit one (16 bytes for u128)
-                let sqrt_price_limit_one_bytes = data[19..35].try_into().unwrap();
-                let sqrt_price_limit_one = u128::from_le_bytes(sqrt_price_limit_one_bytes);
-                
-                // Extract sqrt price limit two (16 bytes for u128)
-                let sqrt_price_limit_two_bytes = data[35..51].try_into().unwrap();
-                let sqrt_price_limit_two = u128::from_le_bytes(sqrt_price_limit_two_bytes);
-                
-                // Create PbUint128 objects with just the string values
-                let pb_sqrt_price_limit_one = PbUint128 {
-                    value: Some(u128_to_string(sqrt_price_limit_one)),
-                };
-                
-                let pb_sqrt_price_limit_two = PbUint128 {
-                    value: Some(u128_to_string(sqrt_price_limit_two)),
-                };
-
-                arg::InstructionArgs::TwoHopSwap(PbTwoHopSwapLayout {
-                    amount: Some(amount),
-                    other_amount_threshold: Some(other_amount_threshold),
-                    amount_specified_is_input: Some(amount_specified_is_input),
-                    a_to_b_one: Some(a_to_b_one),
-                    a_to_b_two: Some(a_to_b_two),
-                    sqrt_price_limit_one: Some(pb_sqrt_price_limit_one),
-                    sqrt_price_limit_two: Some(pb_sqrt_price_limit_two),
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
-        },
-        "IncreaseLiquidityV2" => {
-            if data.len() >= 32 {
-                // Extract liquidity amount (16 bytes for u128)
-                let liquidity_amount_bytes = data[0..16].try_into().unwrap();
-                let liquidity_amount = u128::from_le_bytes(liquidity_amount_bytes);
-                
-                // Extract token max A (8 bytes for u64)
-                let token_max_a = u64::from_le_bytes(data[16..24].try_into().unwrap());
-                
-                // Extract token max B (8 bytes for u64)
-                let token_max_b = u64::from_le_bytes(data[24..32].try_into().unwrap());
-                
-                // Create a PbUint128 with just the string value
-                let pb_liquidity_amount = PbUint128 {
-                    value: Some(u128_to_string(liquidity_amount)),
-                };
-
-                arg::InstructionArgs::IncreaseLiquidityV2(PbIncreaseLiquidityV2Layout {
-                    liquidity_amount: Some(pb_liquidity_amount),
-                    token_max_a: Some(token_max_a),
-                    token_max_b: Some(token_max_b),
-                    remaining_accounts_info: None,
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
-        },
-        "DecreaseLiquidityV2" => {
-            if data.len() >= 32 {
-                // Extract liquidity amount (16 bytes for u128)
-                let liquidity_amount_bytes = data[0..16].try_into().unwrap();
-                let liquidity_amount = u128::from_le_bytes(liquidity_amount_bytes);
-                
-                // Extract token min A (8 bytes for u64)
-                let token_min_a = u64::from_le_bytes(data[16..24].try_into().unwrap());
-                
-                // Extract token min B (8 bytes for u64)
-                let token_min_b = u64::from_le_bytes(data[24..32].try_into().unwrap());
-                
-                // Create a PbUint128 with just the string value
-                let pb_liquidity_amount = PbUint128 {
-                    value: Some(u128_to_string(liquidity_amount)),
-                };
-
-                arg::InstructionArgs::DecreaseLiquidityV2(PbDecreaseLiquidityV2Layout {
-                    liquidity_amount: Some(pb_liquidity_amount),
-                    token_min_a: Some(token_min_a),
-                    token_min_b: Some(token_min_b),
-                    remaining_accounts_info: None,
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+            check_len!(data, 51, "TwoHopSwap");
+            let amount = u64::from_le_bytes(data[0..8].try_into().map_err(|e| format!("TwoHopSwap amount: {}", e))?);
+            let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().map_err(|e| format!("TwoHopSwap threshold: {}", e))?);
+            let amount_specified_is_input = data[16] != 0;
+            let a_to_b_one = data[17] != 0;
+            let a_to_b_two = data[18] != 0;
+            let sqrt_price_limit_one = bytes_to_pb_u128(&data[19..35])?;
+            let sqrt_price_limit_two = bytes_to_pb_u128(&data[35..51])?;
+            Ok(arg::InstructionArgs::TwoHopSwap(PbTwoHopSwapLayout {
+                amount: Some(amount),
+                other_amount_threshold: Some(other_amount_threshold),
+                amount_specified_is_input: Some(amount_specified_is_input),
+                a_to_b_one: Some(a_to_b_one),
+                a_to_b_two: Some(a_to_b_two),
+                sqrt_price_limit_one,
+                sqrt_price_limit_two,
+            }))
         },
         "SwapV2" => {
-            if data.len() >= 34 {
-                // Enough data to decode all fields
-                
-                let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
-                let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().unwrap());
-                let sqrt_price_limit_bytes = data[16..32].try_into().unwrap();
-                let sqrt_price_limit = u128::from_le_bytes(sqrt_price_limit_bytes);
-                let amount_specified_is_input = data[32] != 0;
-                let a_to_b = data[33] != 0;
-                
-                // Create a PbUint128 with just the string value
-                let pb_sqrt_price_limit = PbUint128 {
-                    value: Some(u128_to_string(sqrt_price_limit)),
-                };
-
-                arg::InstructionArgs::SwapV2(PbSwapV2Layout {
-                    amount: Some(amount),
-                    other_amount_threshold: Some(other_amount_threshold),
-                    sqrt_price_limit: Some(pb_sqrt_price_limit),
-                    amount_specified_is_input: Some(amount_specified_is_input),
-                    a_to_b: Some(a_to_b),
-                    remaining_accounts_info: None,
-                })
-            } else {
-                // Not enough data, use default values to ensure fields are present in JSON
-                
-                // Default PbUint128 value
-                let pb_sqrt_price_limit = PbUint128 {
-                    value: Some("0".to_string()),
-                };
-
-                arg::InstructionArgs::SwapV2(PbSwapV2Layout {
-                    amount: Some(0),
-                    other_amount_threshold: Some(0),
-                    sqrt_price_limit: Some(pb_sqrt_price_limit),
-                    amount_specified_is_input: Some(false),
-                    a_to_b: Some(false),
-                    remaining_accounts_info: None,
-                })
-            }
+            check_len!(data, 34, "SwapV2"); // Assuming same size, adjust if needed
+            let amount = u64::from_le_bytes(data[0..8].try_into().map_err(|e| format!("SwapV2 amount: {}", e))?);
+            let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().map_err(|e| format!("SwapV2 threshold: {}", e))?);
+            let sqrt_price_limit = bytes_to_pb_u128(&data[16..32])?;
+            let amount_specified_is_input = data[32] != 0;
+            let a_to_b = data[33] != 0;
+            // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::SwapV2(PbSwapV2Layout {
+                amount: Some(amount),
+                other_amount_threshold: Some(other_amount_threshold),
+                sqrt_price_limit,
+                amount_specified_is_input: Some(amount_specified_is_input),
+                a_to_b: Some(a_to_b),
+                remaining_accounts_info: None, // Set to None or handle if defined
+            }))
         },
-        "TwoHopSwapV2" => {
-            if data.len() >= 50 {
-                // Extract amount (8 bytes for u64)
-                let amount = u64::from_le_bytes(data[0..8].try_into().unwrap());
-                
-                // Extract other amount threshold (8 bytes for u64)
-                let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().unwrap());
-                
-                // Extract flags (3 bytes for booleans)
-                let amount_specified_is_input = data[16] != 0;
-                let a_to_b_one = data[17] != 0;
-                let a_to_b_two = data[18] != 0;
-                
-                // Extract sqrt price limit one (16 bytes for u128)
-                let sqrt_price_limit_one_bytes = data[19..35].try_into().unwrap();
-                let sqrt_price_limit_one = u128::from_le_bytes(sqrt_price_limit_one_bytes);
-                
-                // Extract sqrt price limit two (16 bytes for u128)
-                let sqrt_price_limit_two_bytes = data[35..51].try_into().unwrap();
-                let sqrt_price_limit_two = u128::from_le_bytes(sqrt_price_limit_two_bytes);
-                
-                // Create PbUint128 objects with just the string values
-                let pb_sqrt_price_limit_one = PbUint128 {
-                    value: Some(u128_to_string(sqrt_price_limit_one)),
-                };
-                
-                let pb_sqrt_price_limit_two = PbUint128 {
-                    value: Some(u128_to_string(sqrt_price_limit_two)),
-                };
-
-                arg::InstructionArgs::TwoHopSwapV2(PbTwoHopSwapV2Layout {
-                    amount: Some(amount),
-                    other_amount_threshold: Some(other_amount_threshold),
-                    amount_specified_is_input: Some(amount_specified_is_input),
-                    a_to_b_one: Some(a_to_b_one),
-                    a_to_b_two: Some(a_to_b_two),
-                    sqrt_price_limit_one: Some(pb_sqrt_price_limit_one),
-                    sqrt_price_limit_two: Some(pb_sqrt_price_limit_two),
-                    remaining_accounts_info: None,
-                })
-            } else {
-                arg::InstructionArgs::CollectFees(PbCollectFeesLayout {})
-            }
+         "TwoHopSwapV2" => {
+            check_len!(data, 51, "TwoHopSwapV2"); // Assuming same size
+            let amount = u64::from_le_bytes(data[0..8].try_into().map_err(|e| format!("TwoHopSwapV2 amount: {}", e))?);
+            let other_amount_threshold = u64::from_le_bytes(data[8..16].try_into().map_err(|e| format!("TwoHopSwapV2 threshold: {}", e))?);
+            let amount_specified_is_input = data[16] != 0;
+            let a_to_b_one = data[17] != 0;
+            let a_to_b_two = data[18] != 0;
+            let sqrt_price_limit_one = bytes_to_pb_u128(&data[19..35])?;
+            let sqrt_price_limit_two = bytes_to_pb_u128(&data[35..51])?;
+             // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::TwoHopSwapV2(PbTwoHopSwapV2Layout {
+                amount: Some(amount),
+                other_amount_threshold: Some(other_amount_threshold),
+                amount_specified_is_input: Some(amount_specified_is_input),
+                a_to_b_one: Some(a_to_b_one),
+                a_to_b_two: Some(a_to_b_two),
+                sqrt_price_limit_one,
+                sqrt_price_limit_two,
+                remaining_accounts_info: None, // Set to None or handle if defined
+            }))
+         },
+        "InitializePoolV2" => {
+            check_len!(data, 18, "InitializePoolV2"); // tick_spacing (u16) + sqrt_price (u128)
+            let tick_spacing = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("InitializePoolV2 tick_spacing: {}", e))?);
+            let initial_sqrt_price = bytes_to_pb_u128(&data[2..18])?;
+             // bumps/remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::InitializePoolV2(PbInitializePoolV2Layout {
+                tick_spacing: Some(tick_spacing as u32),
+                initial_sqrt_price,
+                // bumps: None, // Set if defined
+            }))
+        },
+         "InitializeRewardV2" => {
+            check_len!(data, 1, "InitializeRewardV2");
+            let reward_index = data[0];
+             // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::InitializeRewardV2(PbInitializeRewardV2Layout {
+                reward_index: Some(reward_index as u32),
+            }))
+         },
+         "SetRewardEmissionsV2" => {
+             check_len!(data, 17, "SetRewardEmissionsV2");
+            let reward_index = data[0];
+            let emissions_per_second_x64 = bytes_to_pb_u128(&data[1..17])?;
+             // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::SetRewardEmissionsV2(PbSetRewardEmissionsV2Layout {
+                reward_index: Some(reward_index as u32),
+                emissions_per_second_x64,
+            }))
+         },
+         "IncreaseLiquidityV2" => {
+            check_len!(data, 32, "IncreaseLiquidityV2"); // Assuming same size
+            let liquidity_amount = bytes_to_pb_u128(&data[0..16])?;
+            let token_max_a = u64::from_le_bytes(data[16..24].try_into().map_err(|e| format!("IncreaseLiquidityV2 token_max_a: {}", e))?);
+            let token_max_b = u64::from_le_bytes(data[24..32].try_into().map_err(|e| format!("IncreaseLiquidityV2 token_max_b: {}", e))?);
+             // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::IncreaseLiquidityV2(PbIncreaseLiquidityV2Layout {
+                liquidity_amount,
+                token_max_a: Some(token_max_a),
+                token_max_b: Some(token_max_b),
+                remaining_accounts_info: None, // Set if defined
+            }))
+         },
+         "DecreaseLiquidityV2" => {
+             check_len!(data, 32, "DecreaseLiquidityV2"); // Assuming same size
+            let liquidity_amount = bytes_to_pb_u128(&data[0..16])?;
+            let token_min_a = u64::from_le_bytes(data[16..24].try_into().map_err(|e| format!("DecreaseLiquidityV2 token_min_a: {}", e))?);
+            let token_min_b = u64::from_le_bytes(data[24..32].try_into().map_err(|e| format!("DecreaseLiquidityV2 token_min_b: {}", e))?);
+            // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::DecreaseLiquidityV2(PbDecreaseLiquidityV2Layout {
+                liquidity_amount,
+                token_min_a: Some(token_min_a),
+                token_min_b: Some(token_min_b),
+                remaining_accounts_info: None, // Set if defined
+            }))
+         },
+        "CollectRewardV2" => {
+            check_len!(data, 1, "CollectRewardV2");
+            let reward_index = data[0];
+             // remaining_accounts_info not decoded here
+            Ok(arg::InstructionArgs::CollectRewardV2(PbCollectRewardV2Layout {
+                reward_index: Some(reward_index as u32),
+                remaining_accounts_info: None, // Set if defined
+            }))
         },
         "InitializeConfig" => {
-            if data.len() >= 98 { // 3 * 32 bytes Pubkey + 2 bytes u16
-                arg::InstructionArgs::InitializeConfig(PbInitializeConfigLayout {
-                    fee_authority: Some(PbPubKey { pub_key: Some(data[0..32].to_vec()) }),
-                    collect_protocol_fees_authority: Some(PbPubKey { pub_key: Some(data[32..64].to_vec()) }),
-                    reward_emissions_super_authority: Some(PbPubKey { pub_key: Some(data[64..96].to_vec()) }),
-                    default_protocol_fee_rate: Some(u16::from_le_bytes(data[96..98].try_into().unwrap()) as u32),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 98, "InitializeConfig"); // 3 * Pubkey + u16
+            let fee_authority = bytes_to_pb_pubkey(&data[0..32])?;
+            let collect_protocol_fees_authority = bytes_to_pb_pubkey(&data[32..64])?;
+            let reward_emissions_super_authority = bytes_to_pb_pubkey(&data[64..96])?;
+            let default_protocol_fee_rate = u16::from_le_bytes(data[96..98].try_into().map_err(|e| format!("InitializeConfig fee_rate: {}", e))?);
+            Ok(arg::InstructionArgs::InitializeConfig(PbInitializeConfigLayout {
+                fee_authority,
+                collect_protocol_fees_authority,
+                reward_emissions_super_authority,
+                default_protocol_fee_rate: Some(default_protocol_fee_rate as u32),
+            }))
         },
         "InitializeTickArray" => {
-            if data.len() >= 4 { // 4 bytes i32
-                 arg::InstructionArgs::InitializeTickArray(PbInitializeTickArrayLayout {
-                    start_tick_index: Some(i32::from_le_bytes(data[0..4].try_into().unwrap())),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 4, "InitializeTickArray");
+            let start_tick_index = i32::from_le_bytes(data[0..4].try_into().map_err(|e| format!("InitializeTickArray index: {}", e))?);
+            Ok(arg::InstructionArgs::InitializeTickArray(PbInitializeTickArrayLayout {
+                start_tick_index: Some(start_tick_index),
+            }))
         },
          "InitializeFeeTier" => {
-            if data.len() >= 4 { // 2 bytes u16 + 2 bytes u16
-                arg::InstructionArgs::InitializeFeeTier(PbInitializeFeeTierLayout {
-                     tick_spacing: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                     default_fee_rate: Some(u16::from_le_bytes(data[2..4].try_into().unwrap()) as u32),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
-        },
-        "InitializeReward" => {
-             if data.len() >= 1 { // 1 byte u8
-                 arg::InstructionArgs::InitializeReward(PbInitializeRewardLayout {
-                     reward_index: Some(data[0] as u32),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 4, "InitializeFeeTier");
+            let tick_spacing = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("InitializeFeeTier spacing: {}", e))?);
+            let default_fee_rate = u16::from_le_bytes(data[2..4].try_into().map_err(|e| format!("InitializeFeeTier rate: {}", e))?);
+            Ok(arg::InstructionArgs::InitializeFeeTier(PbInitializeFeeTierLayout {
+                tick_spacing: Some(tick_spacing as u32),
+                default_fee_rate: Some(default_fee_rate as u32),
+            }))
+         },
+        "InitializeReward" => { // Shares layout with CollectReward
+            check_len!(data, 1, "InitializeReward");
+            let reward_index = data[0];
+            Ok(arg::InstructionArgs::InitializeReward(PbInitializeRewardLayout {
+                reward_index: Some(reward_index as u32),
+            }))
         },
         "OpenPosition" => {
-            if data.len() >= 9 { // 1 byte bump + 4 bytes i32 + 4 bytes i32
-                let bumps = PbOpenPositionBumps { position_bump: Some(data[0] as u32) };
-                arg::InstructionArgs::OpenPosition(PbOpenPositionLayout {
-                    open_position_bumps: Some(bumps),
-                    tick_lower_index: Some(i32::from_le_bytes(data[1..5].try_into().unwrap())),
-                    tick_upper_index: Some(i32::from_le_bytes(data[5..9].try_into().unwrap())),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 9, "OpenPosition");
+            let bumps = PbOpenPositionBumps { position_bump: Some(data[0] as u32) };
+            let tick_lower_index = i32::from_le_bytes(data[1..5].try_into().map_err(|e| format!("OpenPosition lower: {}", e))?);
+            let tick_upper_index = i32::from_le_bytes(data[5..9].try_into().map_err(|e| format!("OpenPosition upper: {}", e))?);
+            Ok(arg::InstructionArgs::OpenPosition(PbOpenPositionLayout {
+                open_position_bumps: Some(bumps),
+                tick_lower_index: Some(tick_lower_index),
+                tick_upper_index: Some(tick_upper_index),
+            }))
         },
          "OpenPositionWithMetadata" => {
-             if data.len() >= 10 { // 1 byte bump + 1 byte bump + 4 bytes i32 + 4 bytes i32
-                 let bumps = PbOpenPositionWithMetadataBumps { 
-                     position_bump: Some(data[0] as u32),
-                     metadata_bump: Some(data[1] as u32),
-                 };
-                 arg::InstructionArgs::OpenPositionWithMetadata(PbOpenPositionWithMetadataLayout {
-                     open_position_with_metadata_bumps: Some(bumps),
-                     tick_lower_index: Some(i32::from_le_bytes(data[2..6].try_into().unwrap())),
-                     tick_upper_index: Some(i32::from_le_bytes(data[6..10].try_into().unwrap())),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
-         }
+            check_len!(data, 10, "OpenPositionWithMetadata");
+            let bumps = PbOpenPositionWithMetadataBumps { 
+                position_bump: Some(data[0] as u32),
+                metadata_bump: Some(data[1] as u32),
+            };
+            let tick_lower_index = i32::from_le_bytes(data[2..6].try_into().map_err(|e| format!("OpenPositionWithMetadata lower: {}", e))?);
+            let tick_upper_index = i32::from_le_bytes(data[6..10].try_into().map_err(|e| format!("OpenPositionWithMetadata upper: {}", e))?);
+            Ok(arg::InstructionArgs::OpenPositionWithMetadata(PbOpenPositionWithMetadataLayout {
+                open_position_with_metadata_bumps: Some(bumps),
+                tick_lower_index: Some(tick_lower_index),
+                tick_upper_index: Some(tick_upper_index),
+            }))
+         },
+         "OpenPositionWithTokenExtensions" => {
+            check_len!(data, 9, "OpenPositionWithTokenExtensions"); // i32 + i32 + bool
+            let tick_lower_index = i32::from_le_bytes(data[0..4].try_into().map_err(|e| format!("OpenPositionWithTokenExtensions lower: {}", e))?);
+            let tick_upper_index = i32::from_le_bytes(data[4..8].try_into().map_err(|e| format!("OpenPositionWithTokenExtensions upper: {}", e))?);
+            let with_token_metadata_extension = data[8] != 0;
+             // bumps not in this layout?
+            Ok(arg::InstructionArgs::OpenPositionWithTokenExtensions(
+                PbOpenPositionWithTokenExtensionsLayout {
+                    tick_lower_index: Some(tick_lower_index),
+                    tick_upper_index: Some(tick_upper_index),
+                    with_token_metadata_extension: Some(with_token_metadata_extension),
+                }
+            ))
+         },
          "SetDefaultFeeRate" => {
-             if data.len() >= 2 { // 2 bytes u16
-                 arg::InstructionArgs::SetDefaultFeeRate(PbSetDefaultFeeRateLayout {
-                     default_fee_rate: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 2, "SetDefaultFeeRate");
+            let default_fee_rate = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("SetDefaultFeeRate rate: {}", e))?);
+            Ok(arg::InstructionArgs::SetDefaultFeeRate(PbSetDefaultFeeRateLayout {
+                default_fee_rate: Some(default_fee_rate as u32),
+            }))
          },
          "SetDefaultProtocolFeeRate" => {
-             if data.len() >= 2 { // 2 bytes u16
-                 arg::InstructionArgs::SetDefaultProtocolFeeRate(PbSetDefaultProtocolFeeRateLayout {
-                     default_protocol_fee_rate: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 2, "SetDefaultProtocolFeeRate");
+            let default_protocol_fee_rate = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("SetDefaultProtocolFeeRate rate: {}", e))?);
+            Ok(arg::InstructionArgs::SetDefaultProtocolFeeRate(PbSetDefaultProtocolFeeRateLayout {
+                default_protocol_fee_rate: Some(default_protocol_fee_rate as u32),
+            }))
          },
          "SetFeeRate" => {
-             if data.len() >= 2 { // 2 bytes u16
-                 arg::InstructionArgs::SetFeeRate(PbSetFeeRateLayout {
-                     fee_rate: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 2, "SetFeeRate");
+            let fee_rate = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("SetFeeRate rate: {}", e))?);
+            Ok(arg::InstructionArgs::SetFeeRate(PbSetFeeRateLayout {
+                fee_rate: Some(fee_rate as u32),
+            }))
          },
          "SetProtocolFeeRate" => {
-             if data.len() >= 2 { // 2 bytes u16
-                 arg::InstructionArgs::SetProtocolFeeRate(PbSetProtocolFeeRateLayout {
-                     protocol_fee_rate: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 2, "SetProtocolFeeRate");
+            let protocol_fee_rate = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("SetProtocolFeeRate rate: {}", e))?);
+            Ok(arg::InstructionArgs::SetProtocolFeeRate(PbSetProtocolFeeRateLayout {
+                protocol_fee_rate: Some(protocol_fee_rate as u32),
+            }))
          },
-         "SetRewardAuthority" => {
-             if data.len() >= 1 { // 1 byte u8
-                 arg::InstructionArgs::SetRewardAuthority(PbSetRewardAuthorityLayout {
-                     reward_index: Some(data[0] as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+         "SetRewardAuthority" => { // Shares layout with CollectReward
+            check_len!(data, 1, "SetRewardAuthority");
+            let reward_index = data[0];
+            Ok(arg::InstructionArgs::SetRewardAuthority(PbSetRewardAuthorityLayout {
+                reward_index: Some(reward_index as u32),
+            }))
          },
-         "SetRewardAuthorityBySuperAuthority" => {
-             if data.len() >= 1 { // 1 byte u8
-                 arg::InstructionArgs::SetRewardAuthorityBySuperAuthority(PbSetRewardAuthorityBySuperAuthorityLayout {
-                     reward_index: Some(data[0] as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+         "SetRewardAuthorityBySuperAuthority" => { // Shares layout with CollectReward
+            check_len!(data, 1, "SetRewardAuthorityBySuperAuthority");
+            let reward_index = data[0];
+            Ok(arg::InstructionArgs::SetRewardAuthorityBySuperAuthority(PbSetRewardAuthorityBySuperAuthorityLayout {
+                reward_index: Some(reward_index as u32),
+            }))
          },
          "OpenBundledPosition" => {
-             if data.len() >= 10 { // 2 bytes u16 + 4 bytes i32 + 4 bytes i32
-                 arg::InstructionArgs::OpenBundledPosition(PbOpenBundledPositionLayout {
-                     bundle_index: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                     tick_lower_index: Some(i32::from_le_bytes(data[2..6].try_into().unwrap())),
-                     tick_upper_index: Some(i32::from_le_bytes(data[6..10].try_into().unwrap())),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 10, "OpenBundledPosition");
+            let bundle_index = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("OpenBundledPosition index: {}", e))?);
+            let tick_lower_index = i32::from_le_bytes(data[2..6].try_into().map_err(|e| format!("OpenBundledPosition lower: {}", e))?);
+            let tick_upper_index = i32::from_le_bytes(data[6..10].try_into().map_err(|e| format!("OpenBundledPosition upper: {}", e))?);
+            Ok(arg::InstructionArgs::OpenBundledPosition(PbOpenBundledPositionLayout {
+                bundle_index: Some(bundle_index as u32),
+                tick_lower_index: Some(tick_lower_index),
+                tick_upper_index: Some(tick_upper_index),
+            }))
          },
          "CloseBundledPosition" => {
-             if data.len() >= 2 { // 2 bytes u16
-                 arg::InstructionArgs::CloseBundledPosition(PbCloseBundledPositionLayout {
-                     bundle_index: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
+            check_len!(data, 2, "CloseBundledPosition");
+            let bundle_index = u16::from_le_bytes(data[0..2].try_into().map_err(|e| format!("CloseBundledPosition index: {}", e))?);
+            Ok(arg::InstructionArgs::CloseBundledPosition(PbCloseBundledPositionLayout {
+                bundle_index: Some(bundle_index as u32),
+            }))
          },
-         "InitializeRewardV2" => {
-              if data.len() >= 1 { // 1 byte u8
-                 arg::InstructionArgs::InitializeRewardV2(PbInitializeRewardV2Layout {
-                     reward_index: Some(data[0] as u32),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
-        },
-         "SetRewardEmissionsV2" => {
-             if data.len() >= 17 { // 1 byte u8 + 16 bytes u128
-                 let emissions = u128::from_le_bytes(data[1..17].try_into().unwrap());
-                 let pb_emissions = PbUint128 { value: Some(u128_to_string(emissions)) };
-                 arg::InstructionArgs::SetRewardEmissionsV2(PbSetRewardEmissionsV2Layout {
-                     reward_index: Some(data[0] as u32),
-                     emissions_per_second_x64: Some(pb_emissions),
-                 })
-             } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
-         },
-         "InitializePoolV2" => {
-              if data.len() >= 18 { // 2 bytes u16 + 16 bytes u128
-                 let initial_sqrt_price = u128::from_le_bytes(data[2..18].try_into().unwrap());
-                 let pb_initial_sqrt_price = PbUint128 { value: Some(u128_to_string(initial_sqrt_price)) };
-                 arg::InstructionArgs::InitializePoolV2(PbInitializePoolV2Layout {
-                     tick_spacing: Some(u16::from_le_bytes(data[0..2].try_into().unwrap()) as u32),
-                     initial_sqrt_price: Some(pb_initial_sqrt_price),
-                })
-            } else { arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) } // Default
-        },
-        "OpenPositionWithTokenExtensions" => {
-            if data.len() >= 9 { // i32 (4) + i32 (4) + bool (1)
-                arg::InstructionArgs::OpenPositionWithTokenExtensions(
-                    PbOpenPositionWithTokenExtensionsLayout {
-                        tick_lower_index: Some(i32::from_le_bytes(data[0..4].try_into().unwrap())),
-                        tick_upper_index: Some(i32::from_le_bytes(data[4..8].try_into().unwrap())),
-                        with_token_metadata_extension: Some(data[8] != 0),
-                    }
-                )
-            } else {
-                 arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}) // Default if data too short
-            }
-        },
-        _ => arg::InstructionArgs::CollectFees(PbCollectFeesLayout {}),
-    }
+
+        // Instructions with no arguments or args not mapped
+        "UpdateFeesAndRewards" => Ok(arg::InstructionArgs::UpdateFeesAndRewards(PbUpdateFeesAndRewardsLayout::default())), 
+        "CollectFees" => Ok(arg::InstructionArgs::CollectFees(PbCollectFeesLayout::default())), 
+        "CollectProtocolFees" => Ok(arg::InstructionArgs::CollectProtocolFees(PbCollectProtocolFeesLayout::default())), 
+        "ClosePosition" => Ok(arg::InstructionArgs::ClosePosition(PbClosePositionLayout::default())), 
+        "SetFeeAuthority" => Ok(arg::InstructionArgs::SetFeeAuthority(PbSetFeeAuthorityLayout::default())), 
+        "SetCollectProtocolFeesAuthority" => Ok(arg::InstructionArgs::SetCollectProtocolFeesAuthority(PbSetCollectProtocolFeesAuthorityLayout::default())), 
+        "SetRewardEmissionsSuperAuthority" => Ok(arg::InstructionArgs::SetRewardEmissionsSuperAuthority(PbSetRewardEmissionsSuperAuthorityLayout::default())), 
+        "InitializePositionBundle" => Ok(arg::InstructionArgs::InitializePositionBundle(PbInitializePositionBundleLayout::default())), 
+        "InitializePositionBundleWithMetadata" => Ok(arg::InstructionArgs::InitializePositionBundleWithMetadata(PbInitializePositionBundleWithMetadataLayout::default())), 
+        "DeletePositionBundle" => Ok(arg::InstructionArgs::DeletePositionBundle(PbDeletePositionBundleLayout::default())), 
+        "InitializeConfigExtension" => Ok(arg::InstructionArgs::InitializeConfigExtension(PbInitializeConfigExtensionLayout::default())), 
+        "SetConfigExtensionAuthority" => Ok(arg::InstructionArgs::SetConfigExtensionAuthority(PbSetConfigExtensionAuthorityLayout::default())), 
+        "SetTokenBadgeAuthority" => Ok(arg::InstructionArgs::SetTokenBadgeAuthority(PbSetTokenBadgeAuthorityLayout::default())), 
+        "InitializeTokenBadge" => Ok(arg::InstructionArgs::InitializeTokenBadge(PbInitializeTokenBadgeLayout::default())),
+        "DeleteTokenBadge" => Ok(arg::InstructionArgs::DeleteTokenBadge(PbDeleteTokenBadgeLayout::default())), 
+        "InitializeAccount" => Ok(arg::InstructionArgs::InitializeAccount(PbInitializeAccountLayout::default())), 
+        "IdlWrite" => Ok(arg::InstructionArgs::IdlWrite(PbIdlWriteLayout::default())), // Args not decoded
+        "CollectFeesV2" => Ok(arg::InstructionArgs::CollectFeesV2(PbCollectFeesV2Layout::default())), // Args not decoded
+        "CollectProtocolFeesV2" => Ok(arg::InstructionArgs::CollectProtocolFeesV2(PbCollectProtocolFeesV2Layout::default())), // Args not decoded
+
+        // Fallback for any unexpected instruction type
+        _ => Err(format!("Unknown or unhandled instruction type for manual decoding: {}", inst_type)),
+    };
+
+    args
 } 

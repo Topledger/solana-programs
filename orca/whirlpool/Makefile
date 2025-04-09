@@ -6,7 +6,7 @@ build:
 
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 323931275 -t +1000
+	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 323931308 -t +1 > whirlpool_instructions.jsonl
 
 .PHONY: protogen
 protogen:
