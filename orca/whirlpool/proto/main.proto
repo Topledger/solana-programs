@@ -1,0 +1,527 @@
+syntax = "proto2";
+
+package sf.solana.orca_whirlpool.v1; // Choose an appropriate package name
+
+// Reusable Helper Messages
+
+message PbPubKey {
+  // Solana public key (32 bytes)
+  optional bytes pub_key = 1;
+}
+
+message PbBumps {
+  optional uint32 whirlpool_bump = 1;
+}
+
+message PbOpenPositionBumps {
+  optional uint32 position_bump = 1;
+}
+
+message PbOpenPositionWithMetadataBumps {
+  optional uint32 position_bump = 1;
+  optional uint32 metadata_bump = 2;
+}
+
+enum PbAccountsType {
+    TRANSFER_HOOK_A = 0;
+    TRANSFER_HOOK_B = 1;
+    TRANSFER_HOOK_REWARD = 2;
+    TRANSFER_HOOK_INPUT = 3;
+    TRANSFER_HOOK_INTERMEDIATE = 4;
+    TRANSFER_HOOK_OUTPUT = 5;
+    SUPPLEMENTAL_TICK_ARRAYS = 6;
+    SUPPLEMENTAL_TICK_ARRAYS_ONE = 7;
+    SUPPLEMENTAL_TICK_ARRAYS_TWO = 8;
+}
+
+message PbRemainingAccountsSlice {
+    optional PbAccountsType accounts_type = 1;
+    optional uint32 length = 2; // Corresponds to Int8ul
+}
+
+message PbRemainingAccountsInfo {
+    // Represents Vector.get(RemainingAccountsSliceLayout)
+    repeated PbRemainingAccountsSlice slices = 1;
+}
+
+// --- Instruction Argument Messages ---
+
+message PbInitializeConfigLayout {
+  optional PbPubKey fee_authority = 1;
+  optional PbPubKey collect_protocol_fees_authority = 2;
+  optional PbPubKey reward_emissions_super_authority = 3;
+  optional uint32 default_protocol_fee_rate = 4; // Int16ul
+}
+
+message PbInitializePoolLayout {
+  optional PbBumps bumps = 1;
+  optional uint32 tick_spacing = 2; // Int16ul
+  // Use the new PbUint128 type for initial_sqrt_price
+  optional PbUint128 initial_sqrt_price = 3;
+}
+
+message PbInitializeTickArrayLayout {
+  optional int32 start_tick_index = 1; // Int32sl
+}
+
+message PbInitializeFeeTierLayout {
+  optional uint32 tick_spacing = 1; // Int16ul
+  optional uint32 default_fee_rate = 2; // Int16ul
+}
+
+message PbInitializeRewardLayout {
+  optional uint32 reward_index = 1; // Int8ul
+}
+
+message PbSetRewardEmissionsLayout {
+  optional uint32 reward_index = 1; // Int8ul
+  // Use the new PbUint128 type for emissions_per_second_x64
+  optional PbUint128 emissions_per_second_x64 = 2;
+}
+
+message PbOpenPositionLayout {
+  optional PbOpenPositionBumps open_position_bumps = 1;
+  optional int32 tick_lower_index = 2; // Int32sl
+  optional int32 tick_upper_index = 3; // Int32sl
+}
+
+message PbOpenPositionWithMetadataLayout {
+  optional PbOpenPositionWithMetadataBumps open_position_with_metadata_bumps = 1;
+  optional int32 tick_lower_index = 2; // Int32sl
+  optional int32 tick_upper_index = 3; // Int32sl
+}
+
+message PbIncreaseLiquidityLayout {
+  // Use the new PbUint128 type for liquidity_amount
+  optional PbUint128 liquidity_amount = 1;
+  optional uint64 token_max_a = 2; // Int64ul
+  optional uint64 token_max_b = 3; // Int64ul
+}
+
+message PbDecreaseLiquidityLayout {
+  // Use the new PbUint128 type for liquidity_amount
+  optional PbUint128 liquidity_amount = 1;
+  optional uint64 token_min_a = 2; // Int64ul
+  optional uint64 token_min_b = 3; // Int64ul
+}
+
+// Empty message for instructions with no args
+message PbUpdateFeesAndRewardsLayout {}
+message PbCollectFeesLayout {}
+message PbCollectProtocolFeesLayout {}
+message PbClosePositionLayout {}
+message PbSetFeeAuthorityLayout {}
+message PbSetCollectProtocolFeesAuthorityLayout {}
+message PbSetRewardEmissionsSuperAuthorityLayout {}
+message PbInitializePositionBundleLayout {}
+message PbInitializePositionBundleWithMetadataLayout {}
+message PbDeletePositionBundleLayout {}
+message PbInitializeConfigExtensionLayout {}
+message PbSetConfigExtensionAuthorityLayout {}
+message PbSetTokenBadgeAuthorityLayout {}
+message PbInitializeTokenBadgeLayout {}
+message PbDeleteTokenBadgeLayout {}
+message PbOpenPositionWithTokenExtensionsLayout {
+  optional int32 tick_lower_index = 1; // Int32sl
+  optional int32 tick_upper_index = 2; // Int32sl
+  optional bool with_token_metadata_extension = 3; // Flag
+}
+
+message PbCollectRewardLayout {
+  optional uint32 reward_index = 1; // Int8ul
+}
+
+// Modify the PbUint128 message to be just a string
+message PbUint128 {
+  // String representation of the u128 value
+  optional string value = 1;
+}
+
+message PbSwapLayout {
+  optional uint64 amount = 1; // Int64ul
+  optional uint64 other_amount_threshold = 2; // Int64ul
+  // Use the new PbUint128 type instead of raw bytes
+  optional PbUint128 sqrt_price_limit = 3;
+  optional bool amount_specified_is_input = 4; // Flag
+  optional bool a_to_b = 5; // Flag
+}
+
+message PbSetDefaultFeeRateLayout {
+  optional uint32 default_fee_rate = 1; // Int16ul
+}
+
+message PbSetDefaultProtocolFeeRateLayout {
+  optional uint32 default_protocol_fee_rate = 1; // Int16ul
+}
+
+message PbSetFeeRateLayout {
+  optional uint32 fee_rate = 1; // Int16ul
+}
+
+message PbSetProtocolFeeRateLayout {
+  optional uint32 protocol_fee_rate = 1; // Int16ul
+}
+
+message PbSetRewardAuthorityLayout {
+  optional uint32 reward_index = 1; // Int8ul
+}
+
+message PbSetRewardAuthorityBySuperAuthorityLayout {
+  optional uint32 reward_index = 1; // Int8ul
+}
+
+message PbTwoHopSwapLayout {
+  optional uint64 amount = 1; // Int64ul
+  optional uint64 other_amount_threshold = 2; // Int64ul
+  optional bool amount_specified_is_input = 3; // Flag
+  optional bool a_to_b_one = 4; // Flag
+  optional bool a_to_b_two = 5; // Flag
+  // Use the new PbUint128 type for sqrt_price_limit_one
+  optional PbUint128 sqrt_price_limit_one = 6;
+  // Use the new PbUint128 type for sqrt_price_limit_two
+  optional PbUint128 sqrt_price_limit_two = 7;
+}
+
+message PbOpenBundledPositionLayout {
+  optional uint32 bundle_index = 1; // Int16ul
+  optional int32 tick_lower_index = 2; // Int32sl
+  optional int32 tick_upper_index = 3; // Int32sl
+}
+
+message PbCloseBundledPositionLayout {
+  optional uint32 bundle_index = 1; // Int16ul
+}
+
+// V2 Instructions
+
+message PbCollectFeesV2Layout {
+  // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+  optional PbRemainingAccountsInfo remaining_accounts_info = 1;
+}
+
+message PbCollectProtocolFeesV2Layout {
+  // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+  optional PbRemainingAccountsInfo remaining_accounts_info = 1;
+}
+
+message PbCollectRewardV2Layout {
+  optional uint32 reward_index = 1; // Int8ul
+  // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+  optional PbRemainingAccountsInfo remaining_accounts_info = 2;
+}
+
+message PbDecreaseLiquidityV2Layout {
+  // Use the new PbUint128 type for liquidity_amount
+  optional PbUint128 liquidity_amount = 1;
+  optional uint64 token_min_a = 2; // Int64ul
+  optional uint64 token_min_b = 3; // Int64ul
+  // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+  optional PbRemainingAccountsInfo remaining_accounts_info = 4;
+}
+
+message PbIncreaseLiquidityV2Layout {
+  // Use the new PbUint128 type for liquidity_amount
+  optional PbUint128 liquidity_amount = 1;
+  optional uint64 token_max_a = 2;
+  optional uint64 token_max_b = 3;
+  // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+  optional PbRemainingAccountsInfo remaining_accounts_info = 4;
+}
+
+message PbInitializePoolV2Layout {
+  optional uint32 tick_spacing = 1; // Int16ul
+  // Use the new PbUint128 type for initial_sqrt_price
+  optional PbUint128 initial_sqrt_price = 2;
+}
+
+message PbInitializeRewardV2Layout {
+  optional uint32 reward_index = 1; // Int8ul
+}
+
+message PbSetRewardEmissionsV2Layout {
+  optional uint32 reward_index = 1; // Int8ul
+  // Use the new PbUint128 type for emissions_per_second_x64
+  optional PbUint128 emissions_per_second_x64 = 2;
+}
+
+message PbSwapV2Layout {
+  optional uint64 amount = 1; // Int64ul
+  optional uint64 other_amount_threshold = 2; // Int64ul
+  // Use the new PbUint128 type instead of raw bytes
+  optional PbUint128 sqrt_price_limit = 3;
+  optional bool amount_specified_is_input = 4; // Flag
+  optional bool a_to_b = 5; // Flag
+  // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+  optional PbRemainingAccountsInfo remaining_accounts_info = 6;
+}
+
+message PbTwoHopSwapV2Layout {
+    optional uint64 amount = 1; // Int64ul
+    optional uint64 other_amount_threshold = 2; // Int64ul
+    optional bool amount_specified_is_input = 3; // Flag
+    optional bool a_to_b_one = 4; // Flag
+    optional bool a_to_b_two = 5; // Flag
+    // Use the new PbUint128 type for sqrt_price_limit_one
+    optional PbUint128 sqrt_price_limit_one = 6;
+    // Use the new PbUint128 type for sqrt_price_limit_two
+    optional PbUint128 sqrt_price_limit_two = 7;
+    // Represents AvailableOptional.get(RemainingAccountsInfoLayout)
+    optional PbRemainingAccountsInfo remaining_accounts_info = 8;
+}
+
+// --- Flattened Arg Message ---
+message FlatArg {
+  // optional string instruction_type = 1; // Field removed
+  optional string amount = 2;
+  optional string other_amount_threshold = 3;
+  optional bool amount_specified_is_input = 4;
+  // Swap specific
+  optional string sqrt_price_limit = 5; // Flattened PbUint128
+  optional bool a_to_b = 6;
+  // TwoHop specific
+  optional bool a_to_b_one = 7;
+  optional bool a_to_b_two = 8;
+  optional string sqrt_price_limit_one = 9; // Flattened PbUint128
+  optional string sqrt_price_limit_two = 10; // Flattened PbUint128
+  // Liquidity specific
+  optional string liquidity_amount = 11; // Flattened PbUint128
+  optional string token_max_a = 12; // Use string for u64
+  optional string token_max_b = 13; // Use string for u64
+  optional string token_min_a = 14; // Use string for u64
+  optional string token_min_b = 15; // Use string for u64
+  // Reward specific
+  optional uint32 reward_index = 16;
+  optional string emissions_per_second_x64 = 17; // Flattened PbUint128
+  // Tick related
+  optional int32 tick_lower_index = 18;
+  optional int32 tick_upper_index = 19;
+  optional int32 start_tick_index = 20;
+  // Fee related
+  optional uint32 default_fee_rate = 21;
+  optional uint32 default_protocol_fee_rate = 22;
+  optional uint32 fee_rate = 23;
+  optional uint32 protocol_fee_rate = 24;
+  // Bundle related
+  optional uint32 bundle_index = 25;
+  // Config related
+  // Note: Bump/Authority fields usually not needed in flattened args
+  optional bool with_token_metadata_extension = 26;
+  optional uint32 tick_spacing = 27; // Added missing field
+}
+
+// --- Aggregated Arg Message ---
+message Arg {
+  // String representation of the instruction type (e.g., "InitializeConfig")
+  required string instruction_type = 1;
+
+  oneof instruction_args {
+    PbInitializeConfigLayout initialize_config = 2;
+    PbInitializePoolLayout initialize_pool = 3;
+    PbInitializeTickArrayLayout initialize_tick_array = 4;
+    PbInitializeFeeTierLayout initialize_fee_tier = 5;
+    PbInitializeRewardLayout initialize_reward = 6;
+    PbSetRewardEmissionsLayout set_reward_emissions = 7;
+    PbOpenPositionLayout open_position = 8;
+    PbOpenPositionWithMetadataLayout open_position_with_metadata = 9;
+    PbIncreaseLiquidityLayout increase_liquidity = 10;
+    PbDecreaseLiquidityLayout decrease_liquidity = 11;
+    PbUpdateFeesAndRewardsLayout update_fees_and_rewards = 12;
+    PbCollectFeesLayout collect_fees = 13;
+    PbCollectRewardLayout collect_reward = 14;
+    PbCollectProtocolFeesLayout collect_protocol_fees = 15;
+    PbSwapLayout swap = 16;
+    PbClosePositionLayout close_position = 17;
+    PbSetDefaultFeeRateLayout set_default_fee_rate = 18;
+    PbSetDefaultProtocolFeeRateLayout set_default_protocol_fee_rate = 19;
+    PbSetFeeRateLayout set_fee_rate = 20;
+    PbSetProtocolFeeRateLayout set_protocol_fee_rate = 21;
+    PbSetFeeAuthorityLayout set_fee_authority = 22;
+    PbSetCollectProtocolFeesAuthorityLayout set_collect_protocol_fees_authority = 23;
+    PbSetRewardAuthorityLayout set_reward_authority = 24;
+    PbSetRewardAuthorityBySuperAuthorityLayout set_reward_authority_by_super_authority = 25;
+    PbSetRewardEmissionsSuperAuthorityLayout set_reward_emissions_super_authority = 26;
+    PbTwoHopSwapLayout two_hop_swap = 27;
+    PbInitializePositionBundleLayout initialize_position_bundle = 28;
+    PbInitializePositionBundleWithMetadataLayout initialize_position_bundle_with_metadata = 29;
+    PbDeletePositionBundleLayout delete_position_bundle = 30;
+    PbOpenBundledPositionLayout open_bundled_position = 31;
+    PbCloseBundledPositionLayout close_bundled_position = 32;
+    PbCollectFeesV2Layout collect_fees_v2 = 33;
+    PbCollectProtocolFeesV2Layout collect_protocol_fees_v2 = 34;
+    PbCollectRewardV2Layout collect_reward_v2 = 35;
+    PbDecreaseLiquidityV2Layout decrease_liquidity_v2 = 36;
+    PbIncreaseLiquidityV2Layout increase_liquidity_v2 = 37;
+    PbInitializePoolV2Layout initialize_pool_v2 = 38;
+    PbInitializeRewardV2Layout initialize_reward_v2 = 39;
+    PbSetRewardEmissionsV2Layout set_reward_emissions_v2 = 40;
+    PbSwapV2Layout swap_v2 = 41;
+    PbTwoHopSwapV2Layout two_hop_swap_v2 = 42;
+    PbInitializeConfigExtensionLayout initialize_config_extension = 43;
+    PbSetConfigExtensionAuthorityLayout set_config_extension_authority = 44;
+    PbSetTokenBadgeAuthorityLayout set_token_badge_authority = 45;
+    PbInitializeTokenBadgeLayout initialize_token_badge = 46;
+    PbDeleteTokenBadgeLayout delete_token_badge = 47;
+    PbOpenPositionWithTokenExtensionsLayout open_position_with_token_extensions = 48;
+    PbInitializeAccountLayout initialize_account = 49;
+    PbIdlWriteLayout idl_write = 50;
+    // Add other instruction args here as needed...
+  }
+}
+
+// --- Input Accounts Message ---
+
+// Contains the accounts involved in the instruction, identified by their role.
+// All fields are optional as not all instructions use all accounts.
+// Based on the keys found in `instructionTypeAccounts` in the Python code.
+message InputAccounts {
+    // Common accounts
+    optional string funder = 1;
+    optional string owner = 2;
+    optional string system_program = 3;
+    optional string token_program = 4;
+    optional string rent = 5;
+    optional string associated_token_program = 6;
+    optional string position_authority = 7;
+    optional string position = 8;
+    optional string position_mint = 9;
+    optional string position_token_account = 10;
+    optional string whirlpool = 11;
+    optional string token_owner_account_a = 12;
+    optional string token_owner_account_b = 13;
+    optional string token_vault_a = 14;
+    optional string token_vault_b = 15;
+    optional string tick_array_lower = 16;
+    optional string tick_array_upper = 17;
+    optional string receiver = 18;
+    optional string token_authority = 19;
+    optional string oracle = 20; // And oracleOne, oracleTwo for TwoHopSwap
+
+    // Config related
+    optional string config = 21; // Renamed from whirlpools_config for brevity
+    optional string fee_authority = 22;
+    optional string collect_protocol_fees_authority = 23;
+    optional string new_collect_protocol_fees_authority = 24;
+    optional string new_fee_authority = 25;
+
+    // Fee Tier related
+    optional string fee_tier = 26;
+
+    // Reward related
+    optional string reward_authority = 27;
+    optional string reward_mint = 28;
+    optional string reward_vault = 29;
+    optional string new_reward_authority = 30;
+    optional string reward_emissions_super_authority = 31;
+    optional string new_reward_emissions_super_authority = 32;
+    optional string reward_owner_account = 33; // From CollectReward
+
+    // Pool specific
+    optional string token_mint_a = 34;
+    optional string token_mint_b = 35;
+    optional string token_destination_a = 36; // From CollectProtocolFees
+    optional string token_destination_b = 37; // From CollectProtocolFees
+
+    // Tick Array specific
+    optional string tick_array = 38; // From InitializeTickArray
+    optional string tick_array_0 = 39; // From Swap
+    optional string tick_array_1 = 40; // From Swap
+    optional string tick_array_2 = 41; // From Swap
+
+    // OpenPositionWithMetadata specific
+    optional string position_metadata_account = 42;
+    optional string metadata_program = 43;
+    optional string metadata_update_auth = 44;
+
+    // Two Hop Swap specific
+    optional string whirlpool_one = 45;
+    optional string whirlpool_two = 46;
+    optional string token_owner_account_one_a = 47;
+    optional string token_vault_one_a = 48;
+    optional string token_owner_account_one_b = 49;
+    optional string token_vault_one_b = 50;
+    optional string token_owner_account_two_a = 51;
+    optional string token_vault_two_a = 52;
+    optional string token_owner_account_two_b = 53;
+    optional string token_vault_two_b = 54;
+    optional string tick_array_one_0 = 55;
+    optional string tick_array_one_1 = 56;
+    optional string tick_array_one_2 = 57;
+    optional string tick_array_two_0 = 58;
+    optional string tick_array_two_1 = 59;
+    optional string tick_array_two_2 = 60;
+    optional string oracle_one = 61;
+    optional string oracle_two = 62;
+
+    // Position Bundle related
+    optional string position_bundle = 63;
+    optional string position_bundle_mint = 64;
+    optional string position_bundle_token_account = 65;
+    optional string position_bundle_owner = 66;
+    optional string position_bundle_metadata = 67;
+    optional string bundled_position = 68; // From Open/Close BundledPosition
+    optional string position_bundle_authority = 69; // From Open/Close BundledPosition
+
+    // V2 specific accounts
+    optional string token_program_a = 70;
+    optional string token_program_b = 71;
+    optional string memo_program = 72;
+    optional string reward_token_program = 73;
+    optional string token_badge_a = 74;
+    optional string token_badge_b = 75;
+    optional string reward_token_badge = 76;
+    optional string token_mint_input = 77; // TwoHopSwapV2
+    optional string token_mint_intermediate = 78; // TwoHopSwapV2
+    optional string token_mint_output = 79; // TwoHopSwapV2
+    optional string token_program_input = 80; // TwoHopSwapV2
+    optional string token_program_intermediate = 81; // TwoHopSwapV2
+    optional string token_program_output = 82; // TwoHopSwapV2
+    optional string token_owner_account_input = 83; // TwoHopSwapV2
+    optional string token_vault_one_input = 84; // TwoHopSwapV2
+    optional string token_vault_one_intermediate = 85; // TwoHopSwapV2
+    optional string token_vault_two_intermediate = 86; // TwoHopSwapV2
+    optional string token_vault_two_output = 87; // TwoHopSwapV2
+    optional string token_owner_account_output = 88; // TwoHopSwapV2
+
+    // Config Extension related
+    optional string config_extension = 89; // Renamed from whirlpools_config_extension
+    optional string config_extension_authority = 90;
+    optional string new_config_extension_authority = 91;
+
+    // Token Badge related
+    optional string token_badge_authority = 92;
+    optional string new_token_badge_authority = 93;
+    optional string token_mint = 94; // Used in Initialize/Delete TokenBadge
+    optional string token_badge = 95;
+}
+
+
+// --- Top Level Messages ---
+
+message Meta {
+  optional string block_date = 1; // YYYY-MM-DD
+  optional int64 block_time = 2; // Unix timestamp (seconds)
+  optional string tx_id = 3;
+  optional string dapp = 4;
+  optional uint64 block_slot = 5;
+  optional uint32 instruction_index = 6;
+  optional bool is_inner_instruction = 7;
+  optional uint32 inner_instruction_index = 8;
+  optional string instruction_type = 9;
+  optional FlatArg args = 10;
+  optional InputAccounts input_accounts = 11;
+  // Add signer and outer_program, matching AMM structure (using snake_case)
+  optional string signer = 12;
+  optional string outer_program = 13;
+}
+
+message Output {
+  repeated Meta data = 1;
+}
+
+// Add dummy fields to potentially problematic empty messages
+message PbInitializeAccountLayout {
+  optional bool _dummy = 1; 
+}
+message PbIdlWriteLayout {
+  optional bool _dummy = 1;
+}

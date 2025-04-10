@@ -1,0 +1,40 @@
+syntax = "proto2";
+
+package sf.solana.dex.trades.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required int64 tx_index = 5;
+  required string signer = 6;
+  required string pool_address = 7;
+  required string base_mint = 8;
+  required string quote_mint = 9;
+  required string base_vault = 10;
+  required string quote_vault = 11;
+  required double base_amount = 12;
+  required double quote_amount = 13;
+  required bool is_inner_instruction = 14;
+  required uint32 instruction_index = 15;
+  required string instruction_type = 16;
+  required uint32 inner_instruxtion_index = 17;
+  required string outer_program = 18;
+  required string inner_program = 19;
+  required uint64 txn_fee_lamports = 20;
+  required int64 signer_lamports_change = 21;
+  required string trader = 22;
+  repeated string outer_executing_accounts = 23;
+  required int64 trader_lamports_change = 24;
+  repeated TraderTokenBalanceChange trader_token_balance_changes = 25;
+}
+
+message TraderTokenBalanceChange {
+  required string mint = 1;
+  required double amount = 2;
+}

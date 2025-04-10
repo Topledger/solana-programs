@@ -7,6 +7,8 @@ use crate::{
 
 const Deposit: u8 = 3;
 const Withdraw: u8 = 4;
+const Initialize: u8 = 0;
+const Initialize2: u8 = 1;
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -31,12 +33,10 @@ pub fn parse_trade_instruction(
             td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(6).unwrap().to_string();
             td.account_b = input_accounts.get(7).unwrap().to_string();
-            td.account_c = "".to_string();
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
             td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
-            td.mint_c = get_mint_address_for(&td.account_c, post_token_balances, accounts);
 
             td.token_a_amount = get_token_transfer(
                 &td.account_a,
@@ -47,13 +47,6 @@ pub fn parse_trade_instruction(
             );
             td.token_b_amount = get_token_transfer(
                 &td.account_b,
-                inner_idx,
-                inner_instructions,
-                accounts,
-                "destination".to_string(),
-            );
-            td.token_c_amount = get_token_transfer(
-                &td.account_c,
                 inner_idx,
                 inner_instructions,
                 accounts,
@@ -67,12 +60,10 @@ pub fn parse_trade_instruction(
             td.pool = input_accounts.get(1).unwrap().to_string();
             td.account_a = input_accounts.get(6).unwrap().to_string();
             td.account_b = input_accounts.get(7).unwrap().to_string();
-            td.account_c = "".to_string();
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
             td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
-            td.mint_c = get_mint_address_for(&td.account_c, post_token_balances, accounts);
 
             td.token_a_amount = get_token_transfer(
                 &td.account_a,
@@ -88,15 +79,68 @@ pub fn parse_trade_instruction(
                 accounts,
                 "source".to_string(),
             );
-            td.token_c_amount = get_token_transfer(
-                &td.account_c,
+
+            result = Some(td);
+        }
+        Initialize => {
+            td.instruction_type = "Initialize".to_string();
+            td.pool = input_accounts.get(4).unwrap().to_string();
+            td.account_a = input_accounts.get(10).unwrap().to_string();
+            td.account_b = input_accounts.get(11).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
                 inner_idx,
                 inner_instructions,
                 accounts,
-                "source".to_string(),
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
             );
 
             result = Some(td);
+        }
+        Initialize2 => {
+            td.instruction_type = "Initialize2".to_string();
+            td.pool = input_accounts.get(4).unwrap_or(&"".to_string()).to_string();
+            td.account_a = input_accounts
+                .get(10)
+                .unwrap_or(&"".to_string())
+                .to_string();
+
+            if input_accounts.get(11).is_some() {
+                td.account_b = input_accounts.get(11).unwrap().to_string();
+                td.lp_wallet = signer.to_string();
+
+                td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+                td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+                td.token_a_amount = get_token_transfer(
+                    &td.account_a,
+                    inner_idx,
+                    inner_instructions,
+                    accounts,
+                    "destination".to_string(),
+                );
+                td.token_b_amount = get_token_transfer(
+                    &td.account_b,
+                    inner_idx,
+                    inner_instructions,
+                    accounts,
+                    "destination".to_string(),
+                );
+
+                result = Some(td);
+            }
         }
         _ => {}
     }

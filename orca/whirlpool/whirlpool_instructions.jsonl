@@ -1,0 +1,87 @@
+TraceID: e07add6658de4dd5670304bbb5b175fa
+{
+  "@module": "map_block",
+  "@block": 323931308,
+  "@type": "sf.solana.orca_whirlpool.v1.Output",
+  "@data": {
+    "data": [
+      {
+        "blockDate": "2025-03-01",
+        "blockTime": "1740856306",
+        "txId": "5YEt5izLvXiQqEiErEUTWYrYB7T5gcDeoztfMAp3qzYDKxzgEGPAHwRmSQf3riyZU9epCbS9AYPSTymNaLMKveWS",
+        "dapp": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
+        "blockSlot": "323931308",
+        "instructionIndex": 7,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 13,
+        "instructionType": "SwapV2",
+        "args": {
+          "amount": "54232032",
+          "otherAmountThreshold": "0",
+          "amountSpecifiedIsInput": true,
+          "sqrtPriceLimit": "79226673515401279992447579055",
+          "aToB": false
+        },
+        "inputAccounts": {
+          "whirlpool": "DtYKbQELgMZ3ihFUrCcCs9gy4djcUuhwgR7UpxVpP2Tg",
+          "tokenOwnerAccountA": "DjVZB4gqWizHmBsw9M4PkaspMjj9hi74wjDShsVNZr43",
+          "tokenOwnerAccountB": "AykumAyUwDtjonx7xdn9QCVg9eQJDcm8ZDJgvLFpdomW",
+          "tokenVaultA": "3AfqjdDWMof5p2gEH4MRPZQyhDC36spx8GJk5LZJQRnP",
+          "tokenVaultB": "CdRr1RX5uFdJes33NiFiiG5TZNd6gvXWts9u9xjiCVRq",
+          "tokenAuthority": "BL338RFLMz5dZiGu4QRJcVkDnZ7eqqxLNHHQar37FoMf",
+          "oracle": "2JRaPy3wAHeFyJNGoPMTokR75QsZL2MnkJjrUjLHVe5r",
+          "tokenMintA": "So11111111111111111111111111111111111111112",
+          "tokenMintB": "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
+          "tickArray0": "EorYyVEFscCiJToWpxsjjsQr4YWcP67WDj1FGmjuU3Sv",
+          "tickArray1": "2aeQHGQifavGiBQHU3EAwj37vysbehLAWuxA6SKRyWJG",
+          "tickArray2": "6DpLPtDKNzbvRJDwkq4ai6JmfcX6BvPpCTD5D8jb2oEb",
+          "tokenProgramA": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenProgramB": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "memoProgram": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        },
+        "signer": "BL338RFLMz5dZiGu4QRJcVkDnZ7eqqxLNHHQar37FoMf",
+        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+      },
+      {
+        "blockDate": "2025-03-01",
+        "blockTime": "1740856306",
+        "txId": "4n6E1FJjcyVsaMFT5dW9z3TTMk5PPKR9w19SyqUwGxtBbAF5vfVbDiXntUrzArQMhr4mFW2op7xXTEQ7pZe6iqgX",
+        "dapp": "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
+        "blockSlot": "323931308",
+        "instructionIndex": 3,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 0,
+        "instructionType": "SwapV2",
+        "args": {
+          "amount": "397048",
+          "otherAmountThreshold": "0",
+          "amountSpecifiedIsInput": true,
+          "sqrtPriceLimit": "79226673515401279992447579055",
+          "aToB": false
+        },
+        "inputAccounts": {
+          "whirlpool": "B5EwJVDuAauzUEEdwvbuXzbFFgEYnUqqS37TUM1c4PQA",
+          "tokenOwnerAccountA": "HNyoU49gFeXFAtvoJMrqpuu9AK9Sfxgu9rGqfb8Ahx7J",
+          "tokenOwnerAccountB": "8Q77saT34dtsUkLSSFFVd5yvqQ1ttiA3Cai9o7Hc7RH8",
+          "tokenVaultA": "5qk7fzUy9SYi2oHBDHXvmPuLNaxCvkjMck1g1c1dq9NK",
+          "tokenVaultB": "5xXtGXq5JHB3grdgTGQ4yt7YmJBqBxdffhnkZ8vc6xLB",
+          "tokenAuthority": "HE416cTViaQbX3WJke9sB3yXQh5FdzQS8zwj4AC5ywFf",
+          "oracle": "DNmsPHniKz1x1GGwy3DLrfRZQEkPvmZS7GbaGPkn5j5K",
+          "tokenMintA": "So11111111111111111111111111111111111111112",
+          "tokenMintB": "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",
+          "tickArray0": "7L6oT4BzgnAvkULa2KMeuXqL6Cw8CpbN1fsprDfPVHWE",
+          "tickArray1": "FycB3C3NJxvFA58f2NKTDfRGgeAZLAVtWRJB1uqgQwvw",
+          "tickArray2": "4MT7fnyJNhZPgGVirT822omB4FSUVJYUsGZjJCxAp7Mu",
+          "tokenProgramA": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenProgramB": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "memoProgram": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+        },
+        "signer": "HE416cTViaQbX3WJke9sB3yXQh5FdzQS8zwj4AC5ywFf",
+        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+      }
+    ]
+  }
+}
+
+Total Read Bytes (server-side consumption): 5696529
+all done

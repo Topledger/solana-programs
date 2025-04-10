@@ -15,16 +15,10 @@ message TradeData {
   required string pool = 6;
   required string mint_a = 7;
   required string mint_b = 8;
-  required string mint_c = 9;
-  required string mint_d = 10;
   required string account_a = 11;
   required string account_b = 12;
-  required string account_c = 13;
-  required string account_d = 14;
   required double token_a_amount = 15;
   required double token_b_amount = 16;
-  required double token_c_amount = 17;
-  required double token_d_amount = 18;
   required string lp_wallet = 19;
   required string instruction_type = 20;
   required bool is_inner_instruction = 21;

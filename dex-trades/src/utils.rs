@@ -46,6 +46,9 @@ pub fn get_amt(
     accounts: &Vec<String>,
     post_token_balances: &Vec<TokenBalance>,
     dapp_address: String,
+    pre_balances: Vec<u64>,
+    post_balances: Vec<u64>,
+    fee_account: Option<String>,
 ) -> f64 {
     let mut result: f64 = 0.0;
 
@@ -56,6 +59,9 @@ pub fn get_amt(
         accounts,
         "source".to_string(),
         dapp_address.clone(),
+        pre_balances.clone(),
+        post_balances.clone(),
+        fee_account.clone(),
     );
 
     let destination_transfer_amt = get_token_transfer(
@@ -65,6 +71,9 @@ pub fn get_amt(
         accounts,
         "destination".to_string(),
         dapp_address.clone(),
+        pre_balances.clone(),
+        post_balances.clone(),
+        fee_account.clone(),
     );
 
     if source_transfer_amt != 0.0 {
@@ -94,16 +103,19 @@ pub fn get_token_transfer(
     accounts: &Vec<String>,
     account_name_to_check: String,
     dapp_address: String,
+    pre_balances: Vec<u64>,
+    post_balances: Vec<u64>,
+    fee_account: Option<String>,
 ) -> f64 {
-    if dapp_address.eq("MoonCVVNZFSYkqNXP6bxHLPL6QQJiMagDL3qcqUQTrG")
-        || dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P")
-    {
+    if dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P") {
         return get_system_program_transfer(
             address,
             input_inner_idx,
             inner_instructions,
             accounts,
             account_name_to_check,
+            pre_balances,
+            post_balances,
         );
     }
 
@@ -133,6 +145,13 @@ pub fn get_token_transfer(
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
 
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
+
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
                             } else {
@@ -161,6 +180,13 @@ pub fn get_token_transfer(
 
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(2).unwrap().to_string();
+
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
 
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
@@ -305,6 +331,8 @@ fn get_system_program_transfer(
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
     account_name_to_check: String,
+    pre_balances: Vec<u64>,
+    post_balances: Vec<u64>,
 ) -> f64 {
     let mut result = 0.0;
     let mut result_assigned = false;
@@ -344,6 +372,7 @@ fn get_system_program_transfer(
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
                                     result = -1.0 * data.amount as f64;
+                                    result /= 10f64.powi(9);
                                     result_assigned = true;
                                 }
                             }
@@ -351,7 +380,8 @@ fn get_system_program_transfer(
                             if condition && address.eq(&destination) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
-                                    result = data.amount as f64;
+                                    result = 1.0 * data.amount as f64;
+                                    result /= 10f64.powi(9);
                                     result_assigned = true;
                                 }
                             }
@@ -361,6 +391,14 @@ fn get_system_program_transfer(
                 }
             })
     });
+
+    if !result_assigned {
+        let index = accounts.iter().position(|r| r == address).unwrap();
+        let _result = post_balances[index] as f64 - pre_balances[index] as f64;
+        result = 1.0 * _result as f64;
+        result /= 10f64.powi(9);
+    }
+
     result
 }
 

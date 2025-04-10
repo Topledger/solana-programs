@@ -7,6 +7,13 @@ use crate::{
 
 const IncreaseLiquidity: u64 = u64::from_le_bytes([46, 156, 243, 118, 13, 205, 251, 178]);
 const DecreaseLiquidity: u64 = u64::from_le_bytes([160, 38, 208, 111, 104, 91, 44, 1]);
+const IncreaseLiquidityV2: u64 = u64::from_le_bytes([133, 29, 89, 223, 69, 238, 176, 10]);
+const DecreaseLiquidityV2: u64 = u64::from_le_bytes([58, 127, 188, 62, 79, 82, 196, 96]);
+
+const CollectFees: u64 = u64::from_le_bytes([164, 152, 207, 99, 30, 186, 19, 182]);
+const CollectFeesV2: u64 = u64::from_le_bytes([207, 117, 95, 191, 229, 180, 226, 15]);
+const CollectReward: u64 = u64::from_le_bytes([70, 5, 132, 87, 86, 235, 177, 34]);
+const CollectRewardV2: u64 = u64::from_le_bytes([177, 107, 37, 180, 160, 19, 49, 209]);
 
 pub fn parse_trade_instruction(
     signer: &String,
@@ -31,12 +38,11 @@ pub fn parse_trade_instruction(
             td.pool = input_accounts.get(0).unwrap().to_string();
             td.account_a = input_accounts.get(7).unwrap().to_string();
             td.account_b = input_accounts.get(8).unwrap().to_string();
-            td.account_c = "".to_string();
+
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
             td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
-            td.mint_c = get_mint_address_for(&td.account_c, post_token_balances, accounts);
 
             td.token_a_amount = get_token_transfer(
                 &td.account_a,
@@ -47,13 +53,6 @@ pub fn parse_trade_instruction(
             );
             td.token_b_amount = get_token_transfer(
                 &td.account_b,
-                inner_idx,
-                inner_instructions,
-                accounts,
-                "destination".to_string(),
-            );
-            td.token_c_amount = get_token_transfer(
-                &td.account_c,
                 inner_idx,
                 inner_instructions,
                 accounts,
@@ -67,12 +66,11 @@ pub fn parse_trade_instruction(
             td.pool = input_accounts.get(0).unwrap().to_string();
             td.account_a = input_accounts.get(7).unwrap().to_string();
             td.account_b = input_accounts.get(8).unwrap().to_string();
-            td.account_c = "".to_string();
+
             td.lp_wallet = signer.to_string();
 
             td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
             td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
-            td.mint_c = get_mint_address_for(&td.account_c, post_token_balances, accounts);
 
             td.token_a_amount = get_token_transfer(
                 &td.account_a,
@@ -88,8 +86,169 @@ pub fn parse_trade_instruction(
                 accounts,
                 "source".to_string(),
             );
-            td.token_c_amount = get_token_transfer(
-                &td.account_c,
+
+            result = Some(td);
+        }
+        IncreaseLiquidityV2 => {
+            td.instruction_type = "IncreaseLiquidityV2".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(11).unwrap().to_string();
+            td.account_b = input_accounts.get(12).unwrap().to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+
+            result = Some(td);
+        }
+        DecreaseLiquidityV2 => {
+            td.instruction_type = "DecreaseLiquidityV2".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(11).unwrap().to_string();
+            td.account_b = input_accounts.get(12).unwrap().to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+
+            result = Some(td);
+        }
+        CollectFees => {
+            td.instruction_type = "CollectFees".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = input_accounts.get(7).unwrap().to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+
+            result = Some(td);
+        }
+        CollectFeesV2 => {
+            td.instruction_type = "CollectFeesV2".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(7).unwrap().to_string();
+            td.account_b = input_accounts.get(9).unwrap().to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+
+            result = Some(td);
+        }
+        CollectReward => {
+            td.instruction_type = "CollectReward".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(5).unwrap().to_string();
+            td.account_b = "".to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+
+            result = Some(td);
+        }
+        CollectRewardV2 => {
+            td.instruction_type = "CollectRewardV2".to_string();
+            td.pool = input_accounts.get(0).unwrap().to_string();
+            td.account_a = input_accounts.get(6).unwrap().to_string();
+            td.account_b = "".to_string();
+
+            td.lp_wallet = signer.to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "source".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
                 inner_idx,
                 inner_instructions,
                 accounts,

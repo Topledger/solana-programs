@@ -210,19 +210,6 @@ fn get_trade_data(
                     inner_insrtuctions,
                 );
         }
-        "FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X" => {
-            result =
-                dapps::dapp_FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
         "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
             result =
                 dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
@@ -262,32 +249,6 @@ fn get_trade_data(
                     inner_insrtuctions,
                 );
         }
-        "GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn" => {
-            result =
-                dapps::dapp_GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p" => {
-            result =
-                dapps::dapp_BSwp6bEBihVLdqJRKGgzjcGLHkcTuzmSo1TQkHepzH8p::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
         "CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR" => {
             result =
                 dapps::dapp_CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR::parse_trade_instruction(
@@ -301,9 +262,9 @@ fn get_trade_data(
                     inner_insrtuctions,
                 );
         }
-        "MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky" => {
+        "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C" => {
             result =
-                dapps::dapp_MERLuDFBMmsHnsBPZw2sDQZHvXFMwp8EdjudcU2HKky::parse_trade_instruction(
+                dapps::dapp_CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C::parse_trade_instruction(
                     &signer,
                     instruction_data,
                     &accounts,
@@ -329,6 +290,16 @@ fn get_trade_data(
         _result.instruction_index = instruction_index as u32;
         _result.inner_program = inner_program.to_string();
         _result.inner_instruction_index = inner_instruction_index as u32;
+        _result.token_a_amount = _result.token_a_amount
+            / (u64::pow(
+                10,
+                get_decimals(post_token_balances, &_result.account_a, accounts),
+            )) as f64;
+        _result.token_b_amount = _result.token_b_amount
+            / (u64::pow(
+                10,
+                get_decimals(post_token_balances, &_result.account_b, accounts),
+            )) as f64;
         result = Some(_result);
     }
 
@@ -341,6 +312,25 @@ fn prepare_input_accounts(account_indices: &Vec<u8>, accounts: &Vec<String>) -> 
         instruction_accounts.push(accounts.as_slice()[el as usize].to_string());
     }
     return instruction_accounts;
+}
+
+fn get_decimals(
+    post_token_balances: &Vec<TokenBalance>,
+    address: &String,
+    accounts: &Vec<String>,
+) -> u32 {
+    let mut decimals: u32 = 0;
+    let index = accounts
+        .iter()
+        .position(|r| r == address)
+        .unwrap_or_default();
+    post_token_balances
+        .iter()
+        .filter(|token_balance| token_balance.account_index == index as u32)
+        .for_each(|token_balance: &TokenBalance| {
+            decimals = token_balance.ui_token_amount.clone().unwrap().decimals;
+        });
+    decimals
 }
 
 fn filter_inner_instructions(

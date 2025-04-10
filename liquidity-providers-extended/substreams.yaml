@@ -1,0 +1,25 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_liquidity_providers_extended_1_0_9'
+  version: v1.0.9
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.liquidity.providers.v1.Output

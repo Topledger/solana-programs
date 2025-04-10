@@ -18,8 +18,10 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let timestamp = block.block_time.as_ref().unwrap().timestamp;
 
     let mut data: Vec<TradeData> = vec![];
+    let mut tx_count = 0;
 
     for trx in block.transactions_owned() {
+        tx_count += 1;
         let accounts = trx.resolved_accounts_as_strings();
         if let Some(transaction) = trx.transaction {
             let meta = trx.meta.unwrap();
@@ -32,6 +34,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
+                log::info!("Checking program: {}", program);
 
                 let trade_data = get_trade_data(
                     program,
@@ -45,6 +48,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                 );
                 if trade_data.is_some() {
                     let mut td = trade_data.unwrap();
+                    log::info!("Found trade: {} on {}", td.instruction_type, td.platform);
 
                     td.block_date = convert_to_date(timestamp);
                     td.block_time = timestamp;
@@ -101,7 +105,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
         }
     }
 
-    log::info!("{:#?}", slot);
+    log::info!("Block {}: Processed {} transactions, found {} trades", slot, tx_count, data.len());
     Ok(Output { data })
 }
 

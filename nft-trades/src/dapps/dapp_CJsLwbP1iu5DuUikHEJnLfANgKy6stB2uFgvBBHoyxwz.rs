@@ -116,8 +116,10 @@ fn get_sol_balance_change(
     pre_balances: &Vec<u64>,
     post_balances: &Vec<u64>,
 ) -> f64 {
-    let index = accounts.iter().position(|r| r == address).unwrap();
-    let pre_balance = pre_balances[index];
-    let post_balance = post_balances[index];
-    return post_balance as f64 - pre_balance as f64;
+    if let Some(index) = accounts.iter().position(|r| r == address) {
+        let pre_balance = pre_balances[index];
+        let post_balance = post_balances[index];
+        return post_balance as f64 - pre_balance as f64;
+    }
+    return 0.0;
 }

@@ -1,0 +1,28 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_raw_block_1_0_5'
+  version: v1.0.5
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.raw.blocks.v1.Output
+
+network: solana

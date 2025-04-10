@@ -1,0 +1,30 @@
+specVersion: v0.1.0
+package:
+  name: 'tl_solana_block_rewards_1_0_0'
+  version: v1.0.0
+
+protobuf:
+  files:
+    - output.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams.wasm
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+modules:
+  - name: map_block
+    kind: map
+    inputs:
+      - map: sol:blocks_without_votes
+    output:
+      type: proto:sf.solana.block.rewards.v1.Output
+
+network: solana
+
+  

@@ -1,0 +1,27 @@
+specVersion: v0.1.0
+package:
+  name: raydium_clmm_instructions
+  version: v0.1.0
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+protobuf:
+  files:
+    - proto/main.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams_solana_raydium_clmm.wasm
+
+modules:
+  - name: raydium_clmm_instructions
+    kind: map
+    initialBlock: 0 # Adjust if needed
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.raydium_clmm.v1.Instructions 

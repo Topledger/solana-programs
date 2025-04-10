@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+package sf.solana.raw.blocks.v1;
+
+message Output {
+  repeated BlockStat data =1;
+}
+
+message BlockStat {
+  required string block_date = 1;
+  required string previous_block_hash = 2;
+  required string block_hash = 3;
+  required uint64 parent_slot = 4;
+  required uint64 block_time = 6;
+  required uint64 block_height = 7;
+  required uint64 block_slot = 8;
+  required uint64 total_transactions = 9;
+  required uint64 successful_transactions=10;
+  required uint64 failed_transactions=11;
+  required uint64 total_vote_transactions=12;
+  required uint64 total_non_vote_transactions=13;
+  required uint64 successful_vote_transactions=14;
+  required uint64 successful_non_vote_transactions=15;
+  required uint64 failed_vote_transactions=16;
+  required uint64 failed_non_vote_transactions=17;
+
+}

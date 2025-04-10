@@ -1,0 +1,33 @@
+specVersion: v0.1.0
+package:
+  name: substreams_solana_raydium_amm
+  version: v0.1.0
+
+imports:
+  # Use spkg.io URL like in clmm
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+protobuf:
+  files:
+    - proto/main.proto
+  importPaths:
+    - ./proto/sf/solana/raydium_amm/v1
+    - ../../../proto # Added path for substreams/options.proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: target/wasm32-unknown-unknown/release/substreams_solana_raydium_amm.wasm
+
+modules:
+  - name: raydium_amm_instructions
+    kind: map
+    initialBlock: 313745267
+    inputs:
+      # Ensure this source matches the imported package alias
+      - source: sf.solana.type.v1.Block # This comes from the standard solana types, should be compatible
+    output:
+      type: proto:sf.solana.raydium_amm.v1.Instructions
+
+network: solana
+# sinks: {} # Removed invalid field 

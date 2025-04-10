@@ -103,6 +103,35 @@ pub fn get_currency_mint(post_token_balances: &Vec<TokenBalance>, nft_mint: &Str
     }
 }
 
+pub fn get_currency_mint_core(post_token_balances: &Vec<TokenBalance>, nft_mint: &String) -> String {
+    let mut mints: Vec<String> = vec![];
+    for x in post_token_balances.iter() {
+        mints.push(x.mint.to_string());
+    }
+
+    let mut distinct_mints: HashSet<String> = mints.into_iter().collect();
+    distinct_mints.remove("FZN7QZ8ZUUAxMPfxYEYkH3cXUASzH8EqA6B4tyCL8f1j");
+
+    match distinct_mints.len() {
+        0 => {
+            return "So11111111111111111111111111111111111111112".to_string();
+        }
+        1 => {
+            let nft_mints: HashSet<String> = vec![nft_mint.to_string()].into_iter().collect();
+            let result = distinct_mints
+                .difference(&nft_mints)
+                .collect::<Vec<&String>>();
+            if result.is_empty() {
+                return "So11111111111111111111111111111111111111112".to_string();
+            }
+            return result.get(0).unwrap().to_string();
+        }
+        _ => {
+            panic!("Found more than 1 distinct mints");
+        }
+    }
+}
+
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
     input_accounts: Vec<String>,
@@ -284,7 +313,7 @@ pub fn parse_trade_instruction(
                 trade_data.category = "sell".to_string();
             }
 
-            trade_data.currency_mint = get_currency_mint(post_token_balances, &trade_data.mint);
+            trade_data.currency_mint = get_currency_mint_core(post_token_balances, &trade_data.mint);
 
             let instruction_data: CoreExecuteSaleV2Layout;
             instruction_data = CoreExecuteSaleV2Layout::deserialize(&mut rest.clone()).unwrap();
