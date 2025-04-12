@@ -20,7 +20,7 @@ package: build
 # Adjust block number (-s) as needed
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml dex_fee_tier_map -s 89881853 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml dex_fee_tier_map -s 311082157 -t +1
 
 # Clean build artifacts
 .PHONY: clean
