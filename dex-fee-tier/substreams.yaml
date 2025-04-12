@@ -1,0 +1,27 @@
+specVersion: v0.1.0
+package:
+  name: solana_dex_fee_analyzer
+  version: v0.1.0
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+protobuf:
+  files:
+    - proto/output.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams_solana_dex_fee_tier.wasm
+
+modules:
+  - name: dex_fee_tier_map
+    kind: map
+    initialBlock: 0 # Adjust if needed
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.dex.fee.tier.v1.Output 

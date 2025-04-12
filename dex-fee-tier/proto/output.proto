@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+package sf.solana.dex.fee.tier.v1;
+
+message Output {
+  repeated TradeData data = 1;
+}
+
+message TradeData {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required uint64 block_slot = 3;
+  required string tx_id = 4;
+  required string pool_address = 6;
+  required string amm_config = 7;
+  required string instruction_type = 15;
+  required string dapp = 18;
+  required uint64 trade_fee_rate = 19;
+  required uint64 protocol_fee_rate = 20;
+  required uint64 fund_fee_rate = 21;
+  required uint64 param = 22;
+  required uint64 value = 23;
+  required uint64 create_pool_fee = 24;
+} 
