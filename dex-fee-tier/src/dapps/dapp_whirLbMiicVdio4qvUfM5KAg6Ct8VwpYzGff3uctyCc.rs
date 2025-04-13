@@ -79,7 +79,6 @@ pub fn parse_instruction(
             
             let config = get_account_at_index(instruction, account_keys, 0);
             let pool_address = get_account_at_index(instruction, account_keys, 4);
-            let fee_tier = get_account_at_index(instruction, account_keys, 7);
             
             // We need to fetch the fee rate from the fee_tier, but we don't have direct access
             // Let's use default values based on common Orca fee tiers
@@ -120,8 +119,7 @@ pub fn parse_instruction(
             // 11: rent
             
             let config = get_account_at_index(instruction, account_keys, 0);
-            let pool_address = get_account_at_index(instruction, account_keys, 4);
-            let fee_tier = get_account_at_index(instruction, account_keys, 7);
+            let pool_address = get_account_at_index(instruction, account_keys, 6);
             
             // Similar to InitializePool
             let trade_fee_rate = Some(0);
@@ -154,7 +152,6 @@ pub fn parse_instruction(
             // 4: system_program
             
             let config = get_account_at_index(instruction, account_keys, 0);
-            let fee_tier = get_account_at_index(instruction, account_keys, 1);
             
             // Parse fee rate from data
             // Data structure: [8 bytes discriminator][2 bytes tick_spacing][2 bytes default_fee_rate]
@@ -191,7 +188,6 @@ pub fn parse_instruction(
             // 2: fee_authority (signer)
             
             let config = get_account_at_index(instruction, account_keys, 0);
-            let fee_tier = get_account_at_index(instruction, account_keys, 1);
             
             // Parse fee rate from data
             // Data structure: [8 bytes discriminator][2 bytes default_fee_rate]

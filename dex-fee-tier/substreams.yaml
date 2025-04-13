@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
   name: solana_dex_fee_analyzer
-  version: v0.1.1
+  version: v0.2.1
 
 imports:
   sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
