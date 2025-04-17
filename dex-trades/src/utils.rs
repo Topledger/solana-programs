@@ -223,6 +223,7 @@ pub fn get_token_transfer(
             inner_instructions,
             accounts,
             account_name_to_check,
+            fee_account
         );
         if _result.is_some() {
             result = _result.unwrap();
@@ -238,6 +239,7 @@ pub fn get_token_22_transfer(
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
     account_name_to_check: String,
+    fee_account: Option<String>,
 ) -> Option<f64> {
     let mut result = None;
     let mut result_assigned = false;
@@ -271,6 +273,13 @@ pub fn get_token_22_transfer(
                                 true
                             };
 
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
+
                             if condition && address.eq(&source) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
                                 if !result_assigned {
@@ -299,6 +308,13 @@ pub fn get_token_22_transfer(
                             } else {
                                 true
                             };
+
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
 
                             if condition && address.eq(&source) {
                                 let data = TransferLayout::deserialize(&mut rest.clone()).unwrap();
