@@ -488,6 +488,13 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY" => {
+            result =
+                dapps::dapp_ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
         "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin" => {
             let jupiter_dapps = vec![
                 "JUP2jxvXaqu7NQY1GmNF4m1vodw12LVXYxbFL2uJvfo".to_string(),
@@ -689,6 +696,13 @@ fn get_trade_instruction(
         "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P" => {
             result =
                 dapps::dapp_6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA" => {
+            result =
+                dapps::dapp_pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );
