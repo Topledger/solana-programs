@@ -19,6 +19,12 @@ message WalletPositionDexTradeData {
   required double buy_amount = 10;
   required double sell_amount = 11;
   required uint64 txn_fee_lamports = 12;
+  required double buy_mint_pre_token_balance = 13;
+  required double buy_mint_post_token_balance = 14;
+  required double sell_mint_pre_token_balance = 15;
+  required double sell_mint_post_token_balance = 16;
+  required double sol_pre_balance = 17;
+  required double sol_post_balance = 18;
 }
 
 message TraderTokenBalanceChange {
