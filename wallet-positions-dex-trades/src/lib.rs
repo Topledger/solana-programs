@@ -123,10 +123,40 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 &accounts,
                             ),
                             txn_fee_lamports: meta.fee,
-                            buy_mint: buy_mint,
-                            sell_mint: sell_mint,
+                            buy_mint: buy_mint.clone(),
+                            sell_mint: sell_mint.clone(),
                             buy_amount: buy_amount,
                             sell_amount: sell_amount,
+                            buy_mint_pre_token_balance: get_token_balance(
+                                buy_mint.clone(),
+                                trader.clone(),
+                                &pre_token_balances,
+                            ),
+                            buy_mint_post_token_balance: get_token_balance(
+                                buy_mint.clone(),
+                                trader.clone(),
+                                &post_token_balances,
+                            ),
+                            sell_mint_pre_token_balance: get_token_balance(
+                                sell_mint.clone(),
+                                trader.clone(),
+                                &pre_token_balances,
+                            ),
+                            sell_mint_post_token_balance: get_token_balance(
+                                sell_mint.clone(),
+                                trader.clone(),
+                                &post_token_balances,
+                            ),
+                            sol_pre_balance: get_sol_balance(
+                                trader.clone(),
+                                &pre_balances,
+                                &accounts,
+                            ),
+                            sol_post_balance: get_sol_balance(
+                                trader.clone(),
+                                &post_balances,
+                                &accounts,
+                            ),
                         });
                     }
 
@@ -228,10 +258,40 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 &accounts,
                                             ),
                                             txn_fee_lamports: meta.fee,
-                                            buy_mint: buy_mint,
-                                            sell_mint: sell_mint,
+                                            buy_mint: buy_mint.clone(),
+                                            sell_mint: sell_mint.clone(),
                                             buy_amount: buy_amount,
                                             sell_amount: sell_amount,
+                                            buy_mint_pre_token_balance: get_token_balance(
+                                                buy_mint.clone(),
+                                                trader.clone(),
+                                                &pre_token_balances,
+                                            ),
+                                            buy_mint_post_token_balance: get_token_balance(
+                                                buy_mint.clone(),
+                                                trader.clone(),
+                                                &post_token_balances,
+                                            ),
+                                            sell_mint_pre_token_balance: get_token_balance(
+                                                sell_mint.clone(),
+                                                trader.clone(),
+                                                &pre_token_balances,
+                                            ),
+                                            sell_mint_post_token_balance: get_token_balance(
+                                                sell_mint.clone(),
+                                                trader.clone(),
+                                                &post_token_balances,
+                                            ),
+                                            sol_pre_balance: get_sol_balance(
+                                                trader.clone(),
+                                                &pre_balances,
+                                                &accounts,
+                                            ),
+                                            sol_post_balance: get_sol_balance(
+                                                trader.clone(),
+                                                &post_balances,
+                                                &accounts,
+                                            ),
                                         });
                                     }
                                 },
@@ -543,4 +603,32 @@ fn filter_inner_instructions(
         }
     }
     return inner_instructions;
+}
+
+fn get_token_balance(
+    mint_address: String,
+    owner_address: String,
+    token_balances: &Vec<TokenBalance>,
+) -> f64 {
+    let mut result: f64 = 0.0;
+    token_balances
+        .iter()
+        .filter(|token_balance| {
+            token_balance.owner == owner_address.to_string()
+                && token_balance.mint == mint_address.to_string()
+        })
+        .for_each(|token_balance| {
+            result = token_balance.ui_token_amount.clone().unwrap().ui_amount;
+        });
+    result
+}
+
+fn get_sol_balance(address: String, balances: &Vec<u64>, accounts: &Vec<String>) -> f64 {
+    let mut account_index = 0;
+    accounts.iter().enumerate().for_each(|(index, account)| {
+        if account.to_string().eq(&address) {
+            account_index = index;
+        }
+    });
+    *balances.get(account_index).unwrap() as f64 / 1e9
 }
