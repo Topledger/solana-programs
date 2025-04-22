@@ -312,6 +312,7 @@ pub fn get_token_transfer(
             inner_instructions,
             accounts,
             account_name_to_check,
+            fee_account.clone(),
         );
         if _result.is_some() {
             result = _result.clone().unwrap().0;
@@ -328,6 +329,7 @@ pub fn get_token_22_transfer(
     inner_instructions: &Vec<InnerInstructions>,
     accounts: &Vec<String>,
     account_name_to_check: String,
+    fee_account: Option<String>,
 ) -> Option<(f64, String)> {
     let mut result = 0.0;
     let mut token_account = "".to_string();
@@ -355,6 +357,13 @@ pub fn get_token_22_transfer(
 
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(1).unwrap().to_string();
+                            
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
 
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx
@@ -386,6 +395,13 @@ pub fn get_token_22_transfer(
 
                             let source = input_accounts.get(0).unwrap().to_string();
                             let destination = input_accounts.get(2).unwrap().to_string();
+                            
+                            if fee_account
+                                .clone()
+                                .is_some_and(|x| x.clone().eq(&destination))
+                            {
+                                return;
+                            }
 
                             let condition = if input_inner_idx > 0 {
                                 inner_idx as u32 > input_inner_idx

@@ -833,6 +833,20 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA" => {
+            result =
+                dapps::dapp_pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY" => {
+            result =
+                dapps::dapp_ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
         _ => {}
     }
 
