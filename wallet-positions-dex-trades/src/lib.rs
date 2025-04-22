@@ -504,6 +504,11 @@ fn is_trade_instruction(dapp_address: &String, instruction_data: Vec<u8>) -> boo
                 instruction_data,
             );
         }
+        "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA" => {
+            result = dapps::dapp_pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA::is_trade_instruction(
+                instruction_data,
+            );
+        }
         _ => {}
     }
 
