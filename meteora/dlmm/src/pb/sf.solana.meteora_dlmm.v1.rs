@@ -121,7 +121,7 @@ pub struct FlatArg {
 pub struct InstructionArgs {
     #[prost(
         oneof = "instruction_args::InstructionArgs",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 100"
     )]
     pub instruction_args: ::core::option::Option<instruction_args::InstructionArgs>,
 }
@@ -154,8 +154,10 @@ pub mod instruction_args {
         TransferPositionOwner(super::PbTransferPositionOwnerLayout),
         #[prost(message, tag = "12")]
         UpdateFees(super::PbUpdateFeesLayout),
+        /// Used for legacy AddLiquidity
         #[prost(message, tag = "13")]
         AddLiquidity(super::PbAddLiquidityLayout),
+        /// Used for legacy RemoveLiquidity
         #[prost(message, tag = "14")]
         RemoveLiquidity(super::PbRemoveLiquidityLayout),
         #[prost(message, tag = "15")]
@@ -175,6 +177,90 @@ pub mod instruction_args {
         SwapWithPriceImpact(super::PbSwapWithPriceImpactLayout),
         #[prost(message, tag = "22")]
         SwapExactOut(super::PbSwapExactOutLayout),
+        /// Add other instruction layouts
+        #[prost(message, tag = "23")]
+        InitializeCustomizablePermissionlessLbPair(
+            super::PbInitializeCustomizablePermissionlessLbPairLayout,
+        ),
+        #[prost(message, tag = "24")]
+        CloseLbPair(super::PbCloseLbPairLayout),
+        #[prost(message, tag = "25")]
+        InitializeBinArray(super::PbInitializeBinArrayLayout),
+        #[prost(message, tag = "26")]
+        InitializeBinArrayBitmapExtension(
+            super::PbInitializeBinArrayBitmapExtensionLayout,
+        ),
+        #[prost(message, tag = "27")]
+        AddLiquidityByWeight(super::PbAddLiquidityByWeightLayout),
+        #[prost(message, tag = "28")]
+        AddLiquidityByStrategy(super::PbAddLiquidityByStrategyLayout),
+        #[prost(message, tag = "29")]
+        AddLiquidityOneSide(super::PbAddLiquidityOneSideLayout),
+        #[prost(message, tag = "30")]
+        AddLiquidityByStrategyOneSide(super::PbAddLiquidityByStrategyOneSideLayout),
+        #[prost(message, tag = "31")]
+        AddLiquidityOneSidePrecise(super::PbAddLiquidityOneSidePreciseLayout),
+        #[prost(message, tag = "33")]
+        RemoveAllLiquidity(super::PbRemoveAllLiquidityLayout),
+        #[prost(message, tag = "34")]
+        RemoveLiquidityByRange(super::PbRemoveLiquidityByRangeLayout),
+        #[prost(message, tag = "35")]
+        RemoveLiquiditySingleSide(super::PbRemoveLiquiditySingleSideLayout),
+        #[prost(message, tag = "36")]
+        GoToABin(super::PbGoToABinLayout),
+        #[prost(message, tag = "37")]
+        InitializePositionByOperator(super::PbInitializePositionByOperatorLayout),
+        #[prost(message, tag = "38")]
+        UpdatePositionOperator(super::PbUpdatePositionOperatorLayout),
+        #[prost(message, tag = "39")]
+        ClaimLiquidity(super::PbClaimLiquidityLayout),
+        #[prost(message, tag = "40")]
+        WithdrawProtocolFee(super::PbWithdrawProtocolFeeLayout),
+        #[prost(message, tag = "41")]
+        UpdateFeeParameters(super::PbUpdateFeeParametersLayout),
+        #[prost(message, tag = "42")]
+        UpdateFeeOwner(super::PbUpdateFeeOwnerLayout),
+        #[prost(message, tag = "43")]
+        FundReward(super::PbFundRewardLayout),
+        #[prost(message, tag = "44")]
+        UpdateRewardFunder(super::PbUpdateRewardFunderLayout),
+        #[prost(message, tag = "45")]
+        UpdateRewardDuration(super::PbUpdateRewardDurationLayout),
+        #[prost(message, tag = "46")]
+        WithdrawIneligibleReward(super::PbWithdrawIneligibleRewardLayout),
+        #[prost(message, tag = "47")]
+        ClosePresetParameter(super::PbClosePresetParameterLayout),
+        #[prost(message, tag = "48")]
+        InitializePresetParameter(super::PbInitializePresetParameterLayout),
+        #[prost(message, tag = "49")]
+        InitializePresetParameterV2(super::PbInitializePresetParameterV2Layout),
+        #[prost(message, tag = "50")]
+        TogglePairStatus(super::PbTogglePairStatusLayout),
+        #[prost(message, tag = "51")]
+        UpdateWhitelistedWallet(super::PbUpdateWhitelistedWalletLayout),
+        #[prost(message, tag = "52")]
+        IncreaseOracleLength(super::PbIncreaseOracleLengthLayout),
+        #[prost(message, tag = "53")]
+        MigratePosition(super::PbMigratePositionLayout),
+        #[prost(message, tag = "54")]
+        MigrateBinArray(super::PbMigrateBinArrayLayout),
+        #[prost(message, tag = "55")]
+        UpdateFeesAndRewards(super::PbUpdateFeesAndRewardsLayout),
+        #[prost(message, tag = "56")]
+        SetLockReleaseSlot(super::PbSetLockReleaseSlotLayout),
+        #[prost(message, tag = "57")]
+        SetActivationSlot(super::PbSetActivationSlotLayout),
+        #[prost(message, tag = "58")]
+        SetMaxSwappedAmount(super::PbSetMaxSwappedAmountLayout),
+        #[prost(message, tag = "59")]
+        SetPreActivationDuration(super::PbSetPreActivationDurationLayout),
+        #[prost(message, tag = "60")]
+        SetPreActivationSwapAddress(super::PbSetPreActivationSwapAddressLayout),
+        #[prost(message, tag = "61")]
+        IdlWrite(super::PbIdlWriteLayout),
+        /// Event logs - Use the wrapper now
+        #[prost(message, tag = "100")]
+        EventLog(super::PbEventLogWrapper),
     }
 }
 /// Common types
@@ -238,10 +324,10 @@ pub struct PbCreatePositionLayout {
 pub struct PbClosePositionLayout {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbSwapLayout {
-    #[prost(string, tag = "1")]
-    pub amount_in: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub min_amount_out: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "1")]
+    pub amount_in: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(string, optional, tag = "2")]
+    pub min_amount_out: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSwapRouterBaseInLayout {
@@ -303,6 +389,8 @@ pub struct PbAddLiquidityLayout {
     pub token_max_a: u64,
     #[prost(uint64, tag = "5")]
     pub token_max_b: u64,
+    #[prost(bytes = "vec", optional, tag = "6")]
+    pub liquidity_parameter: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbRemoveLiquidityLayout {
@@ -316,6 +404,9 @@ pub struct PbRemoveLiquidityLayout {
     pub token_min_a: u64,
     #[prost(uint64, tag = "5")]
     pub token_min_b: u64,
+    /// Assuming vec!\[\] in Rust maps to repeated bytes
+    #[prost(bytes = "vec", repeated, tag = "6")]
+    pub bin_liquidity_removal: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializeConfigLayout {
@@ -328,53 +419,646 @@ pub struct PbInitializeConfigLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbUpdateConfigLayout {
-    #[prost(uint32, tag = "1")]
-    pub param: u32,
-    #[prost(uint64, tag = "2")]
-    pub value: u64,
+    #[prost(uint32, optional, tag = "1")]
+    pub param: ::core::option::Option<u32>,
+    #[prost(uint64, optional, tag = "2")]
+    pub value: ::core::option::Option<u64>,
 }
-/// New message definitions for Meteora-specific layouts
+/// Parameters for InitializeCustomizablePermissionlessLbPair (Flattened)
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializeCustomizablePermissionlessLbPairLayout {
+    #[prost(int32, optional, tag = "1")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub base_factor: ::core::option::Option<i32>,
+    /// Assuming u8 maps to uint32
+    #[prost(uint32, optional, tag = "4")]
+    pub activation_type: ::core::option::Option<u32>,
+    #[prost(bool, optional, tag = "5")]
+    pub has_alpha_vault: ::core::option::Option<bool>,
+    /// Assuming i64 maps to int64
+    #[prost(int64, optional, tag = "6")]
+    pub activation_point: ::core::option::Option<i64>,
+}
+/// Meteora DLMM specific layouts
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializeLbPairLayout {
-    #[prost(int32, tag = "1")]
-    pub active_id: i32,
-    #[prost(int32, tag = "2")]
-    pub bin_step: i32,
+    #[prost(int32, optional, tag = "1")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<i32>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePermissionLbPairLayout {
-    #[prost(int32, tag = "1")]
-    pub active_id: i32,
-    #[prost(int32, tag = "2")]
-    pub bin_step: i32,
+    #[prost(int32, optional, tag = "1")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<i32>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePositionLayout {
-    #[prost(int32, tag = "1")]
-    pub lower_bin_id: i32,
-    #[prost(int32, tag = "2")]
-    pub width: i32,
+    #[prost(int32, optional, tag = "1")]
+    pub lower_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub width: ::core::option::Option<i32>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePositionPdaLayout {
-    #[prost(int32, tag = "1")]
-    pub lower_bin_id: i32,
-    #[prost(int32, tag = "2")]
-    pub width: i32,
+    #[prost(int32, optional, tag = "1")]
+    pub lower_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub width: ::core::option::Option<i32>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSwapWithPriceImpactLayout {
-    #[prost(uint64, tag = "1")]
-    pub amount_in: u64,
-    #[prost(int32, tag = "2")]
-    pub active_id: i32,
-    #[prost(int32, tag = "3")]
-    pub max_price_impact_bps: i32,
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_in: ::core::option::Option<u64>,
+    #[prost(int32, optional, tag = "2")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub max_price_impact_bps: ::core::option::Option<i32>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSwapExactOutLayout {
-    #[prost(uint64, tag = "1")]
-    pub max_in_amount: u64,
-    #[prost(uint64, tag = "2")]
-    pub out_amount: u64,
+    #[prost(uint64, optional, tag = "1")]
+    pub max_in_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub out_amount: ::core::option::Option<u64>,
+}
+/// Helper messages for liquidity parameters
+///
+/// Fields for general liquidity, maybe amountX/Y?
+/// Define based on Rust usage for other instructions like AddLiquidityByWeight if needed.
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbLiquidityParameterLayout {}
+/// Specific layout for BinLiquidityDistributionByWeight
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbBinLiquidityDistributionByWeightLayout {
+    #[prost(int32, optional, tag = "1")]
+    pub bin_id: ::core::option::Option<i32>,
+    /// Use int32 for u16 for simplicity in proto
+    #[prost(int32, optional, tag = "2")]
+    pub weight: ::core::option::Option<i32>,
+}
+/// Placeholder definitions for missing layouts with fields added
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbCloseLbPairLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializeBinArrayLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub index: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializeBinArrayBitmapExtensionLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityByWeightLayout {
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterLayout>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityByStrategyLayout {
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterLayout>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityOneSideLayout {
+    /// Fields moved directly here from the removed PbLiquidityOneSideParameterLayout
+    #[prost(uint64, optional, tag = "1")]
+    pub amount: ::core::option::Option<u64>,
+    #[prost(int32, optional, tag = "2")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub max_active_bin_slippage: ::core::option::Option<i32>,
+    #[prost(message, repeated, tag = "4")]
+    pub bin_liquidity_dist: ::prost::alloc::vec::Vec<
+        PbBinLiquidityDistributionByWeightLayout,
+    >,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityByStrategyOneSideLayout {
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterLayout>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityOneSidePreciseLayout {
+    /// Fields moved from Python's AddLiquidityOneSidePreciseParameterLayout
+    #[prost(message, repeated, tag = "1")]
+    pub bins: ::prost::alloc::vec::Vec<PbCompressedBinDepositAmountLayout>,
+    #[prost(int64, optional, tag = "2")]
+    pub decompress_multiplier: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbRemoveAllLiquidityLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbRemoveLiquidityByRangeLayout {
+    #[prost(int32, optional, tag = "1")]
+    pub from_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub to_bin_id: ::core::option::Option<i32>,
+    /// Assuming i16 maps to int32
+    #[prost(int32, optional, tag = "3")]
+    pub bps_to_remove: ::core::option::Option<i32>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbRemoveLiquiditySingleSideLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbGoToABinLayout {
+    #[prost(int32, optional, tag = "1")]
+    pub bin_id: ::core::option::Option<i32>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbInitializePositionByOperatorLayout {
+    #[prost(int32, optional, tag = "1")]
+    pub lower_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub width: ::core::option::Option<i32>,
+    #[prost(string, optional, tag = "3")]
+    pub owner: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdatePositionOperatorLayout {
+    #[prost(string, optional, tag = "1")]
+    pub operator: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbClaimLiquidityLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbWithdrawProtocolFeeLayout {
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_x: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub amount_y: ::core::option::Option<u64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbUpdateFeeParametersLayout {
+    /// Fields moved from PbFeeParameterLayout
+    ///
+    /// Assuming i16 maps to int32
+    #[prost(int32, optional, tag = "1")]
+    pub protocol_share: ::core::option::Option<i32>,
+    /// Assuming i16 maps to int32
+    #[prost(int32, optional, tag = "2")]
+    pub base_factor: ::core::option::Option<i32>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbUpdateFeeOwnerLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbFundRewardLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "2")]
+    pub amount: ::core::option::Option<i64>,
+    #[prost(bool, optional, tag = "3")]
+    pub carry_forward: ::core::option::Option<bool>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdateRewardFunderLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(string, optional, tag = "2")]
+    pub new_funder: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbUpdateRewardDurationLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "2")]
+    pub new_duration: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbWithdrawIneligibleRewardLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbClosePresetParameterLayout {}
+/// Flattened structure for InitializePresetParameter
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializePresetParameterLayout {
+    /// Fields moved from PbInitializePresetParameterIxLayout
+    #[prost(int32, optional, tag = "1")]
+    pub bin_step: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub base_factor: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub filter_period: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "4")]
+    pub decay_period: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "5")]
+    pub reduction_factor: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "6")]
+    pub variable_fee_control: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "7")]
+    pub max_volatility_accumulator: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "8")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "9")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "10")]
+    pub protocol_share: ::core::option::Option<i32>,
+}
+/// Flattened structure for InitializePresetParameterV2
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializePresetParameterV2Layout {
+    /// Fields moved from PbInitializePresetParameterV2IxLayout
+    #[prost(int32, optional, tag = "1")]
+    pub bin_step: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub base_factor: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub filter_period: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "4")]
+    pub decay_period: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "5")]
+    pub reduction_factor: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "6")]
+    pub variable_fee_control: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "7")]
+    pub max_volatility_accumulator: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "8")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "9")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "10")]
+    pub protocol_share: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "11")]
+    pub host_fee: ::core::option::Option<i32>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbTogglePairStatusLayout {}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdateWhitelistedWalletLayout {
+    /// Assuming u16 maps to int32
+    #[prost(int32, optional, tag = "1")]
+    pub idx: ::core::option::Option<i32>,
+    #[prost(string, optional, tag = "2")]
+    pub wallet: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbIncreaseOracleLengthLayout {
+    /// Assuming u32 maps to int64 (check Rust type)
+    #[prost(int64, optional, tag = "1")]
+    pub length_to_add: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbMigratePositionLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbMigrateBinArrayLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbUpdateFeesAndRewardsLayout {}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbSetLockReleaseSlotLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub new_lock_release_slot: ::core::option::Option<i64>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbSetActivationSlotLayout {
+    #[prost(int64, optional, tag = "1")]
+    pub activation_slot: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSetMaxSwappedAmountLayout {
+    /// Assuming u64 maps to int64 (check Rust type)
+    #[prost(int64, optional, tag = "1")]
+    pub swap_cap_deactivate_slot: ::core::option::Option<i64>,
+    /// Assuming u128 maps to string
+    #[prost(string, optional, tag = "2")]
+    pub max_swapped_amount: ::core::option::Option<::prost::alloc::string::String>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbSetPreActivationDurationLayout {
+    /// Assuming u64 maps to int64 (check Rust type)
+    #[prost(int64, optional, tag = "1")]
+    pub pre_activation_duration: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSetPreActivationSwapAddressLayout {
+    #[prost(string, optional, tag = "1")]
+    pub pre_activation_swap_address: ::core::option::Option<
+        ::prost::alloc::string::String,
+    >,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbIdlWriteLayout {}
+/// Renamed from PbSwapLogLayout, removed event_name, added optional
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSwapLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(int32, optional, tag = "3")]
+    pub start_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "4")]
+    pub end_bin_id: ::core::option::Option<i32>,
+    #[prost(uint64, optional, tag = "5")]
+    pub amount_in: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "6")]
+    pub amount_out: ::core::option::Option<u64>,
+    #[prost(bool, optional, tag = "7")]
+    pub swap_for_y: ::core::option::Option<bool>,
+    #[prost(uint64, optional, tag = "8")]
+    pub fee: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "9")]
+    pub protocol_fee: ::core::option::Option<u64>,
+    #[prost(string, tag = "10")]
+    pub fee_bps: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag = "11")]
+    pub host_fee: ::core::option::Option<u64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbCompositionFeeLogFields {
+    #[prost(string, tag = "1")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(int32, optional, tag = "2")]
+    pub bin_id: ::core::option::Option<i32>,
+    #[prost(uint64, optional, tag = "3")]
+    pub token_x_fee_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "4")]
+    pub token_y_fee_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "5")]
+    pub protocol_token_x_fee_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "6")]
+    pub protocol_token_y_fee_amount: ::core::option::Option<u64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(uint64, repeated, tag = "4")]
+    pub amounts: ::prost::alloc::vec::Vec<u64>,
+    #[prost(int32, optional, tag = "5")]
+    pub active_bin_id: ::core::option::Option<i32>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbRemoveLiquidityLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub from: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(uint64, repeated, tag = "4")]
+    pub amounts: ::prost::alloc::vec::Vec<u64>,
+    #[prost(int32, optional, tag = "5")]
+    pub active_bin_id: ::core::option::Option<i32>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbClaimRewardLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub owner: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "4")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "5")]
+    pub total_reward: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbFundRewardLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub funder: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "3")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "4")]
+    pub amount: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbInitializeRewardLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub reward_mint: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub funder: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "4")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "5")]
+    pub reward_duration: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdateRewardDurationLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "2")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "3")]
+    pub old_reward_duration: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "4")]
+    pub new_reward_duration: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdateRewardFunderLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "2")]
+    pub reward_index: ::core::option::Option<i64>,
+    #[prost(string, tag = "3")]
+    pub old_funder: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub new_funder: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbPositionCloseLogFields {
+    #[prost(string, tag = "1")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub owner: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbClaimFeeLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub owner: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "4")]
+    pub fee_x: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "5")]
+    pub fee_y: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbLbPairCreateLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(int32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<i32>,
+    #[prost(string, tag = "3")]
+    pub token_x: ::prost::alloc::string::String,
+    #[prost(string, tag = "4")]
+    pub token_y: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbPositionCreateLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub owner: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbFeeParameterUpdateLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(int32, optional, tag = "2")]
+    pub protocol_share: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub base_factor: ::core::option::Option<i32>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbIncreaseObservationLogFields {
+    #[prost(string, tag = "1")]
+    pub oracle: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "2")]
+    pub new_observation_length: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbWithdrawIneligibleRewardLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub reward_mint: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "3")]
+    pub amount: ::core::option::Option<i64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdatePositionOperatorLogFields {
+    #[prost(string, tag = "1")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub old_operator: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub new_operator: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdatePositionLockReleaseSlotLogFields {
+    #[prost(string, tag = "1")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "2")]
+    pub current_slot: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "3")]
+    pub new_lock_release_slot: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "4")]
+    pub old_lock_release_slot: ::core::option::Option<i64>,
+    #[prost(string, tag = "5")]
+    pub sender: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbGoToABinLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(int32, optional, tag = "2")]
+    pub from_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "3")]
+    pub to_bin_id: ::core::option::Option<i32>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUpdatePositionLockReleasePointLogFields {
+    #[prost(string, tag = "1")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "2")]
+    pub current_point: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "3")]
+    pub new_lock_release_point: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "4")]
+    pub old_lock_release_point: ::core::option::Option<i64>,
+    #[prost(string, tag = "5")]
+    pub sender: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbUnknownEvent1LogFields {
+    #[prost(string, tag = "1")]
+    pub vault: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub escrow: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub owner: ::prost::alloc::string::String,
+    #[prost(int64, optional, tag = "4")]
+    pub amount: ::core::option::Option<i64>,
+    #[prost(int64, optional, tag = "5")]
+    pub vault_total_claimed_token: ::core::option::Option<i64>,
+}
+/// Wrapper for all event types
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbEventLogWrapper {
+    #[prost(string, tag = "1")]
+    pub event_name: ::prost::alloc::string::String,
+    #[prost(
+        oneof = "pb_event_log_wrapper::EventFields",
+        tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22"
+    )]
+    pub event_fields: ::core::option::Option<pb_event_log_wrapper::EventFields>,
+}
+/// Nested message and enum types in `PbEventLogWrapper`.
+pub mod pb_event_log_wrapper {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum EventFields {
+        #[prost(message, tag = "2")]
+        SwapLogFields(super::PbSwapLogFields),
+        #[prost(message, tag = "3")]
+        CompositionFeeLogFields(super::PbCompositionFeeLogFields),
+        #[prost(message, tag = "4")]
+        AddLiquidityLogFields(super::PbAddLiquidityLogFields),
+        #[prost(message, tag = "5")]
+        RemoveLiquidityLogFields(super::PbRemoveLiquidityLogFields),
+        #[prost(message, tag = "6")]
+        ClaimRewardLogFields(super::PbClaimRewardLogFields),
+        #[prost(message, tag = "7")]
+        FundRewardLogFields(super::PbFundRewardLogFields),
+        #[prost(message, tag = "8")]
+        InitializeRewardLogFields(super::PbInitializeRewardLogFields),
+        #[prost(message, tag = "9")]
+        UpdateRewardDurationLogFields(super::PbUpdateRewardDurationLogFields),
+        #[prost(message, tag = "10")]
+        UpdateRewardFunderLogFields(super::PbUpdateRewardFunderLogFields),
+        #[prost(message, tag = "11")]
+        PositionCloseLogFields(super::PbPositionCloseLogFields),
+        #[prost(message, tag = "12")]
+        ClaimFeeLogFields(super::PbClaimFeeLogFields),
+        #[prost(message, tag = "13")]
+        LbPairCreateLogFields(super::PbLbPairCreateLogFields),
+        #[prost(message, tag = "14")]
+        PositionCreateLogFields(super::PbPositionCreateLogFields),
+        #[prost(message, tag = "15")]
+        FeeParameterUpdateLogFields(super::PbFeeParameterUpdateLogFields),
+        #[prost(message, tag = "16")]
+        IncreaseObservationLogFields(super::PbIncreaseObservationLogFields),
+        #[prost(message, tag = "17")]
+        WithdrawIneligibleRewardLogFields(super::PbWithdrawIneligibleRewardLogFields),
+        #[prost(message, tag = "18")]
+        UpdatePositionOperatorLogFields(super::PbUpdatePositionOperatorLogFields),
+        #[prost(message, tag = "19")]
+        UpdatePositionLockReleaseSlotLogFields(
+            super::PbUpdatePositionLockReleaseSlotLogFields,
+        ),
+        #[prost(message, tag = "20")]
+        GoToABinLogFields(super::PbGoToABinLogFields),
+        #[prost(message, tag = "21")]
+        UpdatePositionLockReleasePointLogFields(
+            super::PbUpdatePositionLockReleasePointLogFields,
+        ),
+        #[prost(message, tag = "22")]
+        UnknownEvent1LogFields(super::PbUnknownEvent1LogFields),
+    }
+}
+/// Need definition for CompressedBinDepositAmount for AddLiquidityOneSidePrecise
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbCompressedBinDepositAmountLayout {
+    #[prost(int32, optional, tag = "1")]
+    pub bin_id: ::core::option::Option<i32>,
+    /// u32 in Python parser
+    #[prost(int32, optional, tag = "2")]
+    pub amount: ::core::option::Option<i32>,
 }

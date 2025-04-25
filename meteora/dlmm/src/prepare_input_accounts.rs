@@ -210,6 +210,13 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 14, "program");
         },
         
+        // Event logs typically don't have associated accounts passed in the instruction
+        // itself (they might reference accounts involved in the original action).
+        // We return an empty mapping for EventLog.
+        InstructionType::EventLog => {
+            // No accounts associated with EventLog instruction itself
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions
@@ -239,4 +246,15 @@ pub fn map_accounts(
 // Helper function to assign an account role if it exists at a given index
 fn assign_if_exists(roles: &mut HashMap<usize, String>, idx: usize, role: &str) {
     roles.insert(idx, role.to_string());
-} 
+}
+
+// Helper function for instructions with no specific accounts (like EventLog)
+pub fn map_empty_accounts() -> InputAccounts {
+    InputAccounts {
+        accounts: Vec::new(),
+        input_accounts: HashMap::new(),
+    }
+}
+
+// Helper function for generic account mapping if specific mapping not defined
+// Used as a fallback or for Unknown instructions 

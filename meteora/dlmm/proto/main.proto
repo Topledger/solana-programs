@@ -83,8 +83,8 @@ message InstructionArgs {
     PbCollectFeesLayout collect_fees = 10;
     PbTransferPositionOwnerLayout transfer_position_owner = 11;
     PbUpdateFeesLayout update_fees = 12;
-    PbAddLiquidityLayout add_liquidity = 13;
-    PbRemoveLiquidityLayout remove_liquidity = 14;
+    PbAddLiquidityLayout add_liquidity = 13; // Used for legacy AddLiquidity
+    PbRemoveLiquidityLayout remove_liquidity = 14; // Used for legacy RemoveLiquidity
     PbInitializeConfigLayout initialize_config = 15;
     PbUpdateConfigLayout update_config = 16;
     
@@ -95,6 +95,49 @@ message InstructionArgs {
     PbInitializePositionPdaLayout initialize_position_pda = 20;
     PbSwapWithPriceImpactLayout swap_with_price_impact = 21;
     PbSwapExactOutLayout swap_exact_out = 22;
+    
+    // Add other instruction layouts
+    PbInitializeCustomizablePermissionlessLbPairLayout initialize_customizable_permissionless_lb_pair = 23;
+    PbCloseLbPairLayout close_lb_pair = 24;
+    PbInitializeBinArrayLayout initialize_bin_array = 25;
+    PbInitializeBinArrayBitmapExtensionLayout initialize_bin_array_bitmap_extension = 26;
+    PbAddLiquidityByWeightLayout add_liquidity_by_weight = 27;
+    PbAddLiquidityByStrategyLayout add_liquidity_by_strategy = 28;
+    PbAddLiquidityOneSideLayout add_liquidity_one_side = 29;
+    PbAddLiquidityByStrategyOneSideLayout add_liquidity_by_strategy_one_side = 30;
+    PbAddLiquidityOneSidePreciseLayout add_liquidity_one_side_precise = 31;
+    PbRemoveAllLiquidityLayout remove_all_liquidity = 33;
+    PbRemoveLiquidityByRangeLayout remove_liquidity_by_range = 34;
+    PbRemoveLiquiditySingleSideLayout remove_liquidity_single_side = 35;
+    PbGoToABinLayout go_to_a_bin = 36;
+    PbInitializePositionByOperatorLayout initialize_position_by_operator = 37;
+    PbUpdatePositionOperatorLayout update_position_operator = 38;
+    PbClaimLiquidityLayout claim_liquidity = 39;
+    PbWithdrawProtocolFeeLayout withdraw_protocol_fee = 40;
+    PbUpdateFeeParametersLayout update_fee_parameters = 41;
+    PbUpdateFeeOwnerLayout update_fee_owner = 42;
+    PbFundRewardLayout fund_reward = 43;
+    PbUpdateRewardFunderLayout update_reward_funder = 44;
+    PbUpdateRewardDurationLayout update_reward_duration = 45;
+    PbWithdrawIneligibleRewardLayout withdraw_ineligible_reward = 46;
+    PbClosePresetParameterLayout close_preset_parameter = 47;
+    PbInitializePresetParameterLayout initialize_preset_parameter = 48;
+    PbInitializePresetParameterV2Layout initialize_preset_parameter_v2 = 49;
+    PbTogglePairStatusLayout toggle_pair_status = 50;
+    PbUpdateWhitelistedWalletLayout update_whitelisted_wallet = 51;
+    PbIncreaseOracleLengthLayout increase_oracle_length = 52;
+    PbMigratePositionLayout migrate_position = 53;
+    PbMigrateBinArrayLayout migrate_bin_array = 54;
+    PbUpdateFeesAndRewardsLayout update_fees_and_rewards = 55;
+    PbSetLockReleaseSlotLayout set_lock_release_slot = 56;
+    PbSetActivationSlotLayout set_activation_slot = 57;
+    PbSetMaxSwappedAmountLayout set_max_swapped_amount = 58;
+    PbSetPreActivationDurationLayout set_pre_activation_duration = 59;
+    PbSetPreActivationSwapAddressLayout set_pre_activation_swap_address = 60;
+    PbIdlWriteLayout idl_write = 61;
+
+    // Event logs - Use the wrapper now
+    PbEventLogWrapper event_log = 100; 
   }
 }
 
@@ -140,8 +183,8 @@ message PbCreatePositionLayout {
 message PbClosePositionLayout {}
 
 message PbSwapLayout {
-  string amount_in = 1 [json_name = "amountIn"];
-  string min_amount_out = 2 [json_name = "minAmountOut"];
+  optional string amount_in = 1 [json_name = "amountIn"];
+  optional string min_amount_out = 2 [json_name = "minAmountOut"];
 }
 
 message PbSwapRouterBaseInLayout {
@@ -184,6 +227,7 @@ message PbAddLiquidityLayout {
   string liquidity_amount = 3;
   uint64 token_max_a = 4;
   uint64 token_max_b = 5;
+  optional bytes liquidity_parameter = 6;
 }
 
 message PbRemoveLiquidityLayout {
@@ -192,6 +236,7 @@ message PbRemoveLiquidityLayout {
   string liquidity_amount = 3;
   uint64 token_min_a = 4;
   uint64 token_min_b = 5;
+  repeated bytes bin_liquidity_removal = 6;  // Assuming vec![] in Rust maps to repeated bytes
 }
 
 message PbInitializeConfigLayout {
@@ -201,38 +246,395 @@ message PbInitializeConfigLayout {
 }
 
 message PbUpdateConfigLayout {
-  uint32 param = 1;
-  uint64 value = 2;
+  optional uint32 param = 1;
+  optional uint64 value = 2;
 }
 
-// New message definitions for Meteora-specific layouts
+// Parameters for InitializeCustomizablePermissionlessLbPair (Flattened)
+message PbInitializeCustomizablePermissionlessLbPairLayout {
+  optional int32 active_id = 1;
+  optional int32 bin_step = 2;
+  optional int32 base_factor = 3;
+  optional uint32 activation_type = 4; // Assuming u8 maps to uint32
+  optional bool has_alpha_vault = 5;
+  optional int64 activation_point = 6; // Assuming i64 maps to int64
+}
+
+// Meteora DLMM specific layouts
 message PbInitializeLbPairLayout {
-  int32 active_id = 1;
-  int32 bin_step = 2;
+  optional int32 active_id = 1;
+  optional int32 bin_step = 2;
 }
 
 message PbInitializePermissionLbPairLayout {
-  int32 active_id = 1;
-  int32 bin_step = 2;
+  optional int32 active_id = 1;
+  optional int32 bin_step = 2;
 }
 
 message PbInitializePositionLayout {
-  int32 lower_bin_id = 1;
-  int32 width = 2;
+  optional int32 lower_bin_id = 1;
+  optional int32 width = 2;
 }
 
 message PbInitializePositionPdaLayout {
-  int32 lower_bin_id = 1;
-  int32 width = 2;
+  optional int32 lower_bin_id = 1;
+  optional int32 width = 2;
 }
 
 message PbSwapWithPriceImpactLayout {
-  uint64 amount_in = 1;
-  int32 active_id = 2;
-  int32 max_price_impact_bps = 3;
+  optional uint64 amount_in = 1;
+  optional int32 active_id = 2;
+  optional int32 max_price_impact_bps = 3;
 }
 
 message PbSwapExactOutLayout {
-  uint64 max_in_amount = 1;
-  uint64 out_amount = 2;
+  optional uint64 max_in_amount = 1;
+  optional uint64 out_amount = 2;
+}
+
+// Helper messages for liquidity parameters
+message PbLiquidityParameterLayout {
+  // Fields for general liquidity, maybe amountX/Y?
+  // Define based on Rust usage for other instructions like AddLiquidityByWeight if needed.
+}
+
+// Specific layout for BinLiquidityDistributionByWeight
+message PbBinLiquidityDistributionByWeightLayout {
+  optional int32 bin_id = 1;
+  optional int32 weight = 2; // Use int32 for u16 for simplicity in proto
+}
+
+// Removed PbLiquidityOneSideParameterLayout as it's being flattened
+
+// Helper message for Fee Parameters (Flattened into PbUpdateFeeParametersLayout)
+// Removed PbFeeParameterLayout
+
+// Placeholder definitions for missing layouts with fields added
+message PbCloseLbPairLayout {}
+message PbInitializeBinArrayLayout { 
+  optional int64 index = 1;
+}
+message PbInitializeBinArrayBitmapExtensionLayout {}
+message PbAddLiquidityByWeightLayout { 
+  optional PbLiquidityParameterLayout liquidity_parameter = 1;
+}
+message PbAddLiquidityByStrategyLayout { 
+  optional PbLiquidityParameterLayout liquidity_parameter = 1;
+}
+message PbAddLiquidityOneSideLayout { 
+  // Fields moved directly here from the removed PbLiquidityOneSideParameterLayout
+  optional uint64 amount = 1;
+  optional int32 active_id = 2;
+  optional int32 max_active_bin_slippage = 3;
+  repeated PbBinLiquidityDistributionByWeightLayout bin_liquidity_dist = 4;
+}
+message PbAddLiquidityByStrategyOneSideLayout { 
+  optional PbLiquidityParameterLayout liquidity_parameter = 1;
+}
+message PbAddLiquidityOneSidePreciseLayout { 
+  // Fields moved from Python's AddLiquidityOneSidePreciseParameterLayout
+  repeated PbCompressedBinDepositAmountLayout bins = 1;
+  optional int64 decompress_multiplier = 2;
+}
+message PbRemoveAllLiquidityLayout {}
+message PbRemoveLiquidityByRangeLayout { 
+  optional int32 from_bin_id = 1;
+  optional int32 to_bin_id = 2;
+  optional int32 bps_to_remove = 3; // Assuming i16 maps to int32
+}
+message PbRemoveLiquiditySingleSideLayout {}
+message PbGoToABinLayout { 
+  optional int32 bin_id = 1;
+}
+message PbInitializePositionByOperatorLayout { 
+  optional int32 lower_bin_id = 1;
+  optional int32 width = 2;
+  optional string owner = 3; 
+}
+message PbUpdatePositionOperatorLayout { 
+  optional string operator = 1;
+}
+message PbClaimLiquidityLayout {}
+message PbWithdrawProtocolFeeLayout { 
+  optional uint64 amount_x = 1;
+  optional uint64 amount_y = 2;
+}
+message PbUpdateFeeParametersLayout { 
+  // Fields moved from PbFeeParameterLayout
+  optional int32 protocol_share = 1; // Assuming i16 maps to int32
+  optional int32 base_factor = 2; // Assuming i16 maps to int32
+}
+message PbUpdateFeeOwnerLayout {}
+message PbFundRewardLayout { 
+  optional int64 reward_index = 1;
+  optional int64 amount = 2;
+  optional bool carry_forward = 3;
+}
+message PbUpdateRewardFunderLayout { 
+  optional int64 reward_index = 1;
+  optional string new_funder = 2;
+}
+message PbUpdateRewardDurationLayout { 
+  optional int64 reward_index = 1;
+  optional int64 new_duration = 2;
+}
+message PbWithdrawIneligibleRewardLayout { 
+  optional int64 reward_index = 1;
+}
+message PbClosePresetParameterLayout {}
+
+// Flattened structure for InitializePresetParameter
+message PbInitializePresetParameterLayout { 
+  // Fields moved from PbInitializePresetParameterIxLayout
+  optional int32 bin_step = 1;
+  optional int32 base_factor = 2;
+  optional int32 filter_period = 3;
+  optional int32 decay_period = 4;
+  optional int32 reduction_factor = 5;
+  optional int32 variable_fee_control = 6;
+  optional int32 max_volatility_accumulator = 7;
+  optional int32 min_bin_id = 8;
+  optional int32 max_bin_id = 9;
+  optional int32 protocol_share = 10;
+}
+// Removed PbInitializePresetParameterIxLayout
+
+// Flattened structure for InitializePresetParameterV2
+message PbInitializePresetParameterV2Layout { 
+  // Fields moved from PbInitializePresetParameterV2IxLayout
+  optional int32 bin_step = 1;
+  optional int32 base_factor = 2;
+  optional int32 filter_period = 3;
+  optional int32 decay_period = 4;
+  optional int32 reduction_factor = 5;
+  optional int32 variable_fee_control = 6;
+  optional int32 max_volatility_accumulator = 7;
+  optional int32 min_bin_id = 8;
+  optional int32 max_bin_id = 9;
+  optional int32 protocol_share = 10;
+  optional int32 host_fee = 11;
+}
+// Removed PbInitializePresetParameterV2IxLayout
+
+message PbTogglePairStatusLayout {}
+message PbUpdateWhitelistedWalletLayout { 
+  optional int32 idx = 1; // Assuming u16 maps to int32
+  optional string wallet = 2;
+}
+message PbIncreaseOracleLengthLayout { 
+  optional int64 length_to_add = 1; // Assuming u32 maps to int64 (check Rust type)
+}
+message PbMigratePositionLayout {}
+message PbMigrateBinArrayLayout {}
+message PbUpdateFeesAndRewardsLayout {}
+message PbSetLockReleaseSlotLayout { 
+  optional int64 new_lock_release_slot = 1;
+}
+message PbSetActivationSlotLayout { 
+  optional int64 activation_slot = 1;
+}
+message PbSetMaxSwappedAmountLayout { 
+  optional int64 swap_cap_deactivate_slot = 1; // Assuming u64 maps to int64 (check Rust type)
+  optional string max_swapped_amount = 2; // Assuming u128 maps to string
+}
+message PbSetPreActivationDurationLayout { 
+  optional int64 pre_activation_duration = 1; // Assuming u64 maps to int64 (check Rust type)
+}
+message PbSetPreActivationSwapAddressLayout { 
+  optional string pre_activation_swap_address = 1;
+}
+message PbIdlWriteLayout {}
+
+// --- Event Log Structures ---
+
+// Renamed from PbSwapLogLayout, removed event_name, added optional
+message PbSwapLogFields {
+  string lb_pair = 1; 
+  string from = 2; 
+  optional int32 start_bin_id = 3;
+  optional int32 end_bin_id = 4;
+  optional uint64 amount_in = 5;
+  optional uint64 amount_out = 6;
+  optional bool swap_for_y = 7;
+  optional uint64 fee = 8;
+  optional uint64 protocol_fee = 9;
+  string fee_bps = 10; 
+  optional uint64 host_fee = 11;
+}
+
+message PbCompositionFeeLogFields {
+  string from = 1;
+  optional int32 bin_id = 2;
+  optional uint64 token_x_fee_amount = 3;
+  optional uint64 token_y_fee_amount = 4;
+  optional uint64 protocol_token_x_fee_amount = 5;
+  optional uint64 protocol_token_y_fee_amount = 6;
+}
+
+message PbAddLiquidityLogFields {
+  string lb_pair = 1;
+  string from = 2;
+  string position = 3;
+  repeated uint64 amounts = 4;
+  optional int32 active_bin_id = 5;
+}
+
+message PbRemoveLiquidityLogFields {
+  string lb_pair = 1;
+  string from = 2;
+  string position = 3;
+  repeated uint64 amounts = 4;
+  optional int32 active_bin_id = 5;
+}
+
+message PbClaimRewardLogFields {
+  string lb_pair = 1;
+  string position = 2;
+  string owner = 3;
+  optional int64 reward_index = 4;
+  optional int64 total_reward = 5;
+}
+
+message PbFundRewardLogFields {
+  string lb_pair = 1;
+  string funder = 2;
+  optional int64 reward_index = 3;
+  optional int64 amount = 4;
+}
+
+message PbInitializeRewardLogFields {
+  string lb_pair = 1;
+  string reward_mint = 2;
+  string funder = 3;
+  optional int64 reward_index = 4;
+  optional int64 reward_duration = 5;
+}
+
+message PbUpdateRewardDurationLogFields {
+  string lb_pair = 1;
+  optional int64 reward_index = 2;
+  optional int64 old_reward_duration = 3;
+  optional int64 new_reward_duration = 4;
+}
+
+message PbUpdateRewardFunderLogFields {
+  string lb_pair = 1;
+  optional int64 reward_index = 2;
+  string old_funder = 3;
+  string new_funder = 4;
+}
+
+message PbPositionCloseLogFields {
+  string position = 1;
+  string owner = 2;
+}
+
+message PbClaimFeeLogFields {
+  string lb_pair = 1;
+  string position = 2;
+  string owner = 3;
+  optional int64 fee_x = 4;
+  optional int64 fee_y = 5;
+}
+
+message PbLbPairCreateLogFields {
+  string lb_pair = 1;
+  optional int32 bin_step = 2;
+  string token_x = 3;
+  string token_y = 4;
+}
+
+message PbPositionCreateLogFields {
+  string lb_pair = 1;
+  string position = 2;
+  string owner = 3;
+}
+
+message PbFeeParameterUpdateLogFields {
+  string lb_pair = 1;
+  optional int32 protocol_share = 2;
+  optional int32 base_factor = 3;
+}
+
+message PbIncreaseObservationLogFields {
+  string oracle = 1;
+  optional int64 new_observation_length = 2;
+}
+
+message PbWithdrawIneligibleRewardLogFields {
+  string lb_pair = 1;
+  string reward_mint = 2;
+  optional int64 amount = 3;
+}
+
+message PbUpdatePositionOperatorLogFields {
+  string position = 1;
+  string old_operator = 2;
+  string new_operator = 3;
+}
+
+message PbUpdatePositionLockReleaseSlotLogFields {
+  string position = 1;
+  optional int64 current_slot = 2;
+  optional int64 new_lock_release_slot = 3;
+  optional int64 old_lock_release_slot = 4;
+  string sender = 5;
+}
+
+message PbGoToABinLogFields {
+  string lb_pair = 1;
+  optional int32 from_bin_id = 2;
+  optional int32 to_bin_id = 3;
+}
+
+message PbUpdatePositionLockReleasePointLogFields {
+  string position = 1;
+  optional int64 current_point = 2;
+  optional int64 new_lock_release_point = 3;
+  optional int64 old_lock_release_point = 4;
+  string sender = 5;
+}
+
+message PbUnknownEvent1LogFields {
+  string vault = 1;
+  string escrow = 2;
+  string owner = 3;
+  optional int64 amount = 4;
+  optional int64 vault_total_claimed_token = 5;
+}
+
+// Wrapper for all event types
+message PbEventLogWrapper {
+  string event_name = 1;
+  oneof event_fields {
+    PbSwapLogFields swap_log_fields = 2;
+    PbCompositionFeeLogFields composition_fee_log_fields = 3;
+    PbAddLiquidityLogFields add_liquidity_log_fields = 4;
+    PbRemoveLiquidityLogFields remove_liquidity_log_fields = 5;
+    PbClaimRewardLogFields claim_reward_log_fields = 6;
+    PbFundRewardLogFields fund_reward_log_fields = 7;
+    PbInitializeRewardLogFields initialize_reward_log_fields = 8;
+    PbUpdateRewardDurationLogFields update_reward_duration_log_fields = 9;
+    PbUpdateRewardFunderLogFields update_reward_funder_log_fields = 10;
+    PbPositionCloseLogFields position_close_log_fields = 11;
+    PbClaimFeeLogFields claim_fee_log_fields = 12;
+    PbLbPairCreateLogFields lb_pair_create_log_fields = 13;
+    PbPositionCreateLogFields position_create_log_fields = 14;
+    PbFeeParameterUpdateLogFields fee_parameter_update_log_fields = 15;
+    PbIncreaseObservationLogFields increase_observation_log_fields = 16;
+    PbWithdrawIneligibleRewardLogFields withdraw_ineligible_reward_log_fields = 17;
+    PbUpdatePositionOperatorLogFields update_position_operator_log_fields = 18;
+    PbUpdatePositionLockReleaseSlotLogFields update_position_lock_release_slot_log_fields = 19;
+    PbGoToABinLogFields go_to_a_bin_log_fields = 20;
+    PbUpdatePositionLockReleasePointLogFields update_position_lock_release_point_log_fields = 21;
+    PbUnknownEvent1LogFields unknown_event1_log_fields = 22;
+  }
+}
+
+// --- End Event Log Structures --- 
+
+// Need definition for CompressedBinDepositAmount for AddLiquidityOneSidePrecise
+message PbCompressedBinDepositAmountLayout {
+  optional int32 bin_id = 1;
+  optional int32 amount = 2; // u32 in Python parser
 } 

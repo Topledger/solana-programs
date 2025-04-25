@@ -15,7 +15,7 @@ package: build
 
 .PHONY: stream
 stream: build
-	substreams run -e mainnet.sol.streamingfast.io:443 substreams.yaml map_block -s 335779656 -t +1 > meteora_dlmm_instructions.jsonl
+	substreams run -e mainnet.sol.streamingfast.io:443 substreams.yaml map_block -s 335838627 -t +1 > meteora_dlmm_instructions.jsonl
 
 .PHONY: stream_output_to_stdout
 stream_output_to_stdout: build
