@@ -1,0 +1,153 @@
+TraceID: 6234666dabdd368ca3fadada6811fd2d
+{
+  "@module": "map_block",
+  "@block": 335779656,
+  "@type": "sf.solana.meteora_dlmm.v1.Instructions",
+  "@data": {
+    "instructions": [
+      {
+        "txId": "5nCi5NcrAD4u6KxCEgyEFRbVrLwDLmG5ai4K3grJc9GRtCx93dZd5fs4q67XHJtENywrYkVC8fVEFxkDJcX1z2JT",
+        "blockSlot": "335779656",
+        "blockTime": "1745573778",
+        "blockDate": "2025-04-25",
+        "instructionIndex": 2,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 12,
+        "signer": "7rqskAg1eYcHXwL4FFdmgNuJ6rg4jCDfE29ugeeTrKez",
+        "outerProgram": "BN111JnbLtbmQqqiCh7h2pDKhAhMx4wi77Mj7jJFbyp8",
+        "instructionType": "Swap",
+        "args": {
+          "swap": {
+            "amountIn": "75575800",
+            "minAmountOut": "0"
+          }
+        },
+        "inputAccounts": {
+          "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "hostFeeIn": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "lbPair": "66wuLfiPFkuwNtvt3YDBBGTsN8wP65sRJU9sTa7FwmdP",
+          "oracle": "GfCpa4iTcPuLBHXwhh8A3MrRDbLLn9xK3xZvc5uuH5Cs",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "reserveX": "4bBHE1euiTNMYn4rtnrScVssTpmfMkMDd1XYS84aFMm1",
+          "reserveY": "H96VwuEbxV9CAcWVvTbgp1TpunMnJJxCvbL4PjFDU6yG",
+          "tokenXMint": "C3DwDjT17gDvvCYC2nsdGHxDHVmQRdhKfpAdqQ29pump",
+          "tokenXProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "user": "GGztQqQ6pCPaJQnNpXBgELr5cs3WwDakRbh1iEMzjgSJ",
+          "userTokenIn": "g7dD1FHSemkUQrX1Eak37wzvDjscgBW2pFCENwjLdMX",
+          "userTokenOut": "Fj2hKuYCWUMymmrTf4M63SMJWfCoXjWFuvpW6YFjPq6k"
+        }
+      },
+      {
+        "txId": "3RrzbQYA1j6UVgGvzwp8zM1Gv95b7jC3RAK2hD4LKGqnpnJoqZbfEYDPa4z1XUfZyQ8jXHJE84Rd7MPbQ4pmvnTm",
+        "blockSlot": "335779656",
+        "blockTime": "1745573778",
+        "blockDate": "2025-04-25",
+        "instructionIndex": 3,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 0,
+        "signer": "GQEZDiygN1Ric4po2zCSs42kfr6SeBL6Pz1G4DENVWyA",
+        "outerProgram": "King7ki4SKMBPb3iupnQwTyjsq294jaXsgLmJo8cb7T",
+        "instructionType": "Swap",
+        "args": {
+          "swap": {
+            "amountIn": "228256863",
+            "minAmountOut": "0"
+          }
+        },
+        "inputAccounts": {
+          "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "hostFeeIn": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "lbPair": "5w6MqzYtjBvScCCwUvBqja2zdnhNphLMHxH2sTe3onR9",
+          "oracle": "HJwc3HsKQdKm2KLZa1CBdZ5LHBu5LL8o8wz5FicqUfaH",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "reserveX": "Es9msJb2cN48DtPD8fwDdyXHfRRmJXZpGMtcDhL6VjhK",
+          "reserveY": "DELyVhfWBDsBrivAfyXd3vXNRTYSyqgdCU9zs9Cet5Uh",
+          "tokenXMint": "2UqK55pmAWxdzTnfW1dGyi11msbgziCZbNpPrre6pump",
+          "tokenXProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "user": "GQEZDiygN1Ric4po2zCSs42kfr6SeBL6Pz1G4DENVWyA",
+          "userTokenIn": "9BLh3gQNbTAXPVaddia3bd88UhvqApKTgxDeixhgV9Ap",
+          "userTokenOut": "6kS3MJ6dzW3sseALoKrLwfa1THQ36nfxbLpaDx4jBeK4"
+        }
+      },
+      {
+        "txId": "3UvPmTr7i31x7MHm8tx63wyzrEzS1EikVEBXh1gMSB7jH3CsS9SprgYrAGzBtMgTE6iF1kvAB7KWSYTFdPKk5yYH",
+        "blockSlot": "335779656",
+        "blockTime": "1745573778",
+        "blockDate": "2025-04-25",
+        "instructionIndex": 2,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 0,
+        "signer": "G1ATngvGC2DyoMpqYsKdBp8mXdxYdFbXgX7bT1rFmYou",
+        "outerProgram": "MEViEnscUm6tsQRoGd9h6nLQaQspKj7DB2M5FwM3Xvz",
+        "instructionType": "Swap",
+        "args": {
+          "swap": {
+            "amountIn": "11736",
+            "minAmountOut": "0"
+          }
+        },
+        "inputAccounts": {
+          "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "hostFeeIn": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "lbPair": "5w6MqzYtjBvScCCwUvBqja2zdnhNphLMHxH2sTe3onR9",
+          "oracle": "HJwc3HsKQdKm2KLZa1CBdZ5LHBu5LL8o8wz5FicqUfaH",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "reserveX": "Es9msJb2cN48DtPD8fwDdyXHfRRmJXZpGMtcDhL6VjhK",
+          "reserveY": "DELyVhfWBDsBrivAfyXd3vXNRTYSyqgdCU9zs9Cet5Uh",
+          "tokenXMint": "2UqK55pmAWxdzTnfW1dGyi11msbgziCZbNpPrre6pump",
+          "tokenXProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "user": "G1ATngvGC2DyoMpqYsKdBp8mXdxYdFbXgX7bT1rFmYou",
+          "userTokenIn": "GtrkXGzGbcU6LrpoSkPefGbqKjL1yUYWeBhxK2GJLkCc",
+          "userTokenOut": "14kHBppp4XwyiZb1AjwT7s44diiDCYx7nRr7V7aLd7Zx"
+        }
+      },
+      {
+        "txId": "58gMxHfty9GdUbu5diwpUn3FfhXXXB2ZKLPp6XsYJa21kaPWYd4uqz44HGTwCqBScfRpWU1ucbAYwJ6iKkwsczXX",
+        "blockSlot": "335779656",
+        "blockTime": "1745573778",
+        "blockDate": "2025-04-25",
+        "instructionIndex": 2,
+        "isInnerInstruction": true,
+        "innerInstructionIndex": 0,
+        "signer": "2QfBNK2WDwSLoUQRb1zAnp3KM12N9hQ8q6ApwUMnWW2T",
+        "outerProgram": "sattCHvHkM4XHLyadnU4KQtuNWZbWVDKzuPhmJBXCkq",
+        "instructionType": "Swap",
+        "args": {
+          "swap": {
+            "amountIn": "65128720",
+            "minAmountOut": "0"
+          }
+        },
+        "inputAccounts": {
+          "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "hostFeeIn": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "lbPair": "5aF1i7wUNztcujbzFPZACBMCmzSfGmZr8DaNHGUTfeXk",
+          "oracle": "BGVHq89h5EwPFfc8S7pQdQFgvUCxeyTESQwhiqRdVUdF",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "reserveX": "EhYv3M2j3LAaCu1ngok8Jxpni8mSWRm6ktqNyyFieJv8",
+          "reserveY": "4kTy2QtYD8gNyP7LqJMwMsHJSCPdaDcTKCvneVMJRXtu",
+          "tokenXMint": "2UqK55pmAWxdzTnfW1dGyi11msbgziCZbNpPrre6pump",
+          "tokenXProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "user": "2QfBNK2WDwSLoUQRb1zAnp3KM12N9hQ8q6ApwUMnWW2T",
+          "userTokenIn": "F7hCHiC6gZLqufNag1ytn4a34S22nvjEbwgH7qbnjuvG",
+          "userTokenOut": "2syPc7PGX1NrLkP6P9hoVSy1Xgm4ABnwpR3nf6eMsWfw"
+        }
+      }
+    ]
+  }
+}
+
+Total Read Bytes (server-side consumption): 7730801
+all done

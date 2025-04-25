@@ -1,0 +1,238 @@
+syntax = "proto3";
+
+package sf.solana.meteora_dlmm.v1;
+
+// Main instructions container
+message Instructions {
+  repeated Meta instructions = 1;
+}
+
+// Metadata for an instruction
+message Meta {
+  string tx_id = 1;
+  uint64 block_slot = 2;
+  int64 block_time = 3;
+  string block_date = 4;
+  uint32 instruction_index = 5;
+  bool is_inner_instruction = 6;
+  optional uint32 inner_instruction_index = 7;
+  optional string signer = 8;
+  optional string outer_program = 9;
+  string instruction_type = 10;
+  // Map of account roles to their addresses, key is role name, value is account address
+  map<string, string> input_accounts = 14;
+
+  // Instruction data
+  optional InstructionArgs args = 12;
+}
+
+// Flattened args for easy querying
+message FlatArg {
+  optional int32 tick_spacing = 1;
+  optional int32 index = 2;
+  optional uint64 trade_fee_rate = 3;
+  optional uint64 protocol_fee_rate = 4;
+  optional uint64 fund_fee_rate = 5;
+  optional uint32 param = 6;
+  optional uint64 value = 7;
+  optional string sqrt_price_x64 = 8;
+  optional uint64 open_time = 9;
+  optional uint32 status = 10;
+  repeated string keys = 11;
+  optional string new_owner = 12;
+  repeated PbInitializeRewardParam params = 13;
+  optional uint32 reward_index = 14;
+  optional string emissions_per_second_x64 = 15;
+  optional uint64 end_time = 16;
+  optional string amount0_requested = 17;
+  optional string amount1_requested = 18;
+  optional int32 tick_lower_index = 19;
+  optional int32 tick_upper_index = 20;
+  optional int32 tick_array_lower_start_index = 21;
+  optional int32 tick_array_upper_start_index = 22;
+  optional string liquidity = 23;
+  optional uint64 amount0_max = 24;
+  optional uint64 amount1_max = 25;
+  optional uint64 with_metadata = 26;
+  optional string liquidity_amount = 27;
+  optional uint64 amount0_min = 28;
+  optional uint64 amount1_min = 29;
+  optional bool is_base_input = 30;
+  optional uint64 amount_specified = 31;
+  optional uint64 amount_limit = 32;
+  optional uint64 sqrt_price_limit_x64 = 33;
+  optional bool is_base_input_v2 = 34;
+  optional uint64 amount_specified_v2 = 35;
+  optional uint64 other_amount_threshold = 36;
+  optional uint64 sqrt_price_limit_x64_v2 = 37;
+}
+
+// Main instruction arguments structure
+message InstructionArgs {
+  oneof instruction_args {
+    // Core pool operations
+    PbCreatePoolLayout create_pool = 1;
+    PbInitializeTickArrayLayout initialize_tick_array = 2;
+    PbCreatePositionLayout create_position = 3;
+    PbClosePositionLayout close_position = 4;
+    PbSwapLayout swap = 5;
+    PbSwapRouterBaseInLayout swap_router_base_in = 6;
+    PbInitializeRewardLayout initialize_reward = 7;
+    PbSetRewardEmissionsLayout set_reward_emissions = 8;
+    PbCollectRewardLayout collect_reward = 9;
+    PbCollectFeesLayout collect_fees = 10;
+    PbTransferPositionOwnerLayout transfer_position_owner = 11;
+    PbUpdateFeesLayout update_fees = 12;
+    PbAddLiquidityLayout add_liquidity = 13;
+    PbRemoveLiquidityLayout remove_liquidity = 14;
+    PbInitializeConfigLayout initialize_config = 15;
+    PbUpdateConfigLayout update_config = 16;
+    
+    // Additional Meteora-specific instruction layouts
+    PbInitializeLbPairLayout initialize_lb_pair = 17;
+    PbInitializePermissionLbPairLayout initialize_permission_lb_pair = 18;
+    PbInitializePositionLayout initialize_position = 19;
+    PbInitializePositionPdaLayout initialize_position_pda = 20;
+    PbSwapWithPriceImpactLayout swap_with_price_impact = 21;
+    PbSwapExactOutLayout swap_exact_out = 22;
+  }
+}
+
+// Common types
+message PbPubKey {
+  string pubkey = 1;
+}
+
+message PbInt128 {
+  string value = 1;
+}
+
+// Instruction specific layouts
+message PbInitializeRewardParam {
+  string mint = 1;
+  string vault = 2;
+  string authority = 3;
+  string emissions_per_second_x64 = 4;
+  uint64 open_time = 5;
+  uint64 end_time = 6;
+}
+
+// Meteora DLMM specific layouts
+message PbCreatePoolLayout {
+  string token_mint_a = 1;
+  string token_mint_b = 2;
+  int32 tick_spacing = 3;
+  string initial_sqrt_price_x64 = 4;
+}
+
+message PbInitializeTickArrayLayout {
+  int32 start_tick_index = 1;
+}
+
+message PbCreatePositionLayout {
+  int32 tick_lower_index = 1;
+  int32 tick_upper_index = 2;
+  string liquidity_amount = 3;
+  uint64 token_max_a = 4;
+  uint64 token_max_b = 5;
+}
+
+message PbClosePositionLayout {}
+
+message PbSwapLayout {
+  string amount_in = 1 [json_name = "amountIn"];
+  string min_amount_out = 2 [json_name = "minAmountOut"];
+}
+
+message PbSwapRouterBaseInLayout {
+  uint64 amount_in = 1;
+  uint64 amount_out_min = 2;
+  uint64 sqrt_price_limit_x64 = 3;
+}
+
+message PbInitializeRewardLayout {
+  string emissions_per_second_x64 = 1;
+  uint64 open_time = 2;
+  uint64 end_time = 3;
+}
+
+message PbSetRewardEmissionsLayout {
+  uint32 reward_index = 1;
+  string emissions_per_second_x64 = 2;
+  uint64 open_time = 3;
+  uint64 end_time = 4;
+}
+
+message PbCollectRewardLayout {
+  uint32 reward_index = 1;
+}
+
+message PbCollectFeesLayout {}
+
+message PbTransferPositionOwnerLayout {
+  string new_owner = 1;
+}
+
+message PbUpdateFeesLayout {
+  uint64 trade_fee_rate = 1;
+  uint64 protocol_fee_rate = 2;
+}
+
+message PbAddLiquidityLayout {
+  int32 tick_lower_index = 1;
+  int32 tick_upper_index = 2;
+  string liquidity_amount = 3;
+  uint64 token_max_a = 4;
+  uint64 token_max_b = 5;
+}
+
+message PbRemoveLiquidityLayout {
+  int32 tick_lower_index = 1;
+  int32 tick_upper_index = 2;
+  string liquidity_amount = 3;
+  uint64 token_min_a = 4;
+  uint64 token_min_b = 5;
+}
+
+message PbInitializeConfigLayout {
+  uint64 trade_fee_rate = 1;
+  uint64 protocol_fee_rate = 2;
+  uint64 tick_spacing = 3;
+}
+
+message PbUpdateConfigLayout {
+  uint32 param = 1;
+  uint64 value = 2;
+}
+
+// New message definitions for Meteora-specific layouts
+message PbInitializeLbPairLayout {
+  int32 active_id = 1;
+  int32 bin_step = 2;
+}
+
+message PbInitializePermissionLbPairLayout {
+  int32 active_id = 1;
+  int32 bin_step = 2;
+}
+
+message PbInitializePositionLayout {
+  int32 lower_bin_id = 1;
+  int32 width = 2;
+}
+
+message PbInitializePositionPdaLayout {
+  int32 lower_bin_id = 1;
+  int32 width = 2;
+}
+
+message PbSwapWithPriceImpactLayout {
+  uint64 amount_in = 1;
+  int32 active_id = 2;
+  int32 max_price_impact_bps = 3;
+}
+
+message PbSwapExactOutLayout {
+  uint64 max_in_amount = 1;
+  uint64 out_amount = 2;
+} 

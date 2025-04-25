@@ -1,0 +1,219 @@
+mod instructions;
+mod prepare_input_accounts;
+
+pub mod pb;
+use pb::sf::solana::meteora_dlmm::v1::{Instructions, Meta};
+use substreams_solana::pb::sf::solana::r#type::v1::{Block, CompiledInstruction};
+
+#[substreams::handlers::map]
+fn map_block(
+    block: Block,
+) -> Result<Instructions, substreams::errors::Error> {
+    // Print a message that will always show in the output
+    println!("Processing block: {} at timestamp: {}", block.slot, block.block_time.as_ref().map_or(0, |t| t.timestamp));
+    println!("Block contains {} transactions", block.transactions_owned().len());
+    
+    let mut instructions: Vec<Meta> = Vec::new();
+    let block_slot = block.slot;
+    let block_timestamp = block.block_time.as_ref().map_or(0, |t| t.timestamp);
+    
+    // Check if the block has any Meteora DLMM transactions
+    let meteora_program_id = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
+    let mut meteora_tx_count = 0;
+    
+    for trx in block.transactions_owned() {
+        let resolved_accounts: Vec<String> = trx.resolved_accounts().iter().map(|acc_bytes| bs58::encode(acc_bytes).into_string()).collect();
+        
+        // Check if any instruction uses the Meteora DLMM program
+        let mut has_meteora = false;
+        if let Some(tx) = &trx.transaction {
+            if let Some(msg) = &tx.message {
+                for inst in &msg.instructions {
+                    if let Some(program_id) = resolved_accounts.get(inst.program_id_index as usize) {
+                        if program_id == meteora_program_id {
+                            has_meteora = true;
+                            meteora_tx_count += 1;
+                            
+                            // Get transaction signature
+                            let sig = tx.signatures.get(0)
+                                .map_or_else(|| String::from("unknown"), |sig| bs58::encode(sig).into_string());
+                            
+                            println!("Found Meteora DLMM transaction: {}", sig);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if !has_meteora {
+            // Skip to next transaction if no Meteora instructions
+            continue;
+        }
+
+        // Use the first signature as the transaction ID
+        let tx_id = trx.transaction.as_ref()
+            .and_then(|tx| tx.signatures.get(0))
+            .map_or_else(|| String::from("missing_signature"), |sig| bs58::encode(sig).into_string());
+
+        // For debugging - log transaction ID
+        log::info!("Processing transaction: {}", tx_id);
+        
+        // Convert resolved accounts (Vec<u8>) to Base58 strings
+        let resolved_accounts: Vec<String> = trx.resolved_accounts().iter().map(|acc_bytes| bs58::encode(acc_bytes).into_string()).collect();
+
+        // Flatten all instructions, including inner ones
+        let mut flat_instructions: Vec<(CompiledInstruction, u32, bool, Option<u32>)> = Vec::new();
+        if let Some(tx) = &trx.transaction {
+            if let Some(msg) = &tx.message {
+                for (idx, inst) in msg.instructions.iter().enumerate() {
+                    flat_instructions.push((inst.clone(), idx as u32, false, None));
+                }
+            }
+        }
+        if let Some(meta) = &trx.meta {
+            for inner_insts in meta.inner_instructions.iter() {
+                let outer_instruction_index = inner_insts.index;
+                for (inner_idx, inst) in inner_insts.instructions.iter().enumerate() {
+                    let compiled_inst = CompiledInstruction {
+                        program_id_index: inst.program_id_index,
+                        accounts: inst.accounts.clone(),
+                        data: inst.data.clone(),
+                    };
+                    flat_instructions.push((compiled_inst, outer_instruction_index, true, Some(inner_idx as u32)));
+                }
+            }
+        }
+
+        // Process each instruction
+        for (inst, instruction_index, is_inner_instruction, inner_instruction_index) in flat_instructions {
+            // Get the first account as the signer
+            let signer = trx.transaction.as_ref()
+                .and_then(|tx| tx.message.as_ref())
+                .and_then(|msg| msg.account_keys.first().cloned())
+                .map(|pubkey| bs58::encode(&pubkey).into_string())
+                .unwrap_or_default();
+            
+            // If this is an inner instruction
+            let outer_program = if is_inner_instruction {
+                // For inner instructions, find the parent instruction's program ID
+                // The parent is the outer instruction with the same instruction_index
+                Some(trx.transaction.as_ref()
+                    .and_then(|tx| tx.message.as_ref())
+                    .and_then(|msg| msg.instructions.get(instruction_index as usize))
+                    .and_then(|parent_inst| resolved_accounts.get(parent_inst.program_id_index as usize).cloned())
+                    .unwrap_or_default())
+            } else {
+                // For outer instructions, outer_program is the current program's ID
+                let current_program_id = resolved_accounts.get(inst.program_id_index as usize)
+                    .cloned()
+                    .unwrap_or_default();
+                Some(current_program_id)
+            };
+
+            // Determine instruction type first
+            let instruction_type = instructions::get_instruction_type(
+                &inst.data,
+                resolved_accounts.get(inst.program_id_index as usize)
+            ).unwrap_or_default();
+            
+            // Log the instruction type for debugging
+            if !instruction_type.is_empty() {
+                log::info!("Found instruction type: {} in tx: {}", instruction_type, tx_id);
+                
+                // Specifically log if this is a swap instruction
+                if instruction_type == "Swap" || instruction_type == "SwapWithPriceImpact" || instruction_type == "SwapExactOut" {
+                    log::info!("SWAP INSTRUCTION FOUND: {} in tx: {}", instruction_type, tx_id);
+                    
+                    // Log some details about the program
+                    if let Some(program_id) = resolved_accounts.get(inst.program_id_index as usize) {
+                        log::info!("Program ID for swap: {}", program_id);
+                    }
+                }
+
+                // Specifically log if this is a swap instruction
+                if instruction_type == "Swap" || instruction_type == "SwapWithPriceImpact" || instruction_type == "SwapExactOut" {
+                    // Use direct stdout for critical debugging
+                    println!("SWAP INSTRUCTION FOUND: {} in tx: {}", instruction_type, tx_id);
+                    
+                    // Log some details about the program
+                    if let Some(program_id) = resolved_accounts.get(inst.program_id_index as usize) {
+                        println!("Program ID for swap: {}", program_id);
+                    }
+                }
+            }
+            
+            // Map accounts if we have a valid instruction type
+            let mapped_accounts = if !instruction_type.is_empty() {
+                prepare_input_accounts::map_accounts(
+                    &instruction_type,
+                    &inst,
+                    &resolved_accounts
+                ).map(|result| result.accounts)
+            } else {
+                None
+            };
+            
+            // Use mapped accounts if available, otherwise use the original resolved_accounts
+            let accounts_to_use = mapped_accounts.unwrap_or_else(|| {
+                // Select only the accounts referenced in this instruction
+                inst.accounts.iter()
+                    .filter_map(|&idx| resolved_accounts.get(idx as usize).cloned())
+                    .collect()
+            });
+            
+            if let Some(meta) = instructions::process_instruction(
+                &inst,
+                &accounts_to_use, // Use the mapped or filtered accounts
+                block_slot, 
+                block_timestamp,
+                &tx_id,
+                instruction_index,
+                is_inner_instruction,
+                inner_instruction_index,
+                Some(&signer),
+                outer_program.as_deref(),
+            ) {
+                instructions.push(meta);
+            }
+        }
+    }
+
+    // Count how many swap instructions we found, and add debug notes to the output
+    let mut swap_count = 0;
+    let mut total_count = 0;
+    let mut debug_instructions: Vec<Meta> = Vec::new();
+    
+    for inst in &instructions {
+        total_count += 1;
+        let mut modified_inst = inst.clone();
+
+        if inst.instruction_type.contains("Swap") {
+            swap_count += 1;
+            println!("Found swap instruction in final output: {} in tx: {}", inst.instruction_type, inst.tx_id);
+            // Flag swap instructions in the output
+            modified_inst.instruction_type = format!("DEBUG_SWAP:{}", inst.instruction_type);
+        }
+        
+        // Add debug info to all instructions for the specified block
+        if inst.block_slot == 335779656 {
+            modified_inst.tx_id = format!("DEBUG_TX:{}", inst.tx_id);
+        }
+        
+        debug_instructions.push(modified_inst);
+    }
+    
+    println!("SUMMARY: Processed {} total instructions, including {} swap instructions", total_count, swap_count);
+    
+    // Return the modified instructions with debug information
+    Ok(Instructions { instructions: debug_instructions })
+
+    println!("SUMMARY: Processed {} total instructions, including {} swap instructions", total_count, swap_count);
+
+    println!("SUMMARY: Processed {} total instructions, including {} swap instructions", total_count, swap_count);
+    println!("BLOCK SUMMARY: Found {} Meteora DLMM transactions out of {} total transactions", 
+             meteora_tx_count, block.transactions_owned().len());
+    
+    // Return the modified instructions with debug information
+    Ok(Instructions { instructions: debug_instructions })
+} 
