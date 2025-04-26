@@ -458,8 +458,8 @@ pub fn process_instruction(
         block_slot,               // Not optional
         block_time,               // Not optional
         block_date,               // Not optional
-        instruction_index,        // Not optional
-        is_inner_instruction,     // Not optional
+        instruction_index: Some(instruction_index),        // Wrap in Some
+        is_inner_instruction: Some(is_inner_instruction),     // Wrap in Some
         inner_instruction_index: Some(inner_instruction_index.unwrap_or(0)), // Optional: Use default, wrap in Some()
         signer: Some(signer_pubkey.map_or(String::new(), String::from)), // Optional: Use default, wrap in Some()
         outer_program: Some(outer_program.map_or(String::new(), String::from)), // Optional: Use default, wrap in Some()
@@ -683,20 +683,25 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             let mut bin_liquidity_dist = Vec::new();
             
             // Try to parse the bin distribution array if there's enough data
-            if data.len() >= 24 {
-                // First byte after the header should be the length of the array
-                let bin_dist_len = data[24] as usize;
-                let mut offset = 25; // Start after the length byte
+            // Assume length is u32 (4 bytes) starting at offset 24, data starts at 28
+            if data.len() >= 28 { 
+                // Parse length as u32
+                let bin_dist_len = match parse_u32(data, 24) { 
+                    Ok(len) => len as usize,
+                    Err(_) => 0, // Default to 0 if length parsing fails
+                };
+                let mut offset = 28; // Start after the u32 length field
                 
                 for _ in 0..bin_dist_len {
                     if offset + 6 <= data.len() { // 4 bytes for bin_id + 2 bytes for weight
-                        if let (Ok(bin_id), Ok(weight)) = (parse_i32(data, offset), parse_i16(data, offset + 4)) {
+                        // Use parse_u16 for weight based on IDL
+                        if let (Ok(bin_id), Ok(weight)) = (parse_i32(data, offset), parse_u16(data, offset + 4)) {
                             bin_liquidity_dist.push(PbBinLiquidityDistributionByWeightLayout {
                                 bin_id: Some(bin_id),
-                                weight: Some(weight as i32), // Convert i16 to i32 as per the proto definition
+                                weight: Some(weight as i32), // Convert u16 to i32 as per the proto definition
                             });
                         }
-                        offset += 6;
+                        offset += 6; // Move to the next element (i32 + u16 = 4 + 2 = 6 bytes)
                     } else {
                         break; // Not enough data to parse the entry
                     }

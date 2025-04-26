@@ -13,8 +13,8 @@ message Meta {
   uint64 block_slot = 2;
   int64 block_time = 3;
   string block_date = 4;
-  uint32 instruction_index = 5;
-  bool is_inner_instruction = 6;
+  optional uint32 instruction_index = 5;
+  optional bool is_inner_instruction = 6;
   optional uint32 inner_instruction_index = 7;
   optional string signer = 8;
   optional string outer_program = 9;

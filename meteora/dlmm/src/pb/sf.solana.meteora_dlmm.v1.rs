@@ -16,10 +16,10 @@ pub struct Meta {
     pub block_time: i64,
     #[prost(string, tag = "4")]
     pub block_date: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "5")]
-    pub instruction_index: u32,
-    #[prost(bool, tag = "6")]
-    pub is_inner_instruction: bool,
+    #[prost(uint32, optional, tag = "5")]
+    pub instruction_index: ::core::option::Option<u32>,
+    #[prost(bool, optional, tag = "6")]
+    pub is_inner_instruction: ::core::option::Option<bool>,
     #[prost(uint32, optional, tag = "7")]
     pub inner_instruction_index: ::core::option::Option<u32>,
     #[prost(string, optional, tag = "8")]
