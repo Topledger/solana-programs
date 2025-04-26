@@ -30,7 +30,21 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbAddLiquidityByWeightLayout, PbAddLiquidityByStrategyLayout, PbAddLiquidityOneSideLayout,
     PbAddLiquidityByStrategyOneSideLayout, PbRemoveLiquiditySingleSideLayout, PbClaimLiquidityLayout,
     PbInitializePositionByOperatorLayout, PbMigratePositionLayout, PbIdlWriteLayout,
-    PbBinLiquidityDistributionByWeightLayout, PbCompressedBinDepositAmountLayout
+    PbBinLiquidityDistributionByWeightLayout, PbCompressedBinDepositAmountLayout,
+    PbInitializeLbPair2Layout, PbClaimFee2Layout,
+    PbRemainingAccountsInfo, PbRemainingAccountsSlice, PbAccountsType,
+    PbInitializeTokenBadgeLayout, PbCreateClaimProtocolFeeOperatorLayout, 
+    PbCloseClaimProtocolFeeOperatorLayout,
+    PbInitializeCustomizablePermissionlessLbPair2Layout, PbAddLiquidity2Layout, 
+    PbAddLiquidityByStrategy2Layout, 
+    PbCustomizableParams, PbLiquidityParameter, PbBinLiquidityDistribution, 
+    PbLiquidityParameterByStrategy, PbStrategyParameters, PbStrategyType,
+    PbBinLiquidityReduction,
+    PbAddLiquidityOneSidePrecise2Layout, PbRemoveLiquidity2Layout, 
+    PbRemoveLiquidityByRange2Layout, PbAddLiquiditySingleSidePreciseParameter2,
+    PbSwap2Layout, PbSwapExactOut2Layout, PbSwapWithPriceImpact2Layout,
+    PbClosePosition2Layout, PbUpdateFeesAndReward2Layout, 
+    PbClosePositionIfEmptyLayout
 };
 
 // For convenience, alias the instruction args enum
@@ -697,8 +711,8 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                         // Use parse_u16 for weight based on IDL
                         if let (Ok(bin_id), Ok(weight)) = (parse_i32(data, offset), parse_u16(data, offset + 4)) {
                             bin_liquidity_dist.push(PbBinLiquidityDistributionByWeightLayout {
-                                bin_id: Some(bin_id),
-                                weight: Some(weight as i32), // Convert u16 to i32 as per the proto definition
+                                bin_id: if bin_id == 0 { None } else { Some(bin_id) },
+                                weight: if weight == 0 { None } else { Some(weight as u32) }, // Cast u16 to u32
                             });
                         }
                         offset += 6; // Move to the next element (i32 + u16 = 4 + 2 = 6 bytes)
@@ -724,32 +738,37 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::AddLiquidityOneSidePrecise => {
-            if data.len() < 12 { return None; }
+            // Args: parameter: AddLiquiditySingleSidePreciseParameter
+            // AddLiquiditySingleSidePreciseParameter: { bins: Vec<CompressedBinDepositAmount>, decompressMultiplier: u64 }
+            // CompressedBinDepositAmount: { binId: i32, amount: u32 }
+            let mut current_offset = 8;
             
             // Parse decompress_multiplier from data
-            let decompress_multiplier = parse_i64(data, 8).unwrap_or(0);
+            if data.len() < current_offset + 8 { return None; } 
+            let decompress_multiplier = parse_u64(data, current_offset).unwrap_or(0);
+            current_offset += 8;
             
-            // Parse the bins array
+            // Parse the bins array (Vec<CompressedBinDepositAmount>)
             let mut bins = Vec::new();
-            
-            // Try to parse the bin deposit amounts array
-            if data.len() >= 12 {
-                // First byte after the header + decompress_multiplier should indicate the number of bins
-                let bins_len = data[16] as usize;
-                let mut offset = 17; // Start after the length byte
-                
-                for _ in 0..bins_len {
-                    if offset + 6 <= data.len() { // 4 bytes for bin_id + 2 bytes for amount
-                        if let (Ok(bin_id), Ok(amount)) = (parse_i32(data, offset), parse_i16(data, offset + 4)) {
+            if data.len() >= current_offset + 4 { // Check for vec length (u32)
+                if let Ok(vec_len) = parse_u32(data, current_offset) {
+                    current_offset += 4;
+                    for _ in 0..vec_len {
+                        if data.len() < current_offset + 8 { break; } // 4 bytes bin_id + 4 bytes amount (u32)
+                        let bin_id_res = parse_i32(data, current_offset);
+                        let amount_res = parse_u32(data, current_offset + 4); // Parse as u32
+                        if let (Ok(bin_id), Ok(amount)) = (bin_id_res, amount_res) {
                             bins.push(PbCompressedBinDepositAmountLayout {
-                                bin_id: Some(bin_id),
-                                amount: Some(amount as i32), // Convert to i32 as per proto definition
+                                bin_id: if bin_id == 0 { None } else { Some(bin_id) },
+                                amount: if amount == 0 { None } else { Some(amount) }, // Assign directly as u32
                             });
+                        } else {
+                             log::warn!("Failed to parse CompressedBinDepositAmount element in AddLiquidityOneSidePrecise");
                         }
-                        offset += 6;
-                    } else {
-                        break; // Not enough data to parse the entry
+                        current_offset += 8; // Increment by correct size (i32 + u32)
                     }
+                } else {
+                    log::warn!("Failed to parse Vec<CompressedBinDepositAmount> length in AddLiquidityOneSidePrecise");
                 }
             }
             
@@ -757,7 +776,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityOneSidePrecise(PbAddLiquidityOneSidePreciseLayout {
                 bins,
-                decompress_multiplier: Some(decompress_multiplier),
+                decompress_multiplier: if decompress_multiplier == 0 { None } else { Some(decompress_multiplier) },
             }));
         },
         InstructionType::RemoveLiquidity => {
@@ -998,297 +1017,386 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
         },
 
         // V2 Instructions (require more details from IDL - stubbed for now with empty args)
-        InstructionType::InitializeLbPair2 |
-        InstructionType::InitializeCustomizablePermissionlessLbPair2 |
-        InstructionType::ClaimFee2 |
-        InstructionType::ClaimReward2 |
-        InstructionType::AddLiquidity2 |
-        InstructionType::AddLiquidityByStrategy2 |
-        InstructionType::AddLiquidityOneSidePrecise2 |
-        InstructionType::RemoveLiquidity2 |
-        InstructionType::RemoveLiquidityByRange2 |
-        InstructionType::Swap2 |
-        InstructionType::SwapExactOut2 |
-        InstructionType::SwapWithPriceImpact2 |
-        InstructionType::ClosePosition2 |
-        InstructionType::ClosePositionIfEmpty |
-        InstructionType::InitializeTokenBadge |
-        InstructionType::CreateClaimProtocolFeeOperator |
-        InstructionType::CloseClaimProtocolFeeOperator => {
-            // Map V2 instructions to their V1 counterparts where possible
-            match inst_type {
-                InstructionType::ClaimFee2 => {
-                    if data.len() < 12 { return None; }
-                    
-                    // ClaimFee2 has minBinId, maxBinId parameters but they don't change proto representation
-                    log::debug!("Processing ClaimFee2 instruction with minBinId={}, maxBinId={}", 
-                               parse_i32(data, 8).unwrap_or(0), parse_i32(data, 12).unwrap_or(0));
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::CollectFees(PbCollectFeesLayout {}));
-                },
-                
-                InstructionType::ClaimReward2 => {
-                    if data.len() < 16 { return None; }
-                    
-                    // ClaimReward2 has reward_index, minBinId, maxBinId parameters
-                    let reward_index = parse_u64(data, 8).unwrap_or(0) as u32;
-                    log::debug!("Processing ClaimReward2 instruction with reward_index={}, minBinId={}, maxBinId={}", 
-                               reward_index, parse_i32(data, 16).unwrap_or(0), parse_i32(data, 20).unwrap_or(0));
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::CollectReward(PbCollectRewardLayout {
-                        reward_index,
-                    }));
-                },
-                
-                InstructionType::ClosePosition2 | InstructionType::ClosePositionIfEmpty => {
-                    // Both map to the same V1 instruction for now
-                    args.instruction_args = Some(instruction_args::InstructionArgs::ClosePosition(PbClosePositionLayout {}));
-                },
-                
-                InstructionType::InitializeLbPair2 => {
-                    if data.len() < 16 { return None; }
-                    
-                    // Assuming the params are similar to V1 but with additional fields
-                    let active_id = parse_i32(data, 8).unwrap_or(0);
-                    let bin_step = parse_i32(data, 12).unwrap_or(0);
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::InitializeLbPair(PbInitializeLbPairLayout {
-                        active_id: Some(active_id),
-                        bin_step: Some(bin_step),
-                    }));
-                },
-                
-                InstructionType::InitializeCustomizablePermissionlessLbPair2 => {
-                    if data.len() < 40 { return None; }
-                    
-                    // Similar parsing to V1 but potentially with custom params structure
-                    let active_id = parse_i32(data, 8).unwrap_or(0);
-                    let bin_step = parse_i32(data, 12).unwrap_or(0);
-                    let base_factor = parse_i32(data, 16).unwrap_or(0);
-                    let activation_type = data[20] as u32;
-                    let has_alpha_vault = data[21] != 0;
-                    let activation_point = parse_i64(data, 24).unwrap_or(0);
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::InitializeCustomizablePermissionlessLbPair(
-                        PbInitializeCustomizablePermissionlessLbPairLayout {
-                            active_id: Some(active_id),
-                            bin_step: Some(bin_step),
-                            base_factor: Some(base_factor),
-                            activation_type: Some(activation_type),
-                            has_alpha_vault: Some(has_alpha_vault),
-                            activation_point: Some(activation_point),
-                        }
-                    ));
-                },
-                
-                _ => {
-                    // Handle unexpected instruction types gracefully
-                    log::warn!("Unexpected V2 instruction type in match: {:?}", inst_type);
-                    return None;
-                }
+        InstructionType::InitializeLbPair2 => {
+            if data.len() < 12 { // 8 bytes discriminator + 4 bytes active_id
+                log::warn!("Data too short for InitializeLbPair2: {} bytes", data.len());
+                return None; 
             }
+            let active_id = parse_i32(data, 8).unwrap_or(0);
+            args.instruction_args = Some(IArgs::InitializeLbPair2(PbInitializeLbPair2Layout {
+                active_id: if active_id == 0 { None } else { Some(active_id) },
+            }));
+        },
+
+        InstructionType::ClaimFee2 => {
+            if data.len() < 20 { // 8 disc + 4 min_bin + 4 max_bin + 4 vec_len
+                 log::warn!("Data too short for ClaimFee2 base args: {} bytes", data.len());
+                 return None; 
+            }
+            let min_bin_id = parse_i32(data, 8).unwrap_or(0);
+            let max_bin_id = parse_i32(data, 12).unwrap_or(0);
+            
+            let mut parsed_slices = Vec::new();
+            let slices_len_result = parse_u32(data, 16);
+            let mut current_offset = 20;
+
+            if let Ok(slices_len) = slices_len_result {
+                for _ in 0..slices_len {
+                    if data.len() < current_offset + 2 { // Need 1 byte for type, 1 byte for len
+                        log::warn!("Data too short for RemainingAccountsSlice at offset {}: {} bytes", current_offset, data.len());
+                        break;
+                    }
+                    let accounts_type_byte = data[current_offset];
+                    let length_byte = data[current_offset + 1];
+
+                    let accounts_type = match accounts_type_byte {
+                        0 => Some(PbAccountsType::TransferHookX as i32),
+                        1 => Some(PbAccountsType::TransferHookY as i32),
+                        2 => Some(PbAccountsType::TransferHookReward as i32),
+                        _ => {
+                            log::warn!("Unknown PbAccountsType byte: {}", accounts_type_byte);
+                            None
+                        }
+                    };
+
+                    parsed_slices.push(PbRemainingAccountsSlice {
+                        accounts_type: accounts_type,
+                        length: if length_byte == 0 { None } else { Some(length_byte as u32) },
+                    });
+
+                    current_offset += 2; // Move to next slice (assuming slice itself is just 2 bytes)
+                                       // Check IDL definition of RemainingAccountsSlice size if this is wrong
+                }
+            } else {
+                 log::warn!("Failed to parse RemainingAccountsInfo length for ClaimFee2");
+            }
+
+            let remaining_accounts_info = if parsed_slices.is_empty() {
+                None
+            } else {
+                Some(PbRemainingAccountsInfo { slices: parsed_slices })
+            };
+
+            args.instruction_args = Some(IArgs::ClaimFee2(PbClaimFee2Layout {
+                min_bin_id: if min_bin_id == 0 { None } else { Some(min_bin_id) },
+                max_bin_id: if max_bin_id == 0 { None } else { Some(max_bin_id) },
+                remaining_accounts_info,
+            }));
+        },
+
+        // --- Add handlers for the current batch --- 
+        InstructionType::InitializeTokenBadge => {
+             args.instruction_args = Some(IArgs::InitializeTokenBadge(PbInitializeTokenBadgeLayout {}));
+        },
+        InstructionType::CreateClaimProtocolFeeOperator => {
+             args.instruction_args = Some(IArgs::CreateClaimProtocolFeeOperator(PbCreateClaimProtocolFeeOperatorLayout {}));
+        },
+        InstructionType::CloseClaimProtocolFeeOperator => {
+             args.instruction_args = Some(IArgs::CloseClaimProtocolFeeOperator(PbCloseClaimProtocolFeeOperatorLayout {}));
+        },
+
+        InstructionType::InitializeCustomizablePermissionlessLbPair2 => {
+            // Args: params: CustomizableParams
+            let mut current_offset = 8;
+            // Parse CustomizableParams
+            if data.len() < current_offset + 8 { return None; } // active_id, bin_step, base_factor, activation_type
+            let active_id = parse_i32(data, current_offset).unwrap_or(0);
+            let bin_step = parse_u16(data, current_offset + 4).unwrap_or(0);
+            let base_factor = parse_u16(data, current_offset + 6).unwrap_or(0);
+            current_offset += 8;
+
+            if data.len() < current_offset + 1 { return None; } // activation_type (u8)
+            let activation_type = data[current_offset];
+            current_offset += 1;
+
+            if data.len() < current_offset + 1 { return None; } // has_alpha_vault (bool)
+            let has_alpha_vault = data[current_offset] != 0;
+            current_offset += 1;
+
+            if data.len() < current_offset + 9 { return None; } // Option<u64> activation_point (1 byte disc + 8 bytes value)
+            let activation_point_present = data[current_offset] != 0;
+            let activation_point = if activation_point_present { parse_u64(data, current_offset + 1).ok() } else { None };
+            current_offset += 9;
+            
+            if data.len() < current_offset + 1 { return None; } // creator_pool_on_off_control (bool)
+            let creator_pool_on_off_control = data[current_offset] != 0;
+            current_offset += 1;
+
+            if data.len() < current_offset + 1 { return None; } // base_fee_power_factor (u8)
+            let base_fee_power_factor = data[current_offset];
+            // Ignore padding (62 bytes)
+
+            let params = PbCustomizableParams {
+                active_id: if active_id == 0 { None } else { Some(active_id) },
+                bin_step: if bin_step == 0 { None } else { Some(bin_step as u32) },
+                base_factor: if base_factor == 0 { None } else { Some(base_factor as u32) },
+                activation_type: Some(activation_type as u32), // Assuming u8 maps to enum/u32
+                has_alpha_vault: Some(has_alpha_vault),
+                activation_point: activation_point,
+                creator_pool_on_off_control: Some(creator_pool_on_off_control),
+                base_fee_power_factor: Some(base_fee_power_factor as u32),
+            };
+
+            args.instruction_args = Some(IArgs::InitializeCustomizablePermissionlessLbPair2(
+                 PbInitializeCustomizablePermissionlessLbPair2Layout { params: Some(params) }
+            ));
+        },
+
+        InstructionType::AddLiquidity2 => {
+             // Args: liquidityParameter: LiquidityParameter, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+            // Parse LiquidityParameter
+            if data.len() < current_offset + 16 { return None; } // amount_x, amount_y
+            let amount_x = parse_u64(data, current_offset).unwrap_or(0);
+            let amount_y = parse_u64(data, current_offset + 8).unwrap_or(0);
+            current_offset += 16;
+            let (bin_dist, next_offset) = parse_bin_liquidity_distribution_vec(data, current_offset);
+            current_offset = next_offset;
+
+            let liq_param = PbLiquidityParameter {
+                amount_x: if amount_x == 0 { None } else { Some(amount_x) },
+                amount_y: if amount_y == 0 { None } else { Some(amount_y) },
+                bin_liquidity_dist: bin_dist,
+            };
+
+            // Parse RemainingAccountsInfo
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+            
+            args.instruction_args = Some(IArgs::AddLiquidity2(PbAddLiquidity2Layout {
+                liquidity_parameter: Some(liq_param),
+                remaining_accounts_info: remaining_accounts,
+            }));
+        },
+
+        InstructionType::AddLiquidityByStrategy2 => {
+            // Args: liquidityParameter: LiquidityParameterByStrategy, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+            // Parse LiquidityParameterByStrategy
+            if data.len() < current_offset + 24 { return None; } // amount_x, amount_y, active_id, max_active_bin_slippage
+            let amount_x = parse_u64(data, current_offset).unwrap_or(0);
+            let amount_y = parse_u64(data, current_offset + 8).unwrap_or(0);
+            let active_id = parse_i32(data, current_offset + 16).unwrap_or(0);
+            let max_active_bin_slippage = parse_i32(data, current_offset + 20).unwrap_or(0);
+            current_offset += 24;
+
+            // Parse StrategyParameters
+            if data.len() < current_offset + 9 { return None; } // min_bin, max_bin, strategy_type (u8)
+            let min_bin_id = parse_i32(data, current_offset).unwrap_or(0);
+            let max_bin_id = parse_i32(data, current_offset + 4).unwrap_or(0);
+            let strategy_type_byte = data[current_offset + 8];
+            current_offset += 9; // Move past StrategyParameters header
+            // Ignore 64 byte parameters array for now
+            // Ensure we don't read past the end of data if the parameters array is present
+            let parameters_array_offset = current_offset;
+            if data.len() >= parameters_array_offset + 64 {
+                 current_offset += 64; 
+            } else {
+                 log::warn!("Data potentially too short for StrategyParameters parameters array");
+            }
+
+             let strategy_type = match strategy_type_byte {
+                 0 => Some(PbStrategyType::SpotOneSide as i32),
+                 1 => Some(PbStrategyType::CurveOneSide as i32),
+                 2 => Some(PbStrategyType::BidAskOneSide as i32),
+                 3 => Some(PbStrategyType::SpotBalanced as i32),
+                 4 => Some(PbStrategyType::CurveBalanced as i32),
+                 5 => Some(PbStrategyType::BidAskBalanced as i32),
+                 6 => Some(PbStrategyType::SpotImbalanced as i32),
+                 7 => Some(PbStrategyType::CurveImbalanced as i32),
+                 8 => Some(PbStrategyType::BidAskImbalanced as i32),
+                _ => { log::warn!("Unknown strategy type byte: {}", strategy_type_byte); None },
+             };
+
+            let strat_params = PbStrategyParameters {
+                 min_bin_id: if min_bin_id == 0 { None } else { Some(min_bin_id) },
+                 max_bin_id: if max_bin_id == 0 { None } else { Some(max_bin_id) },
+                 strategy_type,
+            };
+            
+            let liq_param = PbLiquidityParameterByStrategy {
+                amount_x: if amount_x == 0 { None } else { Some(amount_x) },
+                amount_y: if amount_y == 0 { None } else { Some(amount_y) },
+                active_id: if active_id == 0 { None } else { Some(active_id) },
+                max_active_bin_slippage: if max_active_bin_slippage == 0 { None } else { Some(max_active_bin_slippage) },
+                strategy_parameters: Some(strat_params),
+            };
+
+            // Parse RemainingAccountsInfo
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+             args.instruction_args = Some(IArgs::AddLiquidityByStrategy2(PbAddLiquidityByStrategy2Layout {
+                 liquidity_parameter: Some(liq_param),
+                 remaining_accounts_info: remaining_accounts,
+             }));
+        },
+
+        InstructionType::AddLiquidityOneSidePrecise2 => {
+            // Args: liquidityParameter: AddLiquiditySingleSidePreciseParameter2, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+            // Parse AddLiquiditySingleSidePreciseParameter2
+            let (bins, next_offset_bins) = parse_compressed_bin_deposit_vec(data, current_offset);
+            current_offset = next_offset_bins;
+            
+            if data.len() < current_offset + 16 { return None; } // decompress_multiplier (u64), max_amount (u64)
+            let decompress_multiplier = parse_u64(data, current_offset).unwrap_or(0);
+            let max_amount = parse_u64(data, current_offset + 8).unwrap_or(0);
+            current_offset += 16;
+
+            let liq_param = PbAddLiquiditySingleSidePreciseParameter2 {
+                bins: bins,
+                decompress_multiplier: if decompress_multiplier == 0 { None } else { Some(decompress_multiplier) },
+                max_amount: if max_amount == 0 { None } else { Some(max_amount) },
+            };
+
+            // Parse RemainingAccountsInfo
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+            args.instruction_args = Some(IArgs::AddLiquidityOneSidePrecise2(PbAddLiquidityOneSidePrecise2Layout {
+                liquidity_parameter: Some(liq_param),
+                remaining_accounts_info: remaining_accounts,
+            }));
+        },
+
+        InstructionType::RemoveLiquidity2 => {
+            // Args: binLiquidityRemoval: Vec<BinLiquidityReduction>, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+            let (reductions, next_offset) = parse_bin_liquidity_reduction_vec(data, current_offset);
+            current_offset = next_offset;
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+            args.instruction_args = Some(IArgs::RemoveLiquidity2(PbRemoveLiquidity2Layout {
+                bin_liquidity_removal: reductions,
+                remaining_accounts_info: remaining_accounts,
+            }));
+        },
+
+        InstructionType::RemoveLiquidityByRange2 => {
+            // Args: fromBinId: i32, toBinId: i32, bpsToRemove: u16, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+             if data.len() < current_offset + 10 { return None; } // from (i32), to (i32), bps (u16)
+            let from_bin_id = parse_i32(data, current_offset).unwrap_or(0);
+            let to_bin_id = parse_i32(data, current_offset + 4).unwrap_or(0);
+            let bps_to_remove = parse_u16(data, current_offset + 8).unwrap_or(0);
+            current_offset += 10;
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+            args.instruction_args = Some(IArgs::RemoveLiquidityByRange2(PbRemoveLiquidityByRange2Layout {
+                from_bin_id: if from_bin_id == 0 { None } else { Some(from_bin_id) },
+                to_bin_id: if to_bin_id == 0 { None } else { Some(to_bin_id) },
+                bps_to_remove: if bps_to_remove == 0 { None } else { Some(bps_to_remove as u32) },
+                remaining_accounts_info: remaining_accounts,
+            }));
         },
         
+        // --- Add handlers for the current batch --- 
+        InstructionType::Swap2 => {
+            // Args: amountIn: u64, minAmountOut: u64, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+             if data.len() < current_offset + 16 { return None; } // amount_in, min_amount_out
+            let amount_in = parse_u64(data, current_offset).unwrap_or(0);
+            let min_amount_out = parse_u64(data, current_offset + 8).unwrap_or(0);
+            current_offset += 16;
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+             args.instruction_args = Some(IArgs::Swap2(PbSwap2Layout {
+                 amount_in: if amount_in == 0 { None } else { Some(amount_in) },
+                 min_amount_out: if min_amount_out == 0 { None } else { Some(min_amount_out) },
+                 remaining_accounts_info: remaining_accounts,
+             }));
+        },
+
+        InstructionType::SwapExactOut2 => {
+            // Args: maxInAmount: u64, outAmount: u64, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+             if data.len() < current_offset + 16 { return None; } // max_in_amount, out_amount
+            let max_in_amount = parse_u64(data, current_offset).unwrap_or(0);
+            let out_amount = parse_u64(data, current_offset + 8).unwrap_or(0);
+            current_offset += 16;
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+             args.instruction_args = Some(IArgs::SwapExactOut2(PbSwapExactOut2Layout {
+                 max_in_amount: if max_in_amount == 0 { None } else { Some(max_in_amount) },
+                 out_amount: if out_amount == 0 { None } else { Some(out_amount) },
+                 remaining_accounts_info: remaining_accounts,
+             }));
+        },
+
+        InstructionType::SwapWithPriceImpact2 => {
+             // Args: amountIn: u64, activeId: Option<i32>, maxPriceImpactBps: u16, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+             if data.len() < current_offset + 8 { return None; } // amount_in
+            let amount_in = parse_u64(data, current_offset).unwrap_or(0);
+            current_offset += 8;
+            
+            // Parse Option<i32> activeId
+             if data.len() < current_offset + 1 { return None; } // Option discriminator byte
+            let active_id_present = data[current_offset] != 0;
+            let mut active_id = None;
+            current_offset += 1;
+            if active_id_present {
+                 if data.len() < current_offset + 4 { return None; }
+                 let val = parse_i32(data, current_offset).unwrap_or(0);
+                 if val != 0 { active_id = Some(val); }
+                 current_offset += 4;
+            }
+
+             if data.len() < current_offset + 2 { return None; } // max_price_impact_bps (u16)
+            let max_price_impact_bps = parse_u16(data, current_offset).unwrap_or(0);
+            current_offset += 2;
+
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+             args.instruction_args = Some(IArgs::SwapWithPriceImpact2(PbSwapWithPriceImpact2Layout {
+                 amount_in: if amount_in == 0 { None } else { Some(amount_in) },
+                 active_id: active_id, // Already Option<i32>
+                 max_price_impact_bps: if max_price_impact_bps == 0 { None } else { Some(max_price_impact_bps as u32) },
+                 remaining_accounts_info: remaining_accounts,
+             }));
+        },
+
+        // --- Add handlers for the current batch --- 
+        InstructionType::ClosePosition2 => {
+            // No arguments
+            args.instruction_args = Some(IArgs::ClosePosition2(PbClosePosition2Layout {}));
+        },
+
+        InstructionType::UpdateFeesAndRewards => { // Handles both UpdateFeesAndRewards and updateFeesAndReward2
+             // Args (for V2 updateFeesAndReward2): minBinId: i32, maxBinId: i32
+            let mut current_offset = 8;
+            if data.len() >= current_offset + 8 { // Check if data length matches V2 args
+                let min_bin_id = parse_i32(data, current_offset).unwrap_or(0);
+                let max_bin_id = parse_i32(data, current_offset + 4).unwrap_or(0);
+                 args.instruction_args = Some(IArgs::UpdateFeesAndReward2(PbUpdateFeesAndReward2Layout {
+                     min_bin_id: if min_bin_id == 0 { None } else { Some(min_bin_id) },
+                     max_bin_id: if max_bin_id == 0 { None } else { Some(max_bin_id) },
+                 }));
+            } else {
+                // Handle as V1 (UpdateFeesAndRewards) which has no args in IDL
+                log::debug!("Processing UpdateFeesAndRewards with data length {}, treating as V1 (no args)", data.len());
+                 args.instruction_args = Some(IArgs::UpdateFeesAndRewards(PbUpdateFeesAndRewardsLayout {}));
+            }
+        },
+
+        InstructionType::ClosePositionIfEmpty => {
+            // No arguments
+            args.instruction_args = Some(IArgs::ClosePositionIfEmpty(PbClosePositionIfEmptyLayout {}));
+        },
+
+        // --- End V2 Handlers ---
+
         // Special case
         InstructionType::EventLog => {
             return process_event_log(data, args);
         },
-        InstructionType::Swap2 | 
-        InstructionType::SwapExactOut2 | 
-        InstructionType::SwapWithPriceImpact2 => {
-            if data.len() < 24 { return None; }
-            
-            // Parse the common arguments based on the instruction type
-            match inst_type {
-                InstructionType::Swap2 => {
-                    // For Swap2, we have amountIn and minAmountOut
-                    let amount_in = parse_u64(data, 8).unwrap_or(0);
-                    let min_amount_out = parse_u64(data, 16).unwrap_or(0);
-                    
-                    // We also need to parse RemainingAccountsInfo but that's complex
-                    // and would require deeper knowledge of the structure
-                    log::debug!("Parsed Swap2 instruction with amount_in={}, min_amount_out={}", 
-                               amount_in, min_amount_out);
-                    
-                    // Using PbSwapLayout as a close match for now
-                    args.instruction_args = Some(instruction_args::InstructionArgs::Swap(PbSwapLayout {
-                        amount_in: Some(amount_in.to_string()),
-                        min_amount_out: Some(min_amount_out.to_string()),
-                    }));
-                },
-                InstructionType::SwapExactOut2 => {
-                    // For SwapExactOut2, we have maxInAmount and outAmount
-                    let max_in_amount = parse_u64(data, 8).unwrap_or(0);
-                    let out_amount = parse_u64(data, 16).unwrap_or(0);
-                    
-                    log::debug!("Parsed SwapExactOut2 instruction with max_in_amount={}, out_amount={}", 
-                               max_in_amount, out_amount);
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::SwapExactOut(PbSwapExactOutLayout {
-                        max_in_amount: Some(max_in_amount),
-                        out_amount: Some(out_amount),
-                    }));
-                },
-                InstructionType::SwapWithPriceImpact2 => {
-                    // For SwapWithPriceImpact2, we have amountIn, activeId, and maxPriceImpactBps
-                    let amount_in = parse_u64(data, 8).unwrap_or(0);
-                    
-                    // activeId is optional, so we need to check if it's present
-                    let active_id_present = data[16] != 0; // Check if the option is Some
-                    let active_id = if active_id_present && data.len() >= 21 {
-                        Some(parse_i32(data, 17).unwrap_or(0))
-                    } else {
-                        None
-                    };
-                    
-                    // Parse maxPriceImpactBps as u16
-                    let offset = if active_id_present { 21 } else { 17 };
-                    let max_price_impact_bps = if data.len() >= offset + 2 {
-                        parse_u16(data, offset).unwrap_or(0)
-                    } else {
-                        0
-                    };
-                    
-                    log::debug!("Parsed SwapWithPriceImpact2 instruction with amount_in={}, active_id={:?}, max_price_impact_bps={}", 
-                               amount_in, active_id, max_price_impact_bps);
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::SwapWithPriceImpact(PbSwapWithPriceImpactLayout {
-                        amount_in: Some(amount_in),
-                        active_id,
-                        max_price_impact_bps: Some(max_price_impact_bps as i32), // Convert u16 to i32
-                    }));
-                },
-                _ => {
-                    // Handle unexpected instruction types gracefully
-                    log::warn!("Unexpected V2 instruction type in match: {:?}", inst_type);
-                    return None;
-                }
-            }
-        },
-        InstructionType::AddLiquidity2 |
-        InstructionType::AddLiquidityByStrategy2 |
-        InstructionType::AddLiquidityOneSidePrecise2 |
-        InstructionType::RemoveLiquidity2 |
-        InstructionType::RemoveLiquidityByRange2 => {
-            // For now, map these V2 instructions to their V1 counterparts
-            // These will need more detailed implementations but this gives basic support
-            
-            match inst_type {
-                InstructionType::AddLiquidity2 => {
-                    if data.len() < 32 { return None; }
-                    
-                    // Similar structure to V1 AddLiquidity, but with additional RemainingAccountsInfo
-                    let liquidity_parameter = if data.len() > 48 {
-                        Some(data[48..].to_vec())
-                    } else {
-                        None
-                    };
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidity(PbAddLiquidityLayout {
-                        tick_lower_index: parse_i32(data, 8).unwrap_or(0),
-                        tick_upper_index: parse_i32(data, 12).unwrap_or(0),
-                        liquidity_amount: parse_u128(data, 16).unwrap_or(0).to_string(),
-                        token_max_a: parse_u64(data, 32).unwrap_or(0),
-                        token_max_b: parse_u64(data, 40).unwrap_or(0),
-                        liquidity_parameter,
-                    }));
-                },
-                
-                InstructionType::AddLiquidityByStrategy2 => {
-                    // Map to V1 with basic structure, details on LiquidityParameterByStrategy would need more parsing
-                    args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByStrategy(PbAddLiquidityByStrategyLayout {
-                        liquidity_parameter: Some(PbLiquidityParameterLayout {}),
-                    }));
-                },
-                
-                InstructionType::AddLiquidityOneSidePrecise2 => {
-                    if data.len() < 12 { return None; }
-                    
-                    // Similar to V1, parse decompress_multiplier and bins array
-                    let decompress_multiplier = parse_i64(data, 8).unwrap_or(0);
-                    
-                    // Parse bins array with extra handling for V2's format
-                    let mut bins = Vec::new();
-                    
-                    if data.len() >= 16 {
-                        let bins_len = data[16] as usize;
-                        let mut offset = 17;
-                        
-                        for _ in 0..bins_len {
-                            if offset + 6 <= data.len() {
-                                if let (Ok(bin_id), Ok(amount)) = (parse_i32(data, offset), parse_i16(data, offset + 4)) {
-                                    bins.push(PbCompressedBinDepositAmountLayout {
-                                        bin_id: Some(bin_id),
-                                        amount: Some(amount as i32),
-                                    });
-                                }
-                                offset += 6;
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityOneSidePrecise(PbAddLiquidityOneSidePreciseLayout {
-                        bins,
-                        decompress_multiplier: Some(decompress_multiplier),
-                    }));
-                },
-                
-                InstructionType::RemoveLiquidity2 => {
-                    if data.len() < 32 { return None; }
-                    
-                    // Parse binLiquidityRemoval array for V2 format
-                    let mut bin_liquidity_removal = Vec::new();
-                    
-                    if data.len() > 48 {
-                        let bins_len = data[48] as usize;
-                        let mut offset = 49;
-                        
-                        for _ in 0..bins_len {
-                            if offset < data.len() {
-                                let element_len = data[offset] as usize;
-                                offset += 1;
-                                
-                                if offset + element_len <= data.len() {
-                                    bin_liquidity_removal.push(data[offset..(offset + element_len)].to_vec());
-                                    offset += element_len;
-                                } else {
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::RemoveLiquidity(PbRemoveLiquidityLayout {
-                        tick_lower_index: parse_i32(data, 8).unwrap_or(0),
-                        tick_upper_index: parse_i32(data, 12).unwrap_or(0),
-                        liquidity_amount: parse_u128(data, 16).unwrap_or(0).to_string(),
-                        token_min_a: parse_u64(data, 32).unwrap_or(0),
-                        token_min_b: parse_u64(data, 40).unwrap_or(0),
-                        bin_liquidity_removal,
-                    }));
-                },
-                
-                InstructionType::RemoveLiquidityByRange2 => {
-                    if data.len() < 14 { return None; }
-                    
-                    args.instruction_args = Some(instruction_args::InstructionArgs::RemoveLiquidityByRange(PbRemoveLiquidityByRangeLayout {
-                        from_bin_id: Some(parse_i32(data, 8).unwrap_or(0)),
-                        to_bin_id: Some(parse_i32(data, 12).unwrap_or(0)),
-                        bps_to_remove: Some(if data.len() >= 14 { parse_i16(data, 14).unwrap_or(0) as i32 } else { 0 }),
-                    }));
-                },
-                
-                _ => {
-                    // Handle unexpected instruction types gracefully
-                    log::warn!("Unexpected V2 instruction type in match: {:?}", inst_type);
-                    return None;
-                }
-            }
-        },
+
+        // Catch-all for unimplemented V2 instructions (for now)
+        // Remove this once all V2 instructions are handled
+        _ => {
+            log::debug!("Instruction type {:?} not yet fully parsed.", inst_type);
+            // Return None or keep args as default/empty
+            // For now, returning None to be explicit that parsing is incomplete
+            return None;
+        }
     }
 
     // Return Some(args) only if instruction_args is Some, otherwise None
@@ -1702,3 +1810,140 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
 
     Some(args)
 } 
+
+// --- Add Helper Functions Back ---
+
+// Helper function to parse RemainingAccountsInfo
+fn parse_remaining_accounts_info(data: &[u8], start_offset: usize) -> Option<PbRemainingAccountsInfo> {
+    if data.len() < start_offset + 4 { // Need 4 bytes for vec length
+        log::warn!("Data too short for RemainingAccountsInfo length: offset={}, len={}", start_offset, data.len());
+        return None;
+    }
+    let slices_len_res = parse_u32(data, start_offset);
+    if slices_len_res.is_err() {
+        log::warn!("Failed to parse RemainingAccountsInfo length at offset {}", start_offset);
+        return None;
+    }
+    let slices_len = slices_len_res.unwrap() as usize;
+    let mut current_offset = start_offset + 4;
+    let mut parsed_slices = Vec::with_capacity(slices_len);
+
+    for i in 0..slices_len {
+        if data.len() < current_offset + 2 { // Need 1 byte for type, 1 byte for length
+            log::warn!("Data too short for RemainingAccountsSlice #{} at offset {}: len={}", i, current_offset, data.len());
+            break; // Stop parsing if data is insufficient
+        }
+        let accounts_type_byte = data[current_offset];
+        let length_byte = data[current_offset + 1];
+
+        let accounts_type = match accounts_type_byte {
+            0 => Some(PbAccountsType::TransferHookX as i32),
+            1 => Some(PbAccountsType::TransferHookY as i32),
+            2 => Some(PbAccountsType::TransferHookReward as i32),
+            _ => {
+                log::warn!("Unknown PbAccountsType byte: {}", accounts_type_byte);
+                None
+            }
+        };
+
+        parsed_slices.push(PbRemainingAccountsSlice {
+            accounts_type: accounts_type,
+            length: if length_byte == 0 { None } else { Some(length_byte as u32) },
+        });
+        current_offset += 2; // Size of RemainingAccountsSlice based on IDL (u8 + u8)
+    }
+
+    if parsed_slices.is_empty() {
+        None
+    } else {
+        Some(PbRemainingAccountsInfo { slices: parsed_slices })
+    }
+}
+
+// Placeholder for parsing Vec<PbBinLiquidityReduction>
+fn parse_bin_liquidity_reduction_vec(data: &[u8], start_offset: usize) -> (Vec<PbBinLiquidityReduction>, usize) {
+    let mut results = Vec::new();
+    let mut current_offset = start_offset;
+    if data.len() < current_offset + 4 { return (results, current_offset); } // Check for len
+
+    if let Ok(vec_len) = parse_u32(data, current_offset) {
+        current_offset += 4;
+        for _ in 0..vec_len {
+            if data.len() < current_offset + 6 { break; } // 4 bytes bin_id + 2 bytes bps_to_remove
+            let bin_id_res = parse_i32(data, current_offset);
+            let bps_res = parse_u16(data, current_offset + 4);
+            if let (Ok(bin_id), Ok(bps)) = (bin_id_res, bps_res) {
+                 results.push(PbBinLiquidityReduction {
+                     bin_id: if bin_id == 0 { None } else { Some(bin_id) },
+                     bps_to_remove: if bps == 0 { None } else { Some(bps as u32) },
+                 });
+            } else {
+                 log::warn!("Failed to parse BinLiquidityReduction element");
+            }
+            current_offset += 6;
+        }
+    } else {
+         log::warn!("Failed to parse Vec<BinLiquidityReduction> length");
+    }
+    (results, current_offset)
+}
+
+// Placeholder for parsing Vec<PbCompressedBinDepositAmountLayout>
+fn parse_compressed_bin_deposit_vec(data: &[u8], start_offset: usize) -> (Vec<PbCompressedBinDepositAmountLayout>, usize) { // Correct return type
+    let mut results = Vec::new();
+    let mut current_offset = start_offset;
+    if data.len() < current_offset + 4 { return (results, current_offset); } // Check for len
+
+    if let Ok(vec_len) = parse_u32(data, current_offset) {
+        current_offset += 4;
+        for _ in 0..vec_len {
+            if data.len() < current_offset + 8 { break; } // 4 bytes bin_id + 4 bytes amount (u32)
+            let bin_id_res = parse_i32(data, current_offset);
+            let amount_res = parse_u32(data, current_offset + 4);
+             if let (Ok(bin_id), Ok(amount)) = (bin_id_res, amount_res) {
+                 results.push(PbCompressedBinDepositAmountLayout { // Correct struct name
+                     bin_id: if bin_id == 0 { None } else { Some(bin_id) },
+                     amount: if amount == 0 { None } else { Some(amount) },
+                 });
+            } else {
+                 log::warn!("Failed to parse CompressedBinDepositAmount element");
+            }
+            current_offset += 8;
+        }
+    } else {
+         log::warn!("Failed to parse Vec<CompressedBinDepositAmount> length");
+    }
+    (results, current_offset)
+}
+
+// Placeholder for parsing Vec<PbBinLiquidityDistribution>
+fn parse_bin_liquidity_distribution_vec(data: &[u8], start_offset: usize) -> (Vec<PbBinLiquidityDistribution>, usize) {
+    let mut results = Vec::new();
+    let mut current_offset = start_offset;
+    if data.len() < current_offset + 4 { return (results, current_offset); } // Check for len
+
+    if let Ok(vec_len) = parse_u32(data, current_offset) {
+        current_offset += 4;
+        for _ in 0..vec_len {
+             if data.len() < current_offset + 8 { break; } // 4 bytes bin_id + 2 bytes dist_x + 2 bytes dist_y
+            let bin_id_res = parse_i32(data, current_offset);
+            let dist_x_res = parse_u16(data, current_offset + 4);
+            let dist_y_res = parse_u16(data, current_offset + 6);
+             if let (Ok(bin_id), Ok(dist_x), Ok(dist_y)) = (bin_id_res, dist_x_res, dist_y_res) {
+                 results.push(PbBinLiquidityDistribution {
+                     bin_id: if bin_id == 0 { None } else { Some(bin_id) },
+                     distribution_x: if dist_x == 0 { None } else { Some(dist_x as u32) },
+                     distribution_y: if dist_y == 0 { None } else { Some(dist_y as u32) },
+                 });
+            } else {
+                 log::warn!("Failed to parse BinLiquidityDistribution element");
+            }
+            current_offset += 8;
+        }
+    } else {
+         log::warn!("Failed to parse Vec<BinLiquidityDistribution> length");
+    }
+    (results, current_offset)
+}
+
+// --- End Helper Functions ---

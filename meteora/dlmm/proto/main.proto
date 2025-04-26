@@ -138,6 +138,26 @@ message InstructionArgs {
 
     // Event logs - Use the wrapper now
     PbEventLogWrapper event_log = 100; 
+
+    // V2 Instructions
+    PbInitializeLbPair2Layout initialize_lb_pair2 = 101;
+    PbClaimFee2Layout claim_fee2 = 102;
+    // Add other V2 layouts here as they are implemented
+    PbInitializeCustomizablePermissionlessLbPair2Layout initialize_customizable_permissionless_lb_pair2 = 103;
+    PbAddLiquidity2Layout add_liquidity2 = 104;
+    PbAddLiquidityByStrategy2Layout add_liquidity_by_strategy2 = 105;
+    PbAddLiquidityOneSidePrecise2Layout add_liquidity_one_side_precise2 = 106;
+    PbRemoveLiquidity2Layout remove_liquidity2 = 107;
+    PbRemoveLiquidityByRange2Layout remove_liquidity_by_range2 = 108;
+    PbSwap2Layout swap2 = 109;
+    PbSwapExactOut2Layout swap_exact_out2 = 110;
+    PbSwapWithPriceImpact2Layout swap_with_price_impact2 = 111;
+    PbClosePosition2Layout close_position2 = 112;
+    PbUpdateFeesAndReward2Layout update_fees_and_reward2 = 113; // Maps to UpdateFeesAndRewards in enum
+    PbClosePositionIfEmptyLayout close_position_if_empty = 114;
+    PbInitializeTokenBadgeLayout initialize_token_badge = 115; // No args, but keep for completeness
+    PbCreateClaimProtocolFeeOperatorLayout create_claim_protocol_fee_operator = 116; // No args
+    PbCloseClaimProtocolFeeOperatorLayout close_claim_protocol_fee_operator = 117; // No args
   }
 }
 
@@ -301,7 +321,7 @@ message PbLiquidityParameterLayout {
 // Specific layout for BinLiquidityDistributionByWeight
 message PbBinLiquidityDistributionByWeightLayout {
   optional int32 bin_id = 1;
-  optional int32 weight = 2; // Use int32 for u16 for simplicity in proto
+  optional uint32 weight = 2; // Changed from int32 to uint32 to match IDL u16
 }
 
 // Removed PbLiquidityOneSideParameterLayout as it's being flattened
@@ -334,7 +354,7 @@ message PbAddLiquidityByStrategyOneSideLayout {
 message PbAddLiquidityOneSidePreciseLayout { 
   // Fields moved from Python's AddLiquidityOneSidePreciseParameterLayout
   repeated PbCompressedBinDepositAmountLayout bins = 1;
-  optional int64 decompress_multiplier = 2;
+  optional uint64 decompress_multiplier = 2;
 }
 message PbRemoveAllLiquidityLayout {}
 message PbRemoveLiquidityByRangeLayout { 
@@ -654,8 +674,186 @@ message PbEventLogWrapper {
 
 // --- End Event Log Structures --- 
 
-// Need definition for CompressedBinDepositAmount for AddLiquidityOneSidePrecise
-message PbCompressedBinDepositAmountLayout {
+// --- V2 Instruction Argument Layouts ---
+
+message PbInitializeLbPair2Layout {
+  optional int32 active_id = 1;
+  // padding field from IDL is omitted
+}
+
+message PbClaimFee2Layout {
+  optional int32 min_bin_id = 1;
+  optional int32 max_bin_id = 2;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 3;
+}
+
+message PbInitializeCustomizablePermissionlessLbPair2Layout {
+  optional PbCustomizableParams params = 1;
+}
+
+message PbAddLiquidity2Layout {
+  optional PbLiquidityParameter liquidity_parameter = 1;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 2;
+}
+
+message PbAddLiquidityByStrategy2Layout {
+  optional PbLiquidityParameterByStrategy liquidity_parameter = 1;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 2;
+}
+
+message PbAddLiquidityOneSidePrecise2Layout {
+  optional PbAddLiquiditySingleSidePreciseParameter2 liquidity_parameter = 1;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 2;
+}
+
+message PbRemoveLiquidity2Layout {
+  repeated PbBinLiquidityReduction bin_liquidity_removal = 1;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 2;
+}
+
+message PbRemoveLiquidityByRange2Layout {
+  optional int32 from_bin_id = 1;
+  optional int32 to_bin_id = 2;
+  optional uint32 bps_to_remove = 3; // u16 in IDL
+  optional PbRemainingAccountsInfo remaining_accounts_info = 4;
+}
+
+message PbSwap2Layout {
+  optional uint64 amount_in = 1;
+  optional uint64 min_amount_out = 2;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 3;
+}
+
+message PbSwapExactOut2Layout {
+  optional uint64 max_in_amount = 1;
+  optional uint64 out_amount = 2;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 3;
+}
+
+message PbSwapWithPriceImpact2Layout {
+  optional uint64 amount_in = 1;
+  optional int32 active_id = 2; // This field is Option<i32> in IDL
+  optional uint32 max_price_impact_bps = 3; // u16 in IDL
+  optional PbRemainingAccountsInfo remaining_accounts_info = 4;
+}
+
+message PbClosePosition2Layout {
+  // No arguments
+}
+
+message PbUpdateFeesAndReward2Layout { // Maps to updateFeesAndReward2 in IDL
+  optional int32 min_bin_id = 1;
+  optional int32 max_bin_id = 2;
+}
+
+message PbClosePositionIfEmptyLayout {
+  // No arguments
+}
+
+message PbInitializeTokenBadgeLayout {
+  // No arguments
+}
+
+message PbCreateClaimProtocolFeeOperatorLayout {
+  // No arguments
+}
+
+message PbCloseClaimProtocolFeeOperatorLayout {
+  // No arguments
+}
+
+// --- Helper Types for V2 Instructions ---
+
+// Corresponds to AccountsType enum in IDL
+enum PbAccountsType {
+  TRANSFER_HOOK_X = 0;
+  TRANSFER_HOOK_Y = 1;
+  TRANSFER_HOOK_REWARD = 2;
+}
+
+// Corresponds to RemainingAccountsSlice struct in IDL
+message PbRemainingAccountsSlice {
+  optional PbAccountsType accounts_type = 1;
+  optional uint32 length = 2; // u8 in IDL
+}
+
+// Corresponds to RemainingAccountsInfo struct in IDL
+message PbRemainingAccountsInfo {
+  repeated PbRemainingAccountsSlice slices = 1;
+}
+
+// Corresponds to CustomizableParams struct in IDL
+message PbCustomizableParams {
+  optional int32 active_id = 1;
+  optional uint32 bin_step = 2; // u16 in IDL
+  optional uint32 base_factor = 3; // u16 in IDL
+  optional uint32 activation_type = 4; // u8 in IDL
+  optional bool has_alpha_vault = 5;
+  optional uint64 activation_point = 6; // Option<u64> in IDL
+  optional bool creator_pool_on_off_control = 7;
+  optional uint32 base_fee_power_factor = 8; // u8 in IDL
+  // padding omitted
+}
+
+// Corresponds to LiquidityParameter struct in IDL
+message PbLiquidityParameter {
+  optional uint64 amount_x = 1;
+  optional uint64 amount_y = 2;
+  repeated PbBinLiquidityDistribution bin_liquidity_dist = 3;
+}
+
+// Corresponds to BinLiquidityDistribution struct in IDL
+message PbBinLiquidityDistribution {
   optional int32 bin_id = 1;
-  optional int32 amount = 2; // u32 in Python parser
+  optional uint32 distribution_x = 2; // u16 in IDL
+  optional uint32 distribution_y = 3; // u16 in IDL
+}
+
+// Corresponds to LiquidityParameterByStrategy struct in IDL
+message PbLiquidityParameterByStrategy {
+  optional uint64 amount_x = 1;
+  optional uint64 amount_y = 2;
+  optional int32 active_id = 3;
+  optional int32 max_active_bin_slippage = 4;
+  optional PbStrategyParameters strategy_parameters = 5;
+}
+
+// Corresponds to StrategyParameters struct in IDL
+message PbStrategyParameters {
+  optional int32 min_bin_id = 1;
+  optional int32 max_bin_id = 2;
+  optional PbStrategyType strategy_type = 3;
+  // parameters (fixed array) omitted for simplicity, parse if needed
+}
+
+// Corresponds to StrategyType enum in IDL
+enum PbStrategyType {
+  SPOT_ONE_SIDE = 0;
+  CURVE_ONE_SIDE = 1;
+  BID_ASK_ONE_SIDE = 2;
+  SPOT_BALANCED = 3;
+  CURVE_BALANCED = 4;
+  BID_ASK_BALANCED = 5;
+  SPOT_IMBALANCED = 6; // Note: IDL uses 'ImBalanced'
+  CURVE_IMBALANCED = 7; // Note: IDL uses 'ImBalanced'
+  BID_ASK_IMBALANCED = 8; // Note: IDL uses 'ImBalanced'
+}
+
+// Corresponds to AddLiquiditySingleSidePreciseParameter2 struct in IDL
+message PbAddLiquiditySingleSidePreciseParameter2 {
+  repeated PbCompressedBinDepositAmountLayout bins = 1; // Use Layout name
+  optional uint64 decompress_multiplier = 2;
+  optional uint64 max_amount = 3;
+}
+
+// Corresponds to CompressedBinDepositAmount struct in IDL (Use Layout name)
+message PbCompressedBinDepositAmountLayout { // Keep Layout name
+  optional int32 bin_id = 1;
+  optional uint32 amount = 2; // u32 in IDL 
+}
+
+// Corresponds to BinLiquidityReduction struct in IDL
+message PbBinLiquidityReduction {
+  optional int32 bin_id = 1;
+  optional uint32 bps_to_remove = 2; // u16 in IDL
 } 

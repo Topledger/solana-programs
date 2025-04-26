@@ -1,4 +1,4 @@
-TraceID: 1b38920d88ee1fc0cf54061f91467220
+TraceID: 0a11aee7e708cffd01da5bada13b5580
 {
   "@module": "map_block",
   "@block": 335838627,
@@ -10,8 +10,12 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "blockSlot": "335838627",
         "blockTime": "1745597123",
         "blockDate": "2025-04-25",
+        "instructionIndex": 0,
+        "isInnerInstruction": false,
+        "innerInstructionIndex": 0,
         "signer": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-        "instructionType": "InitializePosition",
+        "outerProgram": "",
+        "instructionType": "initializePosition",
         "args": {
           "initializePosition": {
             "lowerBinId": -219,
@@ -30,34 +34,16 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "2y8MYSnX9GEM43CSkoDyZr742iwJNSxYrx5RyTBRAbgM56SbnkDe9JAvTsZTSQzGZ8ZWseqxzTLgKwnftmU6zHKZ",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 1,
-        "signer": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-        "outerProgram": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "PositionCreateLog",
-            "positionCreateLogFields": {
-              "lbPair": "4LEue1KFSHaWGarDR8hy5VG8MFXhiuWgvvHAQXceepAJ",
-              "position": "C57woUmBGD23cNF2zRDy11kEAn9jizeTA4HKmyyRZkX9",
-              "owner": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt"
-            }
-          }
-        }
-      },
-      {
         "txId": "3xaUSBQXnC3pekQcVUquj9ecbNe7AsAEgcHB63zXEYWwCGAqYBsKKv5U4PAHVwKEx1jdmDGQ9D6LwQawusvRtAtW",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
         "blockDate": "2025-04-25",
         "instructionIndex": 1,
+        "isInnerInstruction": false,
+        "innerInstructionIndex": 0,
         "signer": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-        "instructionType": "AddLiquidityOneSide",
+        "outerProgram": "",
+        "instructionType": "addLiquidityOneSide",
         "args": {
           "addLiquidityOneSide": {
             "amount": "504068712",
@@ -359,55 +345,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "3xaUSBQXnC3pekQcVUquj9ecbNe7AsAEgcHB63zXEYWwCGAqYBsKKv5U4PAHVwKEx1jdmDGQ9D6LwQawusvRtAtW",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 1,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 0,
-        "signer": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-        "outerProgram": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "CompositionFeeLog",
-            "compositionFeeLogFields": {
-              "from": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-              "binId": -151,
-              "tokenXFeeAmount": "0",
-              "tokenYFeeAmount": "130",
-              "protocolTokenXFeeAmount": "0",
-              "protocolTokenYFeeAmount": "6"
-            }
-          }
-        }
-      },
-      {
-        "txId": "3xaUSBQXnC3pekQcVUquj9ecbNe7AsAEgcHB63zXEYWwCGAqYBsKKv5U4PAHVwKEx1jdmDGQ9D6LwQawusvRtAtW",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 1,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 2,
-        "signer": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-        "outerProgram": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "AddLiquidityLog",
-            "addLiquidityLogFields": {
-              "lbPair": "4LEue1KFSHaWGarDR8hy5VG8MFXhiuWgvvHAQXceepAJ",
-              "from": "4BceiJesr6yM5kXaY9VEkp58kSCk9PKzGwWJCvYKTZLt",
-              "position": "C57woUmBGD23cNF2zRDy11kEAn9jizeTA4HKmyyRZkX9",
-              "amounts": ["0", "504068679"],
-              "activeBinId": -151
-            }
-          }
-        }
-      },
-      {
         "txId": "5hHV5zvpvbWgH8GdoP7AcQrmckRdFNKbN8RCSxHaFX8w5tdwroyRzvo2Epwaw73Xx8ZUbm3vWpW2UHV5pi8tsUYW",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -417,7 +354,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 0,
         "signer": "EeNcYVQgq4Pe5cEmWBHYsscC24yP1Qn1aaxN1jeh2gaC",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "1700000000",
@@ -443,36 +380,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "5hHV5zvpvbWgH8GdoP7AcQrmckRdFNKbN8RCSxHaFX8w5tdwroyRzvo2Epwaw73Xx8ZUbm3vWpW2UHV5pi8tsUYW",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 1,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 3,
-        "signer": "EeNcYVQgq4Pe5cEmWBHYsscC24yP1Qn1aaxN1jeh2gaC",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "71HuFmuYAFEFUna2x2R4HJjrFNQHGuagW3gUMFToL9tk",
-              "from": "EeNcYVQgq4Pe5cEmWBHYsscC24yP1Qn1aaxN1jeh2gaC",
-              "startBinId": 4500,
-              "endBinId": 4500,
-              "amountIn": "1700000000",
-              "amountOut": "18907276",
-              "swapForY": false,
-              "fee": "1843783",
-              "protocolFee": "92189",
-              "feeBps": "1084578",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "5Paj6REsFnYT3XSBtFJr7RcNPTqRp3GFHTQqdWWUEPJDhBN8cxrAarnnrBHFsCkFaqyumFgMAThidpWRwuyb3nAy",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -482,7 +389,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 3,
         "signer": "EsdYNrys96qBTFYiPkmu6LC9vD7ozWuqRMrJHnaVo4C9",
         "outerProgram": "FAMBuBHJ1U8DUeY3HNGuW9XsCM4bPZKYk9NXSyR2W2zd",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "5721",
@@ -508,36 +415,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "5Paj6REsFnYT3XSBtFJr7RcNPTqRp3GFHTQqdWWUEPJDhBN8cxrAarnnrBHFsCkFaqyumFgMAThidpWRwuyb3nAy",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 1,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 6,
-        "signer": "EsdYNrys96qBTFYiPkmu6LC9vD7ozWuqRMrJHnaVo4C9",
-        "outerProgram": "FAMBuBHJ1U8DUeY3HNGuW9XsCM4bPZKYk9NXSyR2W2zd",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "DhpTrtGtFqgSWXHzRz5J4F3ZsqapZEiDBHHtSmaN8vfF",
-              "from": "EsdYNrys96qBTFYiPkmu6LC9vD7ozWuqRMrJHnaVo4C9",
-              "startBinId": 8740,
-              "endBinId": 8740,
-              "amountIn": "5721",
-              "amountOut": "35576012",
-              "swapForY": true,
-              "fee": "2",
-              "protocolFee": "0",
-              "feeBps": "300000",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "4U7fKfjJ9DV8cSKViRGpkPxmrPui9Krzyu5WRo5XzpGzFgUJ6J9gRDvQjcyaJGyvuYzixQHZ7bx7hbfuBUvy7dxk",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -547,7 +424,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 7,
         "signer": "7aZpioGfqsApzZerRXmvfz1VuJjg6TxRx3YHjRXjVj4P",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "219780000",
@@ -573,43 +450,16 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "4U7fKfjJ9DV8cSKViRGpkPxmrPui9Krzyu5WRo5XzpGzFgUJ6J9gRDvQjcyaJGyvuYzixQHZ7bx7hbfuBUvy7dxk",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 10,
-        "signer": "7aZpioGfqsApzZerRXmvfz1VuJjg6TxRx3YHjRXjVj4P",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "3DupsT51RJp3z3yoAcwsXoBgFZitFo7fdRfgW6ZqDN3Z",
-              "from": "6U91aKa8pmMxkJwBCfPTmUEfZi6dHe7DcFq2ALvB2tbB",
-              "startBinId": -1254,
-              "endBinId": -1253,
-              "amountIn": "219780000",
-              "amountOut": "1435424982",
-              "swapForY": false,
-              "fee": "331170",
-              "protocolFee": "16558",
-              "feeBps": "1506750",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "42HzQm3f2TodytRdJCSTSRXRtKvpKJ1UBMonhWEerubrPM4ZXVEm8PAyziMvdxLGN3TjFD1TPoPjq8GzDWG2rs8F",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
         "blockDate": "2025-04-25",
         "instructionIndex": 2,
+        "isInnerInstruction": false,
+        "innerInstructionIndex": 0,
         "signer": "4GQeEya6ZTwvXre4Br6ZfDyfe2WQMkcDz2QbkJZazVqS",
-        "instructionType": "Swap",
+        "outerProgram": "",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "136072935",
@@ -635,36 +485,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "42HzQm3f2TodytRdJCSTSRXRtKvpKJ1UBMonhWEerubrPM4ZXVEm8PAyziMvdxLGN3TjFD1TPoPjq8GzDWG2rs8F",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 2,
-        "signer": "4GQeEya6ZTwvXre4Br6ZfDyfe2WQMkcDz2QbkJZazVqS",
-        "outerProgram": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "ANrJZimFmLFH1LpMQqhU1eEbXSHrjPV7jegHH5KV4wro",
-              "from": "4GQeEya6ZTwvXre4Br6ZfDyfe2WQMkcDz2QbkJZazVqS",
-              "startBinId": 100,
-              "endBinId": 99,
-              "amountIn": "136072935",
-              "amountOut": "150202029",
-              "swapForY": true,
-              "fee": "138016",
-              "protocolFee": "6900",
-              "feeBps": "1004010",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "d4z87M2fpBfuiU8TGA7XpS4sdsSPJKAER11XuDrq1Pbt2pFjaMFnxPtEYzuDKP9h9EArMQBNcgjpDeMpEaq2MfJ",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -674,7 +494,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 0,
         "signer": "8Kj2MoiGtDDLFZMPCCAgGkRQ2RFi2QV2YQ4K1EGvhMTz",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "29032009",
@@ -700,36 +520,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "d4z87M2fpBfuiU8TGA7XpS4sdsSPJKAER11XuDrq1Pbt2pFjaMFnxPtEYzuDKP9h9EArMQBNcgjpDeMpEaq2MfJ",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 3,
-        "signer": "8Kj2MoiGtDDLFZMPCCAgGkRQ2RFi2QV2YQ4K1EGvhMTz",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9",
-              "from": "8Kj2MoiGtDDLFZMPCCAgGkRQ2RFi2QV2YQ4K1EGvhMTz",
-              "startBinId": 2619,
-              "endBinId": 2620,
-              "amountIn": "29032009",
-              "amountOut": "2113456",
-              "swapForY": false,
-              "fee": "42156",
-              "protocolFee": "2107",
-              "feeBps": "1457704",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "5MLZbx2CJ5W7HL3Xr1JndhPoxZW9p8ipeHsUS36BGn3TAvBtWPYKFwd3HKFaak8CKb4x7Xq2zeZehah7ds9LZsB5",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -739,7 +529,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 4,
         "signer": "FkdDHrM8j8psKbxuwjV1jBKCM2JGPygkj7WCX8sSCzNm",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "3594211138",
@@ -765,36 +555,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "5MLZbx2CJ5W7HL3Xr1JndhPoxZW9p8ipeHsUS36BGn3TAvBtWPYKFwd3HKFaak8CKb4x7Xq2zeZehah7ds9LZsB5",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 3,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 7,
-        "signer": "FkdDHrM8j8psKbxuwjV1jBKCM2JGPygkj7WCX8sSCzNm",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "GN5VguUPcQU1xHR5PVH3gA4eESTZiVp9MLwXBL3PP7Yz",
-              "from": "FkdDHrM8j8psKbxuwjV1jBKCM2JGPygkj7WCX8sSCzNm",
-              "startBinId": -594,
-              "endBinId": -594,
-              "amountIn": "3594211138",
-              "amountOut": "31309974",
-              "swapForY": true,
-              "fee": "35942112",
-              "protocolFee": "1797105",
-              "feeBps": "10000000",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "4r2E9MNoA3QUrauoT8m14XKQajwHBi8HyAtuT2tmRd9Tjb9xzF45HQRs12zXfp1VnwcZjFxLEs1DpCMSfeTYutnW",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -804,7 +564,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 6,
         "signer": "arb9FAg5n8u63sXrHSTxNrBBuGf4LnMMMDFFhzCXMXU",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "2144688964",
@@ -830,36 +590,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "4r2E9MNoA3QUrauoT8m14XKQajwHBi8HyAtuT2tmRd9Tjb9xzF45HQRs12zXfp1VnwcZjFxLEs1DpCMSfeTYutnW",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 9,
-        "signer": "arb9FAg5n8u63sXrHSTxNrBBuGf4LnMMMDFFhzCXMXU",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "9iZ2DS2srUKjwKQ7GVUJK6rUCzppc5CAwXv4YPoC4Tcf",
-              "from": "arb9FAg5n8u63sXrHSTxNrBBuGf4LnMMMDFFhzCXMXU",
-              "startBinId": -569,
-              "endBinId": -570,
-              "amountIn": "2144688964",
-              "amountOut": "7231677",
-              "swapForY": true,
-              "fee": "43708092",
-              "protocolFee": "2185404",
-              "feeBps": "20379688",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "2jNCyDuovw4X3kMKujbaw3xBJk1XAR3AtaCu5D47NugcnFsy66M9NbJMzt9dqoW1AMokQButYqUASGVF3pDVUgBD",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -869,7 +599,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 5,
         "signer": "3FF42ETjUmLvb7GWVF8HiBbN1XgU4xhbmx7K5y4DUxwX",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "3600187252",
@@ -895,36 +625,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "2jNCyDuovw4X3kMKujbaw3xBJk1XAR3AtaCu5D47NugcnFsy66M9NbJMzt9dqoW1AMokQButYqUASGVF3pDVUgBD",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 8,
-        "signer": "3FF42ETjUmLvb7GWVF8HiBbN1XgU4xhbmx7K5y4DUxwX",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "25hQQJoiRRJyV2FF69zg9cZgJxuNKZTAmixhKwvSWmD9",
-              "from": "6U91aKa8pmMxkJwBCfPTmUEfZi6dHe7DcFq2ALvB2tbB",
-              "startBinId": -534,
-              "endBinId": -533,
-              "amountIn": "3600187252",
-              "amountOut": "246562873651",
-              "swapForY": false,
-              "fee": "74883896",
-              "protocolFee": "3744194",
-              "feeBps": "20800000",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "3pMT3Tn8YHnrVJN9mQm8JUL6m9rscSuDnkRkZMfpxGPVVwBa8pYgYeEqRuJHbEQNSeH33zEsgAw1FTbys2cA89vT",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -934,7 +634,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 5,
         "signer": "94HnNyEmJeMy7SoxPKKiTpDj5y3h7Z7wN27Mi7hqGEgD",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "539825623",
@@ -960,36 +660,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "3pMT3Tn8YHnrVJN9mQm8JUL6m9rscSuDnkRkZMfpxGPVVwBa8pYgYeEqRuJHbEQNSeH33zEsgAw1FTbys2cA89vT",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 8,
-        "signer": "94HnNyEmJeMy7SoxPKKiTpDj5y3h7Z7wN27Mi7hqGEgD",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "25hQQJoiRRJyV2FF69zg9cZgJxuNKZTAmixhKwvSWmD9",
-              "from": "GGztQqQ6pCPaJQnNpXBgELr5cs3WwDakRbh1iEMzjgSJ",
-              "startBinId": -533,
-              "endBinId": -533,
-              "amountIn": "539825623",
-              "amountOut": "36947794016",
-              "swapForY": false,
-              "fee": "11228373",
-              "protocolFee": "561418",
-              "feeBps": "20800000",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "4ex9uH8pB1rcacfRntE4GVSX7k7BWvDBJ2YgihsSnxxbvQ17gL6FJkRZcX6LvxdVSzeea7daDSWubPP7E7Pq44G",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -999,7 +669,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 0,
         "signer": "FkdDHrM8j8psKbxuwjV1jBKCM2JGPygkj7WCX8sSCzNm",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "3200000",
@@ -1025,36 +695,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "4ex9uH8pB1rcacfRntE4GVSX7k7BWvDBJ2YgihsSnxxbvQ17gL6FJkRZcX6LvxdVSzeea7daDSWubPP7E7Pq44G",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 3,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 3,
-        "signer": "FkdDHrM8j8psKbxuwjV1jBKCM2JGPygkj7WCX8sSCzNm",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "92PMK8SHGmtJYwyaoeYTTbLQu661HJS46WLXj6VBuny8",
-              "from": "FkdDHrM8j8psKbxuwjV1jBKCM2JGPygkj7WCX8sSCzNm",
-              "startBinId": -85,
-              "endBinId": -84,
-              "amountIn": "3200000",
-              "amountOut": "16718588",
-              "swapForY": false,
-              "fee": "32000",
-              "protocolFee": "1600",
-              "feeBps": "10000000",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "64KAaheggWzniqwmmRLPd6hAVwpupAUAYRF12xGScKXHSXeKJUUZcPmBCvGZ535ioqGxmpobgZvvudDoCzKzTAhU",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -1064,7 +704,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 2,
         "signer": "3ecmFWiD4qj5CNvn1sueKvdrE1dFJLGkHoeePiTYNje3",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "9907000",
@@ -1090,36 +730,6 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "64KAaheggWzniqwmmRLPd6hAVwpupAUAYRF12xGScKXHSXeKJUUZcPmBCvGZ535ioqGxmpobgZvvudDoCzKzTAhU",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 3,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 5,
-        "signer": "3ecmFWiD4qj5CNvn1sueKvdrE1dFJLGkHoeePiTYNje3",
-        "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "6a7EnjAoiRBbminKkWPdytMFFf5ogjLutqwpvAVyZ89j",
-              "from": "3ecmFWiD4qj5CNvn1sueKvdrE1dFJLGkHoeePiTYNje3",
-              "startBinId": 833,
-              "endBinId": 833,
-              "amountIn": "9907000",
-              "amountOut": "10766477",
-              "swapForY": true,
-              "fee": "991",
-              "protocolFee": "49",
-              "feeBps": "100000",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "3RR6Ea1jgeAjXYn18iwnQufhSkVsBHtkUutBaZq8W2ZEJVEGqjKcLRPCDR4UtdLAFX3zikNqyv29RHSkv98aJgga",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
@@ -1129,7 +739,7 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "innerInstructionIndex": 10,
         "signer": "tdDmurGTJ288UndUeueSpYcjwpSQY2kGxzrTC2FyvT8",
         "outerProgram": "BN111JnbLtbmQqqiCh7h2pDKhAhMx4wi77Mj7jJFbyp8",
-        "instructionType": "Swap",
+        "instructionType": "swap",
         "args": {
           "swap": {
             "amountIn": "3600000000",
@@ -1155,55 +765,30 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         }
       },
       {
-        "txId": "3RR6Ea1jgeAjXYn18iwnQufhSkVsBHtkUutBaZq8W2ZEJVEGqjKcLRPCDR4UtdLAFX3zikNqyv29RHSkv98aJgga",
-        "blockSlot": "335838627",
-        "blockTime": "1745597123",
-        "blockDate": "2025-04-25",
-        "instructionIndex": 2,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 13,
-        "signer": "tdDmurGTJ288UndUeueSpYcjwpSQY2kGxzrTC2FyvT8",
-        "outerProgram": "BN111JnbLtbmQqqiCh7h2pDKhAhMx4wi77Mj7jJFbyp8",
-        "instructionType": "EventLog",
-        "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "5BEYpX8vFT9FZx7doc8cdhzUXZh7Tbr3GR27tHYcZQjB",
-              "from": "4xDsmeTWPNjgSVSS1VTfzFq3iHZhp77ffPkAmkZkdu71",
-              "startBinId": -2959,
-              "endBinId": -2959,
-              "amountIn": "3600000000",
-              "amountOut": "303262714297",
-              "swapForY": false,
-              "fee": "5427663",
-              "protocolFee": "271383",
-              "feeBps": "1507684",
-              "hostFee": "0"
-            }
-          }
-        }
-      },
-      {
         "txId": "5WRZseSqhCtZMc88ikjQaGPEdvdSLz8Gn3mxiU2Dm44QKtENFA9XWJnHCJectgh9gGHmQWvfMNsuwCzFCfAwqWBm",
         "blockSlot": "335838627",
         "blockTime": "1745597123",
         "blockDate": "2025-04-25",
         "instructionIndex": 3,
-        "isInnerInstruction": true,
-        "innerInstructionIndex": 2,
+        "isInnerInstruction": false,
+        "innerInstructionIndex": 0,
         "signer": "oscK3M29VobhmANAXYwrFTYoy77ciqhnGSX4yYBzVKW",
-        "outerProgram": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-        "instructionType": "EventLog",
+        "outerProgram": "",
+        "instructionType": "removeLiquidityByRange2",
         "args": {
-          "eventLog": {
-            "eventName": "RemoveLiquidityLog",
-            "removeLiquidityLogFields": {
-              "lbPair": "4kdxjt8pKEW4qV4ji4HANixwswDJw3Egn8L4x2BEWQqT",
-              "from": "oscK3M29VobhmANAXYwrFTYoy77ciqhnGSX4yYBzVKW",
-              "position": "E516kW3NCmJGJcM8Qk46r6NXoodgsXr2FeVLPbm8eYy8",
-              "amounts": ["3285", "255211841"],
-              "activeBinId": 17473
+          "removeLiquidityByRange2": {
+            "fromBinId": 17449,
+            "toBinId": 17474,
+            "bpsToRemove": 10000,
+            "remainingAccountsInfo": {
+              "slices": [
+                {
+                  "accountsType": "TRANSFER_HOOK_X"
+                },
+                {
+                  "accountsType": "TRANSFER_HOOK_Y"
+                }
+              ]
             }
           }
         }
@@ -1215,26 +800,13 @@ TraceID: 1b38920d88ee1fc0cf54061f91467220
         "blockDate": "2025-04-25",
         "instructionIndex": 3,
         "isInnerInstruction": true,
-        "innerInstructionIndex": 5,
+        "innerInstructionIndex": 4,
         "signer": "4UFMubecQfY78k2stAzz8w4ZHscY5yjGUhdorap9j6kU",
         "outerProgram": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4",
-        "instructionType": "EventLog",
+        "instructionType": "swap2",
         "args": {
-          "eventLog": {
-            "eventName": "SwapLog",
-            "swapLogFields": {
-              "lbPair": "DGwFL8tQgbbeNSpdwbRX1tHVyfUupsDM3FvGHUfiWoPg",
-              "from": "4UFMubecQfY78k2stAzz8w4ZHscY5yjGUhdorap9j6kU",
-              "startBinId": -6485,
-              "endBinId": -6485,
-              "amountIn": "14428404180",
-              "amountOut": "22068221",
-              "swapForY": true,
-              "fee": "15224968",
-              "protocolFee": "761248",
-              "feeBps": "1055208",
-              "hostFee": "0"
-            }
+          "swap2": {
+            "amountIn": "14428404180"
           }
         }
       }

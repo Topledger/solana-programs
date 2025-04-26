@@ -121,7 +121,7 @@ pub struct FlatArg {
 pub struct InstructionArgs {
     #[prost(
         oneof = "instruction_args::InstructionArgs",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 100"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117"
     )]
     pub instruction_args: ::core::option::Option<instruction_args::InstructionArgs>,
 }
@@ -261,6 +261,48 @@ pub mod instruction_args {
         /// Event logs - Use the wrapper now
         #[prost(message, tag = "100")]
         EventLog(super::PbEventLogWrapper),
+        /// V2 Instructions
+        #[prost(message, tag = "101")]
+        InitializeLbPair2(super::PbInitializeLbPair2Layout),
+        #[prost(message, tag = "102")]
+        ClaimFee2(super::PbClaimFee2Layout),
+        /// Add other V2 layouts here as they are implemented
+        #[prost(message, tag = "103")]
+        InitializeCustomizablePermissionlessLbPair2(
+            super::PbInitializeCustomizablePermissionlessLbPair2Layout,
+        ),
+        #[prost(message, tag = "104")]
+        AddLiquidity2(super::PbAddLiquidity2Layout),
+        #[prost(message, tag = "105")]
+        AddLiquidityByStrategy2(super::PbAddLiquidityByStrategy2Layout),
+        #[prost(message, tag = "106")]
+        AddLiquidityOneSidePrecise2(super::PbAddLiquidityOneSidePrecise2Layout),
+        #[prost(message, tag = "107")]
+        RemoveLiquidity2(super::PbRemoveLiquidity2Layout),
+        #[prost(message, tag = "108")]
+        RemoveLiquidityByRange2(super::PbRemoveLiquidityByRange2Layout),
+        #[prost(message, tag = "109")]
+        Swap2(super::PbSwap2Layout),
+        #[prost(message, tag = "110")]
+        SwapExactOut2(super::PbSwapExactOut2Layout),
+        #[prost(message, tag = "111")]
+        SwapWithPriceImpact2(super::PbSwapWithPriceImpact2Layout),
+        #[prost(message, tag = "112")]
+        ClosePosition2(super::PbClosePosition2Layout),
+        /// Maps to UpdateFeesAndRewards in enum
+        #[prost(message, tag = "113")]
+        UpdateFeesAndReward2(super::PbUpdateFeesAndReward2Layout),
+        #[prost(message, tag = "114")]
+        ClosePositionIfEmpty(super::PbClosePositionIfEmptyLayout),
+        /// No args, but keep for completeness
+        #[prost(message, tag = "115")]
+        InitializeTokenBadge(super::PbInitializeTokenBadgeLayout),
+        /// No args
+        #[prost(message, tag = "116")]
+        CreateClaimProtocolFeeOperator(super::PbCreateClaimProtocolFeeOperatorLayout),
+        /// No args
+        #[prost(message, tag = "117")]
+        CloseClaimProtocolFeeOperator(super::PbCloseClaimProtocolFeeOperatorLayout),
     }
 }
 /// Common types
@@ -498,9 +540,9 @@ pub struct PbLiquidityParameterLayout {}
 pub struct PbBinLiquidityDistributionByWeightLayout {
     #[prost(int32, optional, tag = "1")]
     pub bin_id: ::core::option::Option<i32>,
-    /// Use int32 for u16 for simplicity in proto
-    #[prost(int32, optional, tag = "2")]
-    pub weight: ::core::option::Option<i32>,
+    /// Changed from int32 to uint32 to match IDL u16
+    #[prost(uint32, optional, tag = "2")]
+    pub weight: ::core::option::Option<u32>,
 }
 /// Placeholder definitions for missing layouts with fields added
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
@@ -546,8 +588,8 @@ pub struct PbAddLiquidityOneSidePreciseLayout {
     /// Fields moved from Python's AddLiquidityOneSidePreciseParameterLayout
     #[prost(message, repeated, tag = "1")]
     pub bins: ::prost::alloc::vec::Vec<PbCompressedBinDepositAmountLayout>,
-    #[prost(int64, optional, tag = "2")]
-    pub decompress_multiplier: ::core::option::Option<i64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub decompress_multiplier: ::core::option::Option<u64>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbRemoveAllLiquidityLayout {}
@@ -1085,12 +1127,318 @@ pub mod pb_event_log_wrapper {
         DynamicFeeParameterUpdateLogFields(super::PbDynamicFeeParameterUpdateLogFields),
     }
 }
-/// Need definition for CompressedBinDepositAmount for AddLiquidityOneSidePrecise
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializeLbPair2Layout {
+    /// padding field from IDL is omitted
+    #[prost(int32, optional, tag = "1")]
+    pub active_id: ::core::option::Option<i32>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbClaimFee2Layout {
+    #[prost(int32, optional, tag = "1")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    #[prost(message, optional, tag = "3")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializeCustomizablePermissionlessLbPair2Layout {
+    #[prost(message, optional, tag = "1")]
+    pub params: ::core::option::Option<PbCustomizableParams>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidity2Layout {
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameter>,
+    #[prost(message, optional, tag = "2")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityByStrategy2Layout {
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterByStrategy>,
+    #[prost(message, optional, tag = "2")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquidityOneSidePrecise2Layout {
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<
+        PbAddLiquiditySingleSidePreciseParameter2,
+    >,
+    #[prost(message, optional, tag = "2")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbRemoveLiquidity2Layout {
+    #[prost(message, repeated, tag = "1")]
+    pub bin_liquidity_removal: ::prost::alloc::vec::Vec<PbBinLiquidityReduction>,
+    #[prost(message, optional, tag = "2")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbRemoveLiquidityByRange2Layout {
+    #[prost(int32, optional, tag = "1")]
+    pub from_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub to_bin_id: ::core::option::Option<i32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "3")]
+    pub bps_to_remove: ::core::option::Option<u32>,
+    #[prost(message, optional, tag = "4")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSwap2Layout {
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_in: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub min_amount_out: ::core::option::Option<u64>,
+    #[prost(message, optional, tag = "3")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSwapExactOut2Layout {
+    #[prost(uint64, optional, tag = "1")]
+    pub max_in_amount: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub out_amount: ::core::option::Option<u64>,
+    #[prost(message, optional, tag = "3")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbSwapWithPriceImpact2Layout {
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_in: ::core::option::Option<u64>,
+    /// This field is Option<i32> in IDL
+    #[prost(int32, optional, tag = "2")]
+    pub active_id: ::core::option::Option<i32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "3")]
+    pub max_price_impact_bps: ::core::option::Option<u32>,
+    #[prost(message, optional, tag = "4")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
+/// No arguments
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbClosePosition2Layout {}
+/// Maps to updateFeesAndReward2 in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbUpdateFeesAndReward2Layout {
+    #[prost(int32, optional, tag = "1")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub max_bin_id: ::core::option::Option<i32>,
+}
+/// No arguments
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbClosePositionIfEmptyLayout {}
+/// No arguments
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitializeTokenBadgeLayout {}
+/// No arguments
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbCreateClaimProtocolFeeOperatorLayout {}
+/// No arguments
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbCloseClaimProtocolFeeOperatorLayout {}
+/// Corresponds to RemainingAccountsSlice struct in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbRemainingAccountsSlice {
+    #[prost(enumeration = "PbAccountsType", optional, tag = "1")]
+    pub accounts_type: ::core::option::Option<i32>,
+    /// u8 in IDL
+    #[prost(uint32, optional, tag = "2")]
+    pub length: ::core::option::Option<u32>,
+}
+/// Corresponds to RemainingAccountsInfo struct in IDL
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbRemainingAccountsInfo {
+    #[prost(message, repeated, tag = "1")]
+    pub slices: ::prost::alloc::vec::Vec<PbRemainingAccountsSlice>,
+}
+/// Corresponds to CustomizableParams struct in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbCustomizableParams {
+    #[prost(int32, optional, tag = "1")]
+    pub active_id: ::core::option::Option<i32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<u32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "3")]
+    pub base_factor: ::core::option::Option<u32>,
+    /// u8 in IDL
+    #[prost(uint32, optional, tag = "4")]
+    pub activation_type: ::core::option::Option<u32>,
+    #[prost(bool, optional, tag = "5")]
+    pub has_alpha_vault: ::core::option::Option<bool>,
+    /// Option<u64> in IDL
+    #[prost(uint64, optional, tag = "6")]
+    pub activation_point: ::core::option::Option<u64>,
+    #[prost(bool, optional, tag = "7")]
+    pub creator_pool_on_off_control: ::core::option::Option<bool>,
+    /// u8 in IDL
+    #[prost(uint32, optional, tag = "8")]
+    pub base_fee_power_factor: ::core::option::Option<u32>,
+}
+/// Corresponds to LiquidityParameter struct in IDL
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbLiquidityParameter {
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_x: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub amount_y: ::core::option::Option<u64>,
+    #[prost(message, repeated, tag = "3")]
+    pub bin_liquidity_dist: ::prost::alloc::vec::Vec<PbBinLiquidityDistribution>,
+}
+/// Corresponds to BinLiquidityDistribution struct in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbBinLiquidityDistribution {
+    #[prost(int32, optional, tag = "1")]
+    pub bin_id: ::core::option::Option<i32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "2")]
+    pub distribution_x: ::core::option::Option<u32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "3")]
+    pub distribution_y: ::core::option::Option<u32>,
+}
+/// Corresponds to LiquidityParameterByStrategy struct in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbLiquidityParameterByStrategy {
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_x: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub amount_y: ::core::option::Option<u64>,
+    #[prost(int32, optional, tag = "3")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "4")]
+    pub max_active_bin_slippage: ::core::option::Option<i32>,
+    #[prost(message, optional, tag = "5")]
+    pub strategy_parameters: ::core::option::Option<PbStrategyParameters>,
+}
+/// Corresponds to StrategyParameters struct in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbStrategyParameters {
+    #[prost(int32, optional, tag = "1")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "2")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    /// parameters (fixed array) omitted for simplicity, parse if needed
+    #[prost(enumeration = "PbStrategyType", optional, tag = "3")]
+    pub strategy_type: ::core::option::Option<i32>,
+}
+/// Corresponds to AddLiquiditySingleSidePreciseParameter2 struct in IDL
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbAddLiquiditySingleSidePreciseParameter2 {
+    /// Use Layout name
+    #[prost(message, repeated, tag = "1")]
+    pub bins: ::prost::alloc::vec::Vec<PbCompressedBinDepositAmountLayout>,
+    #[prost(uint64, optional, tag = "2")]
+    pub decompress_multiplier: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "3")]
+    pub max_amount: ::core::option::Option<u64>,
+}
+/// Corresponds to CompressedBinDepositAmount struct in IDL (Use Layout name)
+///
+/// Keep Layout name
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbCompressedBinDepositAmountLayout {
     #[prost(int32, optional, tag = "1")]
     pub bin_id: ::core::option::Option<i32>,
-    /// u32 in Python parser
-    #[prost(int32, optional, tag = "2")]
-    pub amount: ::core::option::Option<i32>,
+    /// u32 in IDL
+    #[prost(uint32, optional, tag = "2")]
+    pub amount: ::core::option::Option<u32>,
+}
+/// Corresponds to BinLiquidityReduction struct in IDL
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbBinLiquidityReduction {
+    #[prost(int32, optional, tag = "1")]
+    pub bin_id: ::core::option::Option<i32>,
+    /// u16 in IDL
+    #[prost(uint32, optional, tag = "2")]
+    pub bps_to_remove: ::core::option::Option<u32>,
+}
+/// Corresponds to AccountsType enum in IDL
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum PbAccountsType {
+    TransferHookX = 0,
+    TransferHookY = 1,
+    TransferHookReward = 2,
+}
+impl PbAccountsType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::TransferHookX => "TRANSFER_HOOK_X",
+            Self::TransferHookY => "TRANSFER_HOOK_Y",
+            Self::TransferHookReward => "TRANSFER_HOOK_REWARD",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "TRANSFER_HOOK_X" => Some(Self::TransferHookX),
+            "TRANSFER_HOOK_Y" => Some(Self::TransferHookY),
+            "TRANSFER_HOOK_REWARD" => Some(Self::TransferHookReward),
+            _ => None,
+        }
+    }
+}
+/// Corresponds to StrategyType enum in IDL
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum PbStrategyType {
+    SpotOneSide = 0,
+    CurveOneSide = 1,
+    BidAskOneSide = 2,
+    SpotBalanced = 3,
+    CurveBalanced = 4,
+    BidAskBalanced = 5,
+    /// Note: IDL uses 'ImBalanced'
+    SpotImbalanced = 6,
+    /// Note: IDL uses 'ImBalanced'
+    CurveImbalanced = 7,
+    /// Note: IDL uses 'ImBalanced'
+    BidAskImbalanced = 8,
+}
+impl PbStrategyType {
+    /// String value of the enum field names used in the ProtoBuf definition.
+    ///
+    /// The values are not transformed in any way and thus are considered stable
+    /// (if the ProtoBuf definition does not change) and safe for programmatic use.
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::SpotOneSide => "SPOT_ONE_SIDE",
+            Self::CurveOneSide => "CURVE_ONE_SIDE",
+            Self::BidAskOneSide => "BID_ASK_ONE_SIDE",
+            Self::SpotBalanced => "SPOT_BALANCED",
+            Self::CurveBalanced => "CURVE_BALANCED",
+            Self::BidAskBalanced => "BID_ASK_BALANCED",
+            Self::SpotImbalanced => "SPOT_IMBALANCED",
+            Self::CurveImbalanced => "CURVE_IMBALANCED",
+            Self::BidAskImbalanced => "BID_ASK_IMBALANCED",
+        }
+    }
+    /// Creates an enum from field names used in the ProtoBuf definition.
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "SPOT_ONE_SIDE" => Some(Self::SpotOneSide),
+            "CURVE_ONE_SIDE" => Some(Self::CurveOneSide),
+            "BID_ASK_ONE_SIDE" => Some(Self::BidAskOneSide),
+            "SPOT_BALANCED" => Some(Self::SpotBalanced),
+            "CURVE_BALANCED" => Some(Self::CurveBalanced),
+            "BID_ASK_BALANCED" => Some(Self::BidAskBalanced),
+            "SPOT_IMBALANCED" => Some(Self::SpotImbalanced),
+            "CURVE_IMBALANCED" => Some(Self::CurveImbalanced),
+            "BID_ASK_IMBALANCED" => Some(Self::BidAskImbalanced),
+            _ => None,
+        }
+    }
 }
