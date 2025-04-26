@@ -1,4 +1,4 @@
-TraceID: 0a11aee7e708cffd01da5bada13b5580
+TraceID: a5713838d46e3dc4a0077e04f1a9129f
 {
   "@module": "map_block",
   "@block": 335838627,
@@ -791,6 +791,22 @@ TraceID: 0a11aee7e708cffd01da5bada13b5580
               ]
             }
           }
+        },
+        "inputAccounts": {
+          "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "binArrayLower": "oscK3M29VobhmANAXYwrFTYoy77ciqhnGSX4yYBzVKW",
+          "binArrayUpper": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "eventAuthority": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+          "lbPair": "4kdxjt8pKEW4qV4ji4HANixwswDJw3Egn8L4x2BEWQqT",
+          "position": "E516kW3NCmJGJcM8Qk46r6NXoodgsXr2FeVLPbm8eYy8",
+          "program": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "reserveX": "6vwm1hbRj5u8ELuiyLiAmVPnLiQ77XiHjZzpGyrYhQXv",
+          "reserveY": "3fmSwzBY2TYStZwtdzBmGkdAHcTThsuowSKLVCgqLMXx",
+          "sender": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "tokenXMint": "3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh",
+          "tokenYMint": "So11111111111111111111111111111111111111112",
+          "userTokenX": "EcidWedPiCjfyYpLZVZXSqkcBNgHx7E6v6v1npScKt6Z",
+          "userTokenY": "9AULUEWNiFuRPbwZU39HLY2fa6gkuJCry9xewgeACAbA"
         }
       },
       {
@@ -806,8 +822,27 @@ TraceID: 0a11aee7e708cffd01da5bada13b5580
         "instructionType": "swap2",
         "args": {
           "swap2": {
-            "amountIn": "14428404180"
+            "amountIn": "14428404180",
+            "minAmountOut": "0"
           }
+        },
+        "inputAccounts": {
+          "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "hostFeeIn": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "lbPair": "DGwFL8tQgbbeNSpdwbRX1tHVyfUupsDM3FvGHUfiWoPg",
+          "memoProgram": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+          "oracle": "DPCrnQAUH4Wn11CvCMzi6movAtaFULMYe9KvUhL424gF",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+          "reserveX": "9ryNoxGiiUcmqPffAzgbX4hdo2EFzigruaur7wMqqhe3",
+          "reserveY": "54BcAz7dGYRPFcEEQ1EMiJ2tnLUWZxRRYwqifkt31WhX",
+          "tokenXMint": "HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC",
+          "tokenXProgram": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+          "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "user": "4UFMubecQfY78k2stAzz8w4ZHscY5yjGUhdorap9j6kU",
+          "userTokenIn": "GWtCKtZ4beGiJR1TgWaDekqaz24Lmsrbwz7x6EawHnWr",
+          "userTokenOut": "E8by7eGRfEhHLxT1wzuWHpVWwPTNKE4FhZbeFVJYow5c"
         }
       }
     ]

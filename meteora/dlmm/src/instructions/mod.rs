@@ -1020,22 +1020,24 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
         InstructionType::InitializeLbPair2 => {
             if data.len() < 12 { // 8 bytes discriminator + 4 bytes active_id
                 log::warn!("Data too short for InitializeLbPair2: {} bytes", data.len());
-                return None; 
+                return None;
             }
-            let active_id = parse_i32(data, 8).unwrap_or(0);
+            // Use .ok() to map Ok(value) -> Some(value) [incl. 0], Err -> None
+            let active_id_opt = parse_i32(data, 8).ok();
             args.instruction_args = Some(IArgs::InitializeLbPair2(PbInitializeLbPair2Layout {
-                active_id: if active_id == 0 { None } else { Some(active_id) },
+                active_id: active_id_opt,
             }));
         },
 
         InstructionType::ClaimFee2 => {
             if data.len() < 20 { // 8 disc + 4 min_bin + 4 max_bin + 4 vec_len
                  log::warn!("Data too short for ClaimFee2 base args: {} bytes", data.len());
-                 return None; 
+                 return None;
             }
-            let min_bin_id = parse_i32(data, 8).unwrap_or(0);
-            let max_bin_id = parse_i32(data, 12).unwrap_or(0);
-            
+            // Use .ok() for optional fields
+            let min_bin_id_opt = parse_i32(data, 8).ok();
+            let max_bin_id_opt = parse_i32(data, 12).ok();
+
             let mut parsed_slices = Vec::new();
             let slices_len_result = parse_u32(data, 16);
             let mut current_offset = 20;
@@ -1078,8 +1080,8 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             };
 
             args.instruction_args = Some(IArgs::ClaimFee2(PbClaimFee2Layout {
-                min_bin_id: if min_bin_id == 0 { None } else { Some(min_bin_id) },
-                max_bin_id: if max_bin_id == 0 { None } else { Some(max_bin_id) },
+                min_bin_id: min_bin_id_opt,
+                max_bin_id: max_bin_id_opt,
                 remaining_accounts_info,
             }));
         },
@@ -1100,9 +1102,10 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             let mut current_offset = 8;
             // Parse CustomizableParams
             if data.len() < current_offset + 8 { return None; } // active_id, bin_step, base_factor, activation_type
-            let active_id = parse_i32(data, current_offset).unwrap_or(0);
-            let bin_step = parse_u16(data, current_offset + 4).unwrap_or(0);
-            let base_factor = parse_u16(data, current_offset + 6).unwrap_or(0);
+            // Use .ok() for optional fields
+            let active_id_opt = parse_i32(data, current_offset).ok();
+            let bin_step_opt = parse_u16(data, current_offset + 4).ok().map(|v| v as u32); // Map u16 to u32
+            let base_factor_opt = parse_u16(data, current_offset + 6).ok().map(|v| v as u32); // Map u16 to u32
             current_offset += 8;
 
             if data.len() < current_offset + 1 { return None; } // activation_type (u8)
@@ -1115,9 +1118,10 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
 
             if data.len() < current_offset + 9 { return None; } // Option<u64> activation_point (1 byte disc + 8 bytes value)
             let activation_point_present = data[current_offset] != 0;
+            // Keep existing Option<u64> parsing logic
             let activation_point = if activation_point_present { parse_u64(data, current_offset + 1).ok() } else { None };
             current_offset += 9;
-            
+
             if data.len() < current_offset + 1 { return None; } // creator_pool_on_off_control (bool)
             let creator_pool_on_off_control = data[current_offset] != 0;
             current_offset += 1;
@@ -1127,14 +1131,16 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Ignore padding (62 bytes)
 
             let params = PbCustomizableParams {
-                active_id: if active_id == 0 { None } else { Some(active_id) },
-                bin_step: if bin_step == 0 { None } else { Some(bin_step as u32) },
-                base_factor: if base_factor == 0 { None } else { Some(base_factor as u32) },
+                 // Apply .ok() results
+                active_id: active_id_opt,
+                bin_step: bin_step_opt,
+                base_factor: base_factor_opt,
+                // Bools and enums mapped directly (assuming non-zero means Some)
                 activation_type: Some(activation_type as u32), // Assuming u8 maps to enum/u32
                 has_alpha_vault: Some(has_alpha_vault),
-                activation_point: activation_point,
+                activation_point: activation_point, // Already Option<u64>
                 creator_pool_on_off_control: Some(creator_pool_on_off_control),
-                base_fee_power_factor: Some(base_fee_power_factor as u32),
+                base_fee_power_factor: Some(base_fee_power_factor as u32), // Assuming u8 maps to u32
             };
 
             args.instruction_args = Some(IArgs::InitializeCustomizablePermissionlessLbPair2(
@@ -1147,21 +1153,23 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             let mut current_offset = 8;
             // Parse LiquidityParameter
             if data.len() < current_offset + 16 { return None; } // amount_x, amount_y
-            let amount_x = parse_u64(data, current_offset).unwrap_or(0);
-            let amount_y = parse_u64(data, current_offset + 8).unwrap_or(0);
+            // Use .ok() for optional fields
+            let amount_x_opt = parse_u64(data, current_offset).ok();
+            let amount_y_opt = parse_u64(data, current_offset + 8).ok();
             current_offset += 16;
             let (bin_dist, next_offset) = parse_bin_liquidity_distribution_vec(data, current_offset);
             current_offset = next_offset;
 
             let liq_param = PbLiquidityParameter {
-                amount_x: if amount_x == 0 { None } else { Some(amount_x) },
-                amount_y: if amount_y == 0 { None } else { Some(amount_y) },
+                 // Apply .ok() results
+                amount_x: amount_x_opt,
+                amount_y: amount_y_opt,
                 bin_liquidity_dist: bin_dist,
             };
 
             // Parse RemainingAccountsInfo
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
-            
+
             args.instruction_args = Some(IArgs::AddLiquidity2(PbAddLiquidity2Layout {
                 liquidity_parameter: Some(liq_param),
                 remaining_accounts_info: remaining_accounts,
@@ -1173,16 +1181,18 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             let mut current_offset = 8;
             // Parse LiquidityParameterByStrategy
             if data.len() < current_offset + 24 { return None; } // amount_x, amount_y, active_id, max_active_bin_slippage
-            let amount_x = parse_u64(data, current_offset).unwrap_or(0);
-            let amount_y = parse_u64(data, current_offset + 8).unwrap_or(0);
-            let active_id = parse_i32(data, current_offset + 16).unwrap_or(0);
-            let max_active_bin_slippage = parse_i32(data, current_offset + 20).unwrap_or(0);
+             // Use .ok() for optional fields
+            let amount_x_opt = parse_u64(data, current_offset).ok();
+            let amount_y_opt = parse_u64(data, current_offset + 8).ok();
+            let active_id_opt = parse_i32(data, current_offset + 16).ok();
+            let max_active_bin_slippage_opt = parse_i32(data, current_offset + 20).ok();
             current_offset += 24;
 
             // Parse StrategyParameters
             if data.len() < current_offset + 9 { return None; } // min_bin, max_bin, strategy_type (u8)
-            let min_bin_id = parse_i32(data, current_offset).unwrap_or(0);
-            let max_bin_id = parse_i32(data, current_offset + 4).unwrap_or(0);
+             // Use .ok() for optional fields
+            let min_bin_id_opt = parse_i32(data, current_offset).ok();
+            let max_bin_id_opt = parse_i32(data, current_offset + 4).ok();
             let strategy_type_byte = data[current_offset + 8];
             current_offset += 9; // Move past StrategyParameters header
             // Ignore 64 byte parameters array for now
@@ -1208,16 +1218,16 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
              };
 
             let strat_params = PbStrategyParameters {
-                 min_bin_id: if min_bin_id == 0 { None } else { Some(min_bin_id) },
-                 max_bin_id: if max_bin_id == 0 { None } else { Some(max_bin_id) },
+                 min_bin_id: min_bin_id_opt,
+                 max_bin_id: max_bin_id_opt,
                  strategy_type,
             };
             
             let liq_param = PbLiquidityParameterByStrategy {
-                amount_x: if amount_x == 0 { None } else { Some(amount_x) },
-                amount_y: if amount_y == 0 { None } else { Some(amount_y) },
-                active_id: if active_id == 0 { None } else { Some(active_id) },
-                max_active_bin_slippage: if max_active_bin_slippage == 0 { None } else { Some(max_active_bin_slippage) },
+                amount_x: amount_x_opt,
+                amount_y: amount_y_opt,
+                active_id: active_id_opt,
+                max_active_bin_slippage: max_active_bin_slippage_opt,
                 strategy_parameters: Some(strat_params),
             };
 
@@ -1236,16 +1246,18 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Parse AddLiquiditySingleSidePreciseParameter2
             let (bins, next_offset_bins) = parse_compressed_bin_deposit_vec(data, current_offset);
             current_offset = next_offset_bins;
-            
+
             if data.len() < current_offset + 16 { return None; } // decompress_multiplier (u64), max_amount (u64)
-            let decompress_multiplier = parse_u64(data, current_offset).unwrap_or(0);
-            let max_amount = parse_u64(data, current_offset + 8).unwrap_or(0);
+             // Use .ok() for optional fields
+            let decompress_multiplier_opt = parse_u64(data, current_offset).ok();
+            let max_amount_opt = parse_u64(data, current_offset + 8).ok();
             current_offset += 16;
 
             let liq_param = PbAddLiquiditySingleSidePreciseParameter2 {
                 bins: bins,
-                decompress_multiplier: if decompress_multiplier == 0 { None } else { Some(decompress_multiplier) },
-                max_amount: if max_amount == 0 { None } else { Some(max_amount) },
+                 // Apply .ok() results
+                decompress_multiplier: decompress_multiplier_opt,
+                max_amount: max_amount_opt,
             };
 
             // Parse RemainingAccountsInfo
@@ -1260,6 +1272,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
         InstructionType::RemoveLiquidity2 => {
             // Args: binLiquidityRemoval: Vec<BinLiquidityReduction>, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
+            // bin_liquidity_removal parsing seems fine (returns Vec)
             let (reductions, next_offset) = parse_bin_liquidity_reduction_vec(data, current_offset);
             current_offset = next_offset;
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
@@ -1274,16 +1287,18 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Args: fromBinId: i32, toBinId: i32, bpsToRemove: u16, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
              if data.len() < current_offset + 10 { return None; } // from (i32), to (i32), bps (u16)
-            let from_bin_id = parse_i32(data, current_offset).unwrap_or(0);
-            let to_bin_id = parse_i32(data, current_offset + 4).unwrap_or(0);
-            let bps_to_remove = parse_u16(data, current_offset + 8).unwrap_or(0);
+             // Use .ok() for optional fields
+            let from_bin_id_opt = parse_i32(data, current_offset).ok();
+            let to_bin_id_opt = parse_i32(data, current_offset + 4).ok();
+            let bps_to_remove_opt = parse_u16(data, current_offset + 8).ok().map(|v| v as u32); // Map u16 to u32
             current_offset += 10;
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
 
             args.instruction_args = Some(IArgs::RemoveLiquidityByRange2(PbRemoveLiquidityByRange2Layout {
-                from_bin_id: if from_bin_id == 0 { None } else { Some(from_bin_id) },
-                to_bin_id: if to_bin_id == 0 { None } else { Some(to_bin_id) },
-                bps_to_remove: if bps_to_remove == 0 { None } else { Some(bps_to_remove as u32) },
+                 // Apply .ok() results
+                from_bin_id: from_bin_id_opt,
+                to_bin_id: to_bin_id_opt,
+                bps_to_remove: bps_to_remove_opt,
                 remaining_accounts_info: remaining_accounts,
             }));
         },
@@ -1293,14 +1308,16 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Args: amountIn: u64, minAmountOut: u64, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
              if data.len() < current_offset + 16 { return None; } // amount_in, min_amount_out
-            let amount_in = parse_u64(data, current_offset).unwrap_or(0);
-            let min_amount_out = parse_u64(data, current_offset + 8).unwrap_or(0);
+             // Use .ok() for optional fields
+            let amount_in_opt = parse_u64(data, current_offset).ok();
+            let min_amount_out_opt = parse_u64(data, current_offset + 8).ok();
             current_offset += 16;
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
 
              args.instruction_args = Some(IArgs::Swap2(PbSwap2Layout {
-                 amount_in: if amount_in == 0 { None } else { Some(amount_in) },
-                 min_amount_out: if min_amount_out == 0 { None } else { Some(min_amount_out) },
+                  // Apply .ok() results
+                 amount_in: amount_in_opt,
+                 min_amount_out: min_amount_out_opt,
                  remaining_accounts_info: remaining_accounts,
              }));
         },
@@ -1309,14 +1326,16 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Args: maxInAmount: u64, outAmount: u64, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
              if data.len() < current_offset + 16 { return None; } // max_in_amount, out_amount
-            let max_in_amount = parse_u64(data, current_offset).unwrap_or(0);
-            let out_amount = parse_u64(data, current_offset + 8).unwrap_or(0);
+             // Use .ok() for optional fields
+            let max_in_amount_opt = parse_u64(data, current_offset).ok();
+            let out_amount_opt = parse_u64(data, current_offset + 8).ok();
             current_offset += 16;
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
 
              args.instruction_args = Some(IArgs::SwapExactOut2(PbSwapExactOut2Layout {
-                 max_in_amount: if max_in_amount == 0 { None } else { Some(max_in_amount) },
-                 out_amount: if out_amount == 0 { None } else { Some(out_amount) },
+                  // Apply .ok() results
+                 max_in_amount: max_in_amount_opt,
+                 out_amount: out_amount_opt,
                  remaining_accounts_info: remaining_accounts,
              }));
         },
@@ -1325,31 +1344,34 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
              // Args: amountIn: u64, activeId: Option<i32>, maxPriceImpactBps: u16, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
              if data.len() < current_offset + 8 { return None; } // amount_in
-            let amount_in = parse_u64(data, current_offset).unwrap_or(0);
+             // Use .ok() for optional amount_in
+            let amount_in_opt = parse_u64(data, current_offset).ok();
             current_offset += 8;
-            
-            // Parse Option<i32> activeId
+
+            // Parse Option<i32> activeId - existing logic is correct
              if data.len() < current_offset + 1 { return None; } // Option discriminator byte
             let active_id_present = data[current_offset] != 0;
-            let mut active_id = None;
+            let mut active_id = None; // Keep this as Option<i32>
             current_offset += 1;
             if active_id_present {
                  if data.len() < current_offset + 4 { return None; }
-                 let val = parse_i32(data, current_offset).unwrap_or(0);
-                 if val != 0 { active_id = Some(val); }
+                 // Use .ok() here as well, although the outer check handles None already
+                 active_id = parse_i32(data, current_offset).ok();
                  current_offset += 4;
             }
 
              if data.len() < current_offset + 2 { return None; } // max_price_impact_bps (u16)
-            let max_price_impact_bps = parse_u16(data, current_offset).unwrap_or(0);
+             // Use .ok() for optional max_price_impact_bps
+            let max_price_impact_bps_opt = parse_u16(data, current_offset).ok().map(|v| v as u32); // Map u16 to u32
             current_offset += 2;
 
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
 
              args.instruction_args = Some(IArgs::SwapWithPriceImpact2(PbSwapWithPriceImpact2Layout {
-                 amount_in: if amount_in == 0 { None } else { Some(amount_in) },
-                 active_id: active_id, // Already Option<i32>
-                 max_price_impact_bps: if max_price_impact_bps == 0 { None } else { Some(max_price_impact_bps as u32) },
+                  // Apply .ok() results
+                 amount_in: amount_in_opt,
+                 active_id: active_id, // Keep as Option<i32>
+                 max_price_impact_bps: max_price_impact_bps_opt,
                  remaining_accounts_info: remaining_accounts,
              }));
         },
@@ -1361,14 +1383,15 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
         },
 
         InstructionType::UpdateFeesAndRewards => { // Handles both UpdateFeesAndRewards and updateFeesAndReward2
-             // Args (for V2 updateFeesAndReward2): minBinId: i32, maxBinId: i32
-            let mut current_offset = 8;
+            let mut current_offset = 8; // Remove mut later if cargo fix doesn't
             if data.len() >= current_offset + 8 { // Check if data length matches V2 args
-                let min_bin_id = parse_i32(data, current_offset).unwrap_or(0);
-                let max_bin_id = parse_i32(data, current_offset + 4).unwrap_or(0);
+                 // Use .ok() for optional fields
+                let min_bin_id_opt = parse_i32(data, current_offset).ok();
+                let max_bin_id_opt = parse_i32(data, current_offset + 4).ok();
                  args.instruction_args = Some(IArgs::UpdateFeesAndReward2(PbUpdateFeesAndReward2Layout {
-                     min_bin_id: if min_bin_id == 0 { None } else { Some(min_bin_id) },
-                     max_bin_id: if max_bin_id == 0 { None } else { Some(max_bin_id) },
+                     // Apply .ok() results
+                     min_bin_id: min_bin_id_opt,
+                     max_bin_id: max_bin_id_opt,
                  }));
             } else {
                 // Handle as V1 (UpdateFeesAndRewards) which has no args in IDL
