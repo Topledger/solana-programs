@@ -603,6 +603,24 @@ message PbUnknownEvent1LogFields {
   optional int64 vault_total_claimed_token = 5;
 }
 
+// New event message types for the recently added events
+message PbIncreasePositionLengthLogFields {
+  string position = 1;
+  optional uint64 new_length = 2;
+}
+
+message PbDecreasePositionLengthLogFields {
+  string position = 1;
+  optional uint64 new_length = 2;
+}
+
+message PbDynamicFeeParameterUpdateLogFields {
+  string lb_pair = 1;
+  optional uint32 volatility_accumulator = 2;
+  optional uint32 volatility_reference = 3;
+  optional uint32 index_reference = 4;
+}
+
 // Wrapper for all event types
 message PbEventLogWrapper {
   string event_name = 1;
@@ -628,6 +646,9 @@ message PbEventLogWrapper {
     PbGoToABinLogFields go_to_a_bin_log_fields = 20;
     PbUpdatePositionLockReleasePointLogFields update_position_lock_release_point_log_fields = 21;
     PbUnknownEvent1LogFields unknown_event1_log_fields = 22;
+    PbIncreasePositionLengthLogFields increase_position_length_log_fields = 23;
+    PbDecreasePositionLengthLogFields decrease_position_length_log_fields = 24;
+    PbDynamicFeeParameterUpdateLogFields dynamic_fee_parameter_update_log_fields = 25;
   }
 }
 

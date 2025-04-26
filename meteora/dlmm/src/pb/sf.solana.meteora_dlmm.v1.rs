@@ -990,6 +990,32 @@ pub struct PbUnknownEvent1LogFields {
     #[prost(int64, optional, tag = "5")]
     pub vault_total_claimed_token: ::core::option::Option<i64>,
 }
+/// New event message types for the recently added events
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbIncreasePositionLengthLogFields {
+    #[prost(string, tag = "1")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag = "2")]
+    pub new_length: ::core::option::Option<u64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbDecreasePositionLengthLogFields {
+    #[prost(string, tag = "1")]
+    pub position: ::prost::alloc::string::String,
+    #[prost(uint64, optional, tag = "2")]
+    pub new_length: ::core::option::Option<u64>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbDynamicFeeParameterUpdateLogFields {
+    #[prost(string, tag = "1")]
+    pub lb_pair: ::prost::alloc::string::String,
+    #[prost(uint32, optional, tag = "2")]
+    pub volatility_accumulator: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "3")]
+    pub volatility_reference: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "4")]
+    pub index_reference: ::core::option::Option<u32>,
+}
 /// Wrapper for all event types
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbEventLogWrapper {
@@ -997,7 +1023,7 @@ pub struct PbEventLogWrapper {
     pub event_name: ::prost::alloc::string::String,
     #[prost(
         oneof = "pb_event_log_wrapper::EventFields",
-        tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22"
+        tags = "2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25"
     )]
     pub event_fields: ::core::option::Option<pb_event_log_wrapper::EventFields>,
 }
@@ -1051,6 +1077,12 @@ pub mod pb_event_log_wrapper {
         ),
         #[prost(message, tag = "22")]
         UnknownEvent1LogFields(super::PbUnknownEvent1LogFields),
+        #[prost(message, tag = "23")]
+        IncreasePositionLengthLogFields(super::PbIncreasePositionLengthLogFields),
+        #[prost(message, tag = "24")]
+        DecreasePositionLengthLogFields(super::PbDecreasePositionLengthLogFields),
+        #[prost(message, tag = "25")]
+        DynamicFeeParameterUpdateLogFields(super::PbDynamicFeeParameterUpdateLogFields),
     }
 }
 /// Need definition for CompressedBinDepositAmount for AddLiquidityOneSidePrecise
