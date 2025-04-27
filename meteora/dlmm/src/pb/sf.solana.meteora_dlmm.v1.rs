@@ -707,6 +707,9 @@ pub struct PbWithdrawIneligibleRewardLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbClosePresetParameterLayout {}
+/// Add new message for ClosePresetParameter2
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbClosePresetParameter2Layout {}
 /// Flattened structure for InitializePresetParameter
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePresetParameterLayout {
@@ -734,8 +737,14 @@ pub struct PbInitializePresetParameterLayout {
     /// u32 in IDL
     #[prost(uint32, optional, tag = "7")]
     pub max_volatility_accumulator: ::core::option::Option<u32>,
-    /// u16 in IDL -> u32 (min/max bin id removed)
-    #[prost(uint32, optional, tag = "8")]
+    /// i32 in IDL
+    #[prost(int32, optional, tag = "8")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    /// i32 in IDL
+    #[prost(int32, optional, tag = "9")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "10")]
     pub protocol_share: ::core::option::Option<u32>,
 }
 /// Flattened structure for InitializePresetParameterV2

@@ -415,6 +415,31 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 8, "program");
         },
         
+        InstructionType::InitializePresetParameter => {
+            assign_if_exists(&mut role_by_index, 0, "presetParameter");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+            assign_if_exists(&mut role_by_index, 2, "systemProgram");
+            assign_if_exists(&mut role_by_index, 3, "rent");
+        },
+        
+        InstructionType::InitializePresetParameter2 => {
+            assign_if_exists(&mut role_by_index, 0, "presetParameter");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+            assign_if_exists(&mut role_by_index, 2, "systemProgram");
+        },
+        
+        InstructionType::ClosePresetParameter => {
+            assign_if_exists(&mut role_by_index, 0, "presetParameter");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+            assign_if_exists(&mut role_by_index, 2, "rentReceiver");
+        },
+        
+        InstructionType::ClosePresetParameter2 => {
+            assign_if_exists(&mut role_by_index, 0, "presetParameter");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+            assign_if_exists(&mut role_by_index, 2, "rentReceiver");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions

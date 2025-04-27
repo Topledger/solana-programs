@@ -20,7 +20,7 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbTransferPositionOwnerLayout, PbRemoveLiquidityByRangeLayout, PbAddLiquidityOneSidePreciseLayout,
     PbGoToABinLayout, PbWithdrawIneligibleRewardLayout, PbUpdateFeesAndRewardsLayout, PbEventLogWrapper,
     pb_event_log_wrapper, PbLiquidityParameterLayout, PbInitializeLbPairLayout, PbInitializePermissionLbPairLayout,
-    PbInitializeBinArrayLayout, PbInitializePresetParameterLayout, PbClosePresetParameterLayout,
+    PbInitializeBinArrayLayout, PbInitializePresetParameterLayout, PbClosePresetParameterLayout, PbClosePresetParameter2Layout,
     PbCloseLbPairLayout, PbUpdateFeeParametersLayout, PbUpdateFeeOwnerLayout, PbTogglePairStatusLayout,
     PbUpdateWhitelistedWalletLayout, PbIncreaseOracleLengthLayout, PbInitializeBinArrayBitmapExtensionLayout,
     PbMigrateBinArrayLayout, PbSetActivationSlotLayout, PbSetMaxSwappedAmountLayout, PbSetPreActivationDurationLayout,
@@ -42,7 +42,7 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbRemoveLiquidityByRange2Layout, PbAddLiquiditySingleSidePreciseParameter2,
     PbSwap2Layout, PbSwapExactOut2Layout, PbSwapWithPriceImpact2Layout,
     PbClosePosition2Layout, PbUpdateFeesAndReward2Layout, 
-    PbClosePositionIfEmptyLayout
+    PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout
 };
 
 // For convenience, alias the instruction args enum
@@ -62,7 +62,9 @@ pub enum InstructionType {
     InitializePermissionLbPair, // IDL: initializePermissionLbPair
     InitializeBinArray, // IDL: initializeBinArray
     InitializePresetParameter, // IDL: initializePresetParameter
+    InitializePresetParameter2, // IDL: initializePresetParameter2
     ClosePresetParameter, // IDL: closePresetParameter
+    ClosePresetParameter2, // IDL: closePresetParameter2
     CloseLbPair, // IDL: closeLbPair
     UpdateFeeParameters, // IDL: updateFeeParameters
     UpdateFeeOwner, // IDL: updateFeeOwner
@@ -150,12 +152,21 @@ pub enum InstructionType {
 // TODO: This array needs to be updated to match the InstructionType enum and IDL names exactly.
 //       The order also matters for discriminator matching.
 const INSTRUCTION_TYPES: &[(&str, InstructionType)] = &[
-    // Use camelCase instruction names from IDL
     ("initializeLbPair", InstructionType::InitializeLbPair),
     ("initializePermissionLbPair", InstructionType::InitializePermissionLbPair),
+    ("initializePosition", InstructionType::InitializePosition),
+    ("initializePositionPda", InstructionType::InitializePositionPda),
+    ("closePosition", InstructionType::ClosePosition),
+    ("claimFee", InstructionType::ClaimFee),
+    ("claimReward", InstructionType::ClaimReward),
+    ("swap", InstructionType::Swap),
+    ("swapWithPriceImpact", InstructionType::SwapWithPriceImpact),
+    ("swapExactOut", InstructionType::SwapExactOut),
     ("initializeBinArray", InstructionType::InitializeBinArray),
     ("initializePresetParameter", InstructionType::InitializePresetParameter),
+    ("initializePresetParameter2", InstructionType::InitializePresetParameter2),
     ("closePresetParameter", InstructionType::ClosePresetParameter),
+    ("closePresetParameter2", InstructionType::ClosePresetParameter2),
     ("closeLbPair", InstructionType::CloseLbPair),
     ("updateFeeParameters", InstructionType::UpdateFeeParameters),
     ("updateFeeOwner", InstructionType::UpdateFeeOwner),
@@ -327,7 +338,9 @@ fn get_instruction_type_str(inst_type: InstructionType) -> &'static str {
         InstructionType::UpdateRewardDuration => "UpdateRewardDuration",
         InstructionType::WithdrawIneligibleReward => "WithdrawIneligibleReward",
         InstructionType::ClosePresetParameter => "ClosePresetParameter",
+        InstructionType::ClosePresetParameter2 => "ClosePresetParameter2",
         InstructionType::InitializePresetParameter => "InitializePresetParameter",
+        InstructionType::InitializePresetParameter2 => "InitializePresetParameter2",
         InstructionType::TogglePairStatus => "TogglePairStatus",
         InstructionType::UpdateWhitelistedWallet => "UpdateWhitelistedWallet",
         InstructionType::IncreaseOracleLength => "IncreaseOracleLength",
@@ -516,19 +529,49 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::InitializePresetParameter => {
-            if data.len() < 48 { return None; }
+            if data.len() < 36 { return None; }
             args.instruction_args = Some(instruction_args::InstructionArgs::InitializePresetParameter(PbInitializePresetParameterLayout {
-                bin_step: Some(parse_i32(data, 8).unwrap_or(0).try_into().unwrap_or(0)),
-                base_factor: Some(parse_i32(data, 12).unwrap_or(0).try_into().unwrap_or(0)),
-                filter_period: Some(parse_i32(data, 16).unwrap_or(0).try_into().unwrap_or(0)),
-                decay_period: Some(parse_i32(data, 20).unwrap_or(0).try_into().unwrap_or(0)),
-                reduction_factor: Some(parse_i32(data, 24).unwrap_or(0).try_into().unwrap_or(0)),
-                variable_fee_control: Some(parse_i32(data, 28).unwrap_or(0).try_into().unwrap_or(0)),
-                max_volatility_accumulator: Some(parse_i32(data, 32).unwrap_or(0).try_into().unwrap_or(0)),
-                protocol_share: Some(parse_i32(data, 44).unwrap_or(0).try_into().unwrap_or(0)),
+                // 2-byte fields (Int16ul in Python)
+                bin_step: Some(parse_u16(data, 8).unwrap_or(0) as u32),
+                base_factor: Some(parse_u16(data, 10).unwrap_or(0) as u32),
+                filter_period: Some(parse_u16(data, 12).unwrap_or(0) as u32),
+                decay_period: Some(parse_u16(data, 14).unwrap_or(0) as u32),
+                reduction_factor: Some(parse_u16(data, 16).unwrap_or(0) as u32),
+                // 4-byte fields (Int32ul in Python)
+                variable_fee_control: Some(parse_u32(data, 18).unwrap_or(0)),
+                max_volatility_accumulator: Some(parse_u32(data, 22).unwrap_or(0)),
+                // 4-byte signed fields (Int32sl in Python)
+                min_bin_id: Some(parse_i32(data, 26).unwrap_or(0)),
+                max_bin_id: Some(parse_i32(data, 30).unwrap_or(0)),
+                // 2-byte field (Int16ul in Python)
+                protocol_share: Some(parse_u16(data, 34).unwrap_or(0) as u32),
+            }));
+        },
+        InstructionType::InitializePresetParameter2 => {
+            if data.len() < 31 { return None; }
+            args.instruction_args = Some(instruction_args::InstructionArgs::InitializePresetParameterV2(PbInitializePresetParameterV2Layout {
+                // First field is index (2-byte)
+                index: Some(parse_u16(data, 8).unwrap_or(0) as u32),
+                // 2-byte fields
+                bin_step: Some(parse_u16(data, 10).unwrap_or(0) as u32),
+                base_factor: Some(parse_u16(data, 12).unwrap_or(0) as u32),
+                filter_period: Some(parse_u16(data, 14).unwrap_or(0) as u32),
+                decay_period: Some(parse_u16(data, 16).unwrap_or(0) as u32),
+                reduction_factor: Some(parse_u16(data, 18).unwrap_or(0) as u32),
+                // 4-byte fields
+                variable_fee_control: Some(parse_u32(data, 20).unwrap_or(0)),
+                max_volatility_accumulator: Some(parse_u32(data, 24).unwrap_or(0)),
+                // 2-byte field
+                protocol_share: Some(parse_u16(data, 28).unwrap_or(0) as u32),
+                // 1-byte field
+                base_fee_power_factor: Some(if data.len() > 30 { data[30] as u32 } else { 0 }),
             }));
         },
         InstructionType::ClosePresetParameter => {
+            // No arguments needed
+            args.instruction_args = Some(instruction_args::InstructionArgs::ClosePresetParameter(PbClosePresetParameterLayout {}));
+        },
+        InstructionType::ClosePresetParameter2 => {
             // No arguments needed
             args.instruction_args = Some(instruction_args::InstructionArgs::ClosePresetParameter(PbClosePresetParameterLayout {}));
         },

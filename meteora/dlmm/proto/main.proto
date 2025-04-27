@@ -418,6 +418,8 @@ message PbWithdrawIneligibleRewardLayout {
   optional int64 reward_index = 1;
 }
 message PbClosePresetParameterLayout {}
+// Add new message for ClosePresetParameter2
+message PbClosePresetParameter2Layout {}
 
 // Flattened structure for InitializePresetParameter
 message PbInitializePresetParameterLayout { 
@@ -430,7 +432,9 @@ message PbInitializePresetParameterLayout {
   optional uint32 reduction_factor = 5; // u16 in IDL -> u32
   optional uint32 variable_fee_control = 6; // u32 in IDL
   optional uint32 max_volatility_accumulator = 7; // u32 in IDL
-  optional uint32 protocol_share = 8; // u16 in IDL -> u32 (min/max bin id removed)
+  optional int32 min_bin_id = 8; // i32 in IDL
+  optional int32 max_bin_id = 9; // i32 in IDL
+  optional uint32 protocol_share = 10; // u16 in IDL -> u32
 }
 // Removed PbInitializePresetParameterIxLayout
 
