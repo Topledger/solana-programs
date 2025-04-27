@@ -401,6 +401,20 @@ pub fn map_accounts(
             // No accounts associated with EventLog instruction itself
         },
         
+        // Reward operations
+        InstructionType::InitializeReward => {
+            // Based on JSON: lbPair, rewardVault, rewardMint, tokenBadge(opt), admin, tokenProgram, systemProgram, rent, eventAuthority, program
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "rewardVault");
+            assign_if_exists(&mut role_by_index, 2, "rewardMint");
+            assign_if_exists(&mut role_by_index, 3, "admin");
+            assign_if_exists(&mut role_by_index, 4, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 5, "systemProgram");
+            assign_if_exists(&mut role_by_index, 6, "rent");
+            assign_if_exists(&mut role_by_index, 7, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 8, "program");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions

@@ -922,12 +922,27 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
 
         // Rewards Management
         InstructionType::InitializeReward => {
-            if data.len() < 32 { return None; }
+            // Args: rewardIndex (u64), rewardDuration (u64), funder (publicKey)
+            // Offsets: disc(8) + idx(8) + duration(8) + funder(32) = 56 bytes total needed
+            if data.len() < 56 { 
+                log::warn!("Data too short for InitializeReward: {} bytes", data.len());
+                return None; 
+            }
             
+            // Use .ok() to map Ok -> Some, Err -> None
+            let reward_index_opt = parse_u64(data, 8).ok();
+            let reward_duration_opt = parse_u64(data, 16).ok();
+            let funder_opt = bytes_to_pubkey_str(data, 24).ok(); // .ok() converts Result to Option
+
             args.instruction_args = Some(instruction_args::InstructionArgs::InitializeReward(PbInitializeRewardLayout {
-                emissions_per_second_x64: parse_u128(data, 8).unwrap_or(0).to_string(),
-                open_time: parse_u64(data, 24).unwrap_or(0),
-                end_time: parse_u64(data, 32).unwrap_or(0),
+                // Update fields to match proto and parsed values
+                reward_index: reward_index_opt, // Assuming proto has reward_index: Option<u64>
+                reward_duration: reward_duration_opt, // Assuming proto has reward_duration: Option<u64>
+                funder: funder_opt, // Assuming proto has funder: Option<String>
+                // Remove fields not present in JSON args
+                // emissions_per_second_x64: None, 
+                // open_time: None, 
+                // end_time: None,
             }));
         },
         InstructionType::FundReward => {

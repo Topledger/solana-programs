@@ -229,9 +229,9 @@ message PbSwapRouterBaseInLayout {
 }
 
 message PbInitializeRewardLayout {
-  string emissions_per_second_x64 = 1;
-  uint64 open_time = 2;
-  uint64 end_time = 3;
+  optional uint64 reward_index = 1;
+  optional uint64 reward_duration = 2;
+  optional string funder = 3; // publicKey mapped to string
 }
 
 message PbSetRewardEmissionsLayout {

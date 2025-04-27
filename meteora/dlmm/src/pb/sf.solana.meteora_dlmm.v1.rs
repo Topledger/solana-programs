@@ -411,12 +411,13 @@ pub struct PbSwapRouterBaseInLayout {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbInitializeRewardLayout {
-    #[prost(string, tag = "1")]
-    pub emissions_per_second_x64: ::prost::alloc::string::String,
-    #[prost(uint64, tag = "2")]
-    pub open_time: u64,
-    #[prost(uint64, tag = "3")]
-    pub end_time: u64,
+    #[prost(uint64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub reward_duration: ::core::option::Option<u64>,
+    /// publicKey mapped to string
+    #[prost(string, optional, tag = "3")]
+    pub funder: ::core::option::Option<::prost::alloc::string::String>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbSetRewardEmissionsLayout {
