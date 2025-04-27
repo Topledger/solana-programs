@@ -42,7 +42,8 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbRemoveLiquidityByRange2Layout, PbAddLiquiditySingleSidePreciseParameter2,
     PbSwap2Layout, PbSwapExactOut2Layout, PbSwapWithPriceImpact2Layout,
     PbClosePosition2Layout, PbUpdateFeesAndReward2Layout, 
-    PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout
+    PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout,
+    PbInitPermissionPairIx,
 };
 
 // For convenience, alias the instruction args enum
@@ -516,11 +517,45 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::InitializePermissionLbPair => {
-            if data.len() < 116 { return None; } // Need at least 4x8 bytes for args
-            // Skip implementation for now as structure doesn't match what we need
-            args.instruction_args = Some(instruction_args::InstructionArgs::InitializePermissionLbPair(PbInitializePermissionLbPairLayout {
-                ix_data: None,
-            }));
+            if data.len() >= 29 { // Adjusted size: 8(discriminator) + 4(i32) + 2(u16) + 2(u16) + 4(i32) + 4(i32) + 8(u64) + 1(u8) = 33
+                let active_id = parse_i32(data, 8).unwrap_or_default();
+                
+                // Parse u16 fields (2 bytes each)
+                let bin_step = parse_u16(data, 12).unwrap_or_default();
+                let base_factor = parse_u16(data, 14).unwrap_or_default();
+                
+                // Parse i32 fields
+                let min_bin_id = parse_i32(data, 16).unwrap_or_default();
+                let max_bin_id = parse_i32(data, 20).unwrap_or_default();
+                
+                // Parse u64 field
+                let lock_duration = parse_u64(data, 24).unwrap_or_default();
+                
+                // Parse u8 field (1 byte)
+                let activation_type = if data.len() > 32 { data[32] } else { 0 };
+
+                // Create nested struct to match proto structure
+                let ix_data = crate::pb::sf::solana::meteora_dlmm::v1::PbInitPermissionPairIx {
+                    active_id: Some(active_id),
+                    bin_step: Some(bin_step as u32), // Convert u16 to u32
+                    base_factor: Some(base_factor as u32), // Convert u16 to u32
+                    min_bin_id: Some(min_bin_id),
+                    max_bin_id: Some(max_bin_id),
+                    lock_duration: Some(lock_duration),
+                    activation_type: Some(activation_type as u32), // Convert u8 to u32
+                };
+
+                // Create parent struct and assign nested struct
+                let inst_args = crate::pb::sf::solana::meteora_dlmm::v1::PbInitializePermissionLbPairLayout {
+                    ix_data: Some(ix_data),
+                };
+                
+                args.instruction_args = Some(
+                    crate::pb::sf::solana::meteora_dlmm::v1::instruction_args::InstructionArgs::InitializePermissionLbPair(
+                        inst_args
+                    ),
+                );
+            }
         },
         InstructionType::InitializeBinArray => {
             if data.len() < 16 { return None; }
@@ -1797,15 +1832,48 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
         },
         
         "LbPairCreate" => {
+            log::info!("Raw event data for LbPairCreate: {:?}", event_data);
+            
+            // First get the lb_pair address (bytes 0-32)
+            let lb_pair = if event_data.len() >= 32 { 
+                bytes_to_pubkey_str(event_data, 0).unwrap_or_default() 
+            } else { 
+                "".to_string() 
+            };
+            
+            // Next field is bin_step (likely u16 or i16, not i32)
+            let bin_step = if event_data.len() >= 34 { 
+                parse_u16(event_data, 32).unwrap_or(0) as i32 
+            } else { 
+                0 
+            };
+            
+            // token_x should start immediately after bin_step
+            let token_x = if event_data.len() >= 66 { 
+                bytes_to_pubkey_str(event_data, 34).unwrap_or_default() 
+            } else { 
+                "".to_string() 
+            };
+            
+            // token_y should start immediately after token_x
+            let token_y = if event_data.len() >= 98 { 
+                bytes_to_pubkey_str(event_data, 66).unwrap_or_default() 
+            } else { 
+                "".to_string() 
+            };
+            
             let fields = pb_event_log_wrapper::EventFields::LbPairCreateLogFields(
                 crate::pb::sf::solana::meteora_dlmm::v1::PbLbPairCreateLogFields {
-                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                    bin_step: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                    token_x: if event_data.len() >= 68 { bytes_to_pubkey_str(event_data, 36).unwrap_or_default() } else { "".to_string() },
-                    token_y: if event_data.len() >= 100 { bytes_to_pubkey_str(event_data, 68).unwrap_or_default() } else { "".to_string() }, // Corrected offset check
+                    lb_pair: lb_pair.clone(),
+                    bin_step: Some(bin_step),
+                    token_x: token_x.clone(),
+                    token_y: token_y.clone(),
                 }
             );
             event_wrapper.event_fields = Some(fields);
+            
+            log::info!("Processing LbPairCreate event: lb_pair={}, bin_step={}, token_x={}, token_y={}",
+                      lb_pair, bin_step, token_x, token_y);
         },
         
         "PositionCreate" => {

@@ -66,13 +66,12 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 5, "reserveX");
             assign_if_exists(&mut role_by_index, 6, "reserveY");
             assign_if_exists(&mut role_by_index, 7, "oracle");
-            assign_if_exists(&mut role_by_index, 8, "presetParameter");
-            assign_if_exists(&mut role_by_index, 9, "admin");
-            assign_if_exists(&mut role_by_index, 10, "tokenProgram");
-            assign_if_exists(&mut role_by_index, 11, "systemProgram");
-            assign_if_exists(&mut role_by_index, 12, "rent");
-            assign_if_exists(&mut role_by_index, 13, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 14, "program");
+            assign_if_exists(&mut role_by_index, 8, "admin");
+            assign_if_exists(&mut role_by_index, 9, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 10, "systemProgram");
+            assign_if_exists(&mut role_by_index, 11, "rent");
+            assign_if_exists(&mut role_by_index, 12, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 13, "program");
         },
         
         // Liquidity operations
