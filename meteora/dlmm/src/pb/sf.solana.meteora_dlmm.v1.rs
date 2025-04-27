@@ -592,10 +592,10 @@ pub struct PbAddLiquidityByWeightLayout {
     #[prost(message, optional, tag = "1")]
     pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterLayout>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbAddLiquidityByStrategyLayout {
     #[prost(message, optional, tag = "1")]
-    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterLayout>,
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterByStrategy>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbAddLiquidityOneSideLayout {

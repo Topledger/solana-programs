@@ -356,7 +356,7 @@ message PbAddLiquidityByWeightLayout {
   optional PbLiquidityParameterLayout liquidity_parameter = 1;
 }
 message PbAddLiquidityByStrategyLayout { 
-  optional PbLiquidityParameterLayout liquidity_parameter = 1;
+  optional PbLiquidityParameterByStrategy liquidity_parameter = 1;
 }
 message PbAddLiquidityOneSideLayout { 
   // Fields moved directly here from the removed PbLiquidityOneSideParameterLayout

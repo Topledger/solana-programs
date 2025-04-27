@@ -750,16 +750,13 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Args: liquidityParameter: LiquidityParameterByStrategy, remainingAccountsInfo: Optional<RemainingAccountsInfo>
             let mut current_offset = 8;
             // Placeholder check - Needs correct length based on actual LiquidityParameterByStrategy structure if fully parsed
-            if data.len() < 33 { // Minimal check assuming nested strategy params base size
+            // Check for base + strategy + params = 8 + 8 + 4 + 4 + 4 + 4 + 1 + 64 = 97 bytes minimum after discriminator
+            if data.len() < 8 + 97 { 
                 log::warn!("Data potentially too short for full AddLiquidityByStrategy parsing: {} bytes", data.len());
-                // Fallback to empty for now to allow compilation
-                args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByStrategy(PbAddLiquidityByStrategyLayout {
-                    liquidity_parameter: Some(PbLiquidityParameterLayout {}), // Use empty placeholder
-                }));
-                return Some(args); // Return with placeholder
+                return None; 
             }
 
-            // Assuming PbLiquidityParameterByStrategy structure for parsing (may need adjustment)
+            // Assuming PbLiquidityParameterByStrategy structure for parsing
             let amount_x_res = parse_u64(data, current_offset);
             current_offset += 8;
             let amount_y_res = parse_u64(data, current_offset);
@@ -770,11 +767,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             current_offset += 4;
 
             // Parse StrategyParameters
-            if data.len() < current_offset + 9 + 64 { // Check for strategy base + parameters bytes
-                 log::warn!("Data too short for StrategyParameters in AddLiquidityByStrategy: {} bytes needed from offset {}", 9 + 64, current_offset);
-                 // Fallback or return None if essential
-                 return None; // Cannot parse StrategyParameters fully
-            }
+            // Length check already done above
             let min_bin_id_res = parse_i32(data, current_offset);
             let max_bin_id_res = parse_i32(data, current_offset + 4);
             let strategy_type_byte = data[current_offset + 8];
@@ -801,11 +794,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                 parameters: parameters_numeric, // Assign Vec<u32> to the 'parameters' field
             };
 
-            // NOTE: PbAddLiquidityByStrategyLayout currently uses PbLiquidityParameterLayout (empty)
-            //       This means the detailed parsing above isn't stored correctly in the final args.
-            //       Keeping the parsing logic for reference, but assigning the placeholder.
-            //       FIX THE PROTO DEF for PbAddLiquidityByStrategyLayout to use PbLiquidityParameterByStrategy
-            /*
+            // Create the correct liquidity parameter struct now
             let liquidity_parameter = PbLiquidityParameterByStrategy {
                 amount_x: amount_x_res.ok(),
                 amount_y: amount_y_res.ok(),
@@ -813,10 +802,10 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                 max_active_bin_slippage: max_active_bin_slippage_res.ok(),
                 strategy_parameters: Some(strategy_parameters),
             };
-            */
 
+            // Assign the correctly parsed liquidity parameter
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByStrategy(PbAddLiquidityByStrategyLayout {
-                 liquidity_parameter: Some(PbLiquidityParameterLayout {}), // Use placeholder
+                 liquidity_parameter: Some(liquidity_parameter),
             }));
         },
         InstructionType::AddLiquidityOneSide => {
