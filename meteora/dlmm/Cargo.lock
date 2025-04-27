@@ -769,6 +769,7 @@ dependencies = [
  "bytes",
  "chrono",
  "hex",
+ "lazy_static",
  "log",
  "num-bigint",
  "num-traits",

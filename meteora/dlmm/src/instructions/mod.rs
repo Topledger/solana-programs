@@ -1,8 +1,6 @@
+#[allow(unused_imports)]
 use std::convert::TryInto;
-use std::fmt;
-use std::str::FromStr;
 use std::vec::Vec;
-use std::ops::Index;
 use std::collections::HashMap;
 use sha2::{Sha256, Digest};
 use log;
@@ -52,6 +50,9 @@ use crate::pb::sf::solana::meteora_dlmm::v1::instruction_args::InstructionArgs a
 
 // Meteora DLMM Program ID
 const METEORA_DLMM_PROGRAM_ID: &str = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
+
+// Use a proper event log discriminator 
+const EVENT_LOG_DISCRIMINATOR: &[u8] = &[228, 69, 165, 46, 81, 203, 154, 29];
 
 // Enum representing different instruction types
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -145,33 +146,6 @@ pub enum InstructionType {
 }
 
 // Event discriminators
-const EVENT_COMPOSITION_FEE_DISCRIMINATOR: &[u8] = &[220, 173, 171, 46, 117, 16, 250, 22];
-const EVENT_ADD_LIQUIDITY_DISCRIMINATOR: &[u8] = &[75, 16, 143, 85, 158, 142, 79, 209];
-const EVENT_REMOVE_LIQUIDITY_DISCRIMINATOR: &[u8] = &[133, 94, 200, 100, 59, 148, 76, 203];
-const EVENT_SWAP_DISCRIMINATOR: &[u8] = &[148, 13, 55, 222, 120, 220, 22, 65];
-const EVENT_CLAIM_REWARD_DISCRIMINATOR: &[u8] = &[173, 22, 221, 116, 213, 176, 188, 175];
-const EVENT_FUND_REWARD_DISCRIMINATOR: &[u8] = &[61, 13, 255, 176, 106, 247, 203, 24];
-const EVENT_INITIALIZE_REWARD_DISCRIMINATOR: &[u8] = &[37, 216, 20, 211, 181, 115, 146, 2];
-const EVENT_UPDATE_REWARD_DURATION_DISCRIMINATOR: &[u8] = &[202, 150, 52, 51, 130, 149, 22, 34];
-const EVENT_UPDATE_REWARD_FUNDER_DISCRIMINATOR: &[u8] = &[73, 169, 123, 25, 146, 210, 236, 121];
-const EVENT_POSITION_CLOSE_DISCRIMINATOR: &[u8] = &[77, 239, 165, 5, 182, 6, 24, 140];
-const EVENT_CLAIM_FEE_DISCRIMINATOR: &[u8] = &[67, 28, 252, 254, 139, 191, 42, 197];
-const EVENT_LB_PAIR_CREATE_DISCRIMINATOR: &[u8] = &[60, 164, 14, 54, 231, 17, 162, 255];
-const EVENT_POSITION_CREATE_DISCRIMINATOR: &[u8] = &[210, 192, 164, 185, 43, 131, 106, 66];
-const EVENT_FEE_PARAMETER_UPDATE_DISCRIMINATOR: &[u8] = &[3, 89, 137, 250, 156, 109, 156, 131];
-const EVENT_INCREASE_OBSERVATION_DISCRIMINATOR: &[u8] = &[56, 122, 125, 134, 96, 152, 207, 57];
-const EVENT_WITHDRAW_INELIGIBLE_REWARD_DISCRIMINATOR: &[u8] = &[226, 62, 82, 13, 174, 30, 6, 132];
-const EVENT_UPDATE_POSITION_OPERATOR_DISCRIMINATOR: &[u8] = &[87, 252, 133, 141, 135, 217, 104, 132];
-const EVENT_UPDATE_POSITION_LOCK_RELEASE_SLOT_DISCRIMINATOR: &[u8] = &[148, 113, 235, 97, 116, 147, 13, 98];
-const EVENT_GO_TO_A_BIN_DISCRIMINATOR: &[u8] = &[44, 173, 250, 85, 11, 159, 32, 35];
-const EVENT_UPDATE_POSITION_LOCK_RELEASE_POINT_DISCRIMINATOR: &[u8] = &[183, 213, 111, 83, 40, 239, 41, 187];
-const EVENT_INCREASE_POSITION_LENGTH_DISCRIMINATOR: &[u8] = &[227, 85, 84, 147, 8, 105, 191, 24];
-const EVENT_DECREASE_POSITION_LENGTH_DISCRIMINATOR: &[u8] = &[8, 202, 160, 141, 192, 197, 21, 247];
-const EVENT_DYNAMIC_FEE_PARAMETER_UPDATE_DISCRIMINATOR: &[u8] = &[69, 95, 192, 251, 144, 196, 179, 221];
-const EVENT_UNKNOWN_EVENT1_DISCRIMINATOR: &[u8] = &[179, 72, 71, 30, 59, 19, 170, 3];
-
-// Use a proper event log discriminator 
-const EVENT_LOG_DISCRIMINATOR: &[u8] = &[31, 236, 14, 41, 98, 139, 236, 72];
 
 // TODO: This array needs to be updated to match the InstructionType enum and IDL names exactly.
 //       The order also matters for discriminator matching.
@@ -252,7 +226,7 @@ const INSTRUCTION_TYPES: &[(&str, InstructionType)] = &[
 ];
 
 /// Compute an 8-byte discriminator from a string by hashing its bytes and taking the first 8 bytes
-fn compute_discriminator(name: &str) -> [u8; 8] {
+pub fn compute_discriminator(name: &str) -> [u8; 8] {
     // For Meteora/Anchor programs, the instruction discriminator is calculated by:
     // - Taking the first 8 bytes of the SHA256 hash of "global:" + instruction_name in snake_case
     let prefixed_name = format!("global:{}", camel_to_snake(name));
@@ -428,8 +402,14 @@ pub fn process_instruction(
     let instruction_type_str = match get_instruction_type_from_discriminator(discriminator) {
         Some(inst_type) => inst_type,
         None => {
-            log::info!("Unknown instruction discriminator: {}", hex::encode(discriminator));
-            return None;
+            // Check if it's an event log instruction
+            if data.len() >= 8 && &data[0..8] == EVENT_LOG_DISCRIMINATOR {
+                log::info!("Found EventLog instruction in process_instruction");
+                "EventLog" // Use "EventLog" as instruction type for event logs
+            } else {
+                log::info!("Unknown instruction discriminator: {}", hex::encode(discriminator));
+                return None;
+            }
         }
     };
     
@@ -493,7 +473,9 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
     if inst_type_opt.is_none() {
         // Check if this is an event log instruction with "EventLog" discriminator
         if data.len() >= 8 && &data[0..8] == EVENT_LOG_DISCRIMINATOR {
-            return process_event_log(&data[8..], InstructionArgs {
+            // Using the full data here - process_event_log will handle the second discriminator
+            log::info!("Found EventLog instruction with discriminator: {}", hex::encode(&data[0..8]));
+            return process_event_log(data, InstructionArgs {
                 instruction_args: Some(instruction_args::InstructionArgs::EventLog(PbEventLogWrapper {
                     event_name: "EventLog".to_string(),
                     event_fields: None,
@@ -521,10 +503,10 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::InitializePermissionLbPair => {
-            if data.len() < 16 { return None; }
+            if data.len() < 116 { return None; } // Need at least 4x8 bytes for args
+            // Skip implementation for now as structure doesn't match what we need
             args.instruction_args = Some(instruction_args::InstructionArgs::InitializePermissionLbPair(PbInitializePermissionLbPairLayout {
-                active_id: Some(parse_i32(data, 8).unwrap_or(0)),
-                bin_step: Some(parse_i32(data, 12).unwrap_or(0)),
+                ix_data: None,
             }));
         },
         InstructionType::InitializeBinArray => {
@@ -534,19 +516,16 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::InitializePresetParameter => {
-            // Parse all preset parameter fields
-            if data.len() < 40 { return None; }
+            if data.len() < 48 { return None; }
             args.instruction_args = Some(instruction_args::InstructionArgs::InitializePresetParameter(PbInitializePresetParameterLayout {
-                bin_step: Some(parse_i32(data, 8).unwrap_or(0)),
-                base_factor: Some(parse_i32(data, 12).unwrap_or(0)),
-                filter_period: Some(parse_i32(data, 16).unwrap_or(0)),
-                decay_period: Some(parse_i32(data, 20).unwrap_or(0)),
-                reduction_factor: Some(parse_i32(data, 24).unwrap_or(0)),
-                variable_fee_control: Some(parse_i32(data, 28).unwrap_or(0)),
-                max_volatility_accumulator: Some(parse_i32(data, 32).unwrap_or(0)),
-                min_bin_id: Some(parse_i32(data, 36).unwrap_or(0)),
-                max_bin_id: Some(parse_i32(data, 40).unwrap_or(0)),
-                protocol_share: Some(parse_i32(data, 44).unwrap_or(0)),
+                bin_step: Some(parse_i32(data, 8).unwrap_or(0).try_into().unwrap_or(0)),
+                base_factor: Some(parse_i32(data, 12).unwrap_or(0).try_into().unwrap_or(0)),
+                filter_period: Some(parse_i32(data, 16).unwrap_or(0).try_into().unwrap_or(0)),
+                decay_period: Some(parse_i32(data, 20).unwrap_or(0).try_into().unwrap_or(0)),
+                reduction_factor: Some(parse_i32(data, 24).unwrap_or(0).try_into().unwrap_or(0)),
+                variable_fee_control: Some(parse_i32(data, 28).unwrap_or(0).try_into().unwrap_or(0)),
+                max_volatility_accumulator: Some(parse_i32(data, 32).unwrap_or(0).try_into().unwrap_or(0)),
+                protocol_share: Some(parse_i32(data, 44).unwrap_or(0).try_into().unwrap_or(0)),
             }));
         },
         InstructionType::ClosePresetParameter => {
@@ -569,8 +548,10 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             args.instruction_args = Some(instruction_args::InstructionArgs::UpdateFeeOwner(PbUpdateFeeOwnerLayout {}));
         },
         InstructionType::TogglePairStatus => {
-            // No arguments needed
-            args.instruction_args = Some(instruction_args::InstructionArgs::TogglePairStatus(PbTogglePairStatusLayout {}));
+            if data.len() < 9 { return None; }
+            args.instruction_args = Some(instruction_args::InstructionArgs::TogglePairStatus(PbTogglePairStatusLayout {
+                status: Some(if data.len() >= 9 { if data[8] != 0 { 1u32 } else { 0u32 } } else { 0u32 }),
+            }));
         },
         InstructionType::UpdateWhitelistedWallet => {
             if data.len() < 42 { return None; }
@@ -1428,7 +1409,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
     } else {
         None
     }
-}
+} 
 
 // Helper function to parse a fixed-size byte slice into a PubKey string
 fn bytes_to_pubkey_str(data: &[u8], offset: usize) -> Result<String, &'static str> {
@@ -1495,13 +1476,22 @@ where
 
 // Process event log function with proper implementation
 fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<InstructionArgs> {
-    if data.len() < 8 {
-        log::info!("Event log data too short to contain discriminator");
+    if data.len() < 16 { // Need at least 8 bytes for EVENT_LOG_DISCRIMINATOR + 8 bytes for event discriminator
+        log::info!("Event log data too short to contain both discriminators");
         return None;
     }
 
-    let discriminator = &data[0..8];
-    let event_data = &data[8..];
+    // First check if this is really an event log by checking the first 8 bytes
+    if &data[0..8] != EVENT_LOG_DISCRIMINATOR {
+        log::info!("Data doesn't start with EVENT_LOG_DISCRIMINATOR: {} vs {}", 
+                 hex::encode(&data[0..8]), hex::encode(EVENT_LOG_DISCRIMINATOR));
+        return None;
+    }
+
+    // Skip the first 8 bytes (EVENT_LOG_DISCRIMINATOR) to get the event-specific discriminator
+    let discriminator = &data[8..16];
+    // Skip both discriminators to get the actual event data
+    let event_data = &data[16..];
     
     // Create wrapper with default empty event name
     let mut event_wrapper = PbEventLogWrapper {
@@ -1509,318 +1499,519 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
         event_fields: None,
     };
 
-    // Match event discriminator against known types
-    if discriminator == EVENT_SWAP_DISCRIMINATOR {
-        event_wrapper.event_name = "Swap".to_string();
-        // Always create the struct, using defaults if data is short
-        let fields = pb_event_log_wrapper::EventFields::SwapLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbSwapLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
-                end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
-                amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
-                amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
-                swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
-                fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
-                protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
-                fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
-                host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
+    // Add enhanced debugging for discriminator matching
+    log::info!("Trying to match event discriminator: {}", hex::encode(discriminator));
+    
+    // Debug log for some common event types to see what their computed discriminators are
+    let debug_event_types = [
+        "Swap", "FundReward", "AddLiquidity", "RemoveLiquidity", 
+        "Swap2", "ClaimFee2", "ClaimReward2", "AddLiquidity2", "RemoveLiquidity2"
+    ];
+    
+    for event_type in debug_event_types.iter() {
+        let computed = compute_event_discriminator(event_type);
+        if computed[..] == discriminator[..] {
+            log::info!("MATCH FOUND: {} event discriminator matches current data", event_type);
+        } else {
+            log::debug!("Event: {}, Computed: {}, Actual: {}", 
+                     event_type, hex::encode(computed), hex::encode(discriminator));
+        }
+    }
+
+    // Match event discriminator against computed types
+    let event_name = match discriminator {
+        // Use correct event discriminators (not instruction discriminators)
+        &[81, 108, 227, 190, 205, 208, 10, 196] => "Swap".to_string(),
+        &[31, 94, 125, 90, 227, 52, 61, 186] => "AddLiquidity".to_string(),
+        &[116, 244, 97, 232, 103, 31, 152, 58] => "RemoveLiquidity".to_string(),
+        &[148, 116, 134, 204, 22, 171, 85, 95] => "ClaimReward".to_string(),
+        &[246, 228, 58, 130, 145, 170, 79, 204] => "FundReward".to_string(),
+        &[211, 153, 88, 62, 149, 60, 177, 70] => "InitializeReward".to_string(),
+        &[223, 245, 224, 153, 49, 29, 163, 172] => "UpdateRewardDuration".to_string(),
+        &[224, 178, 174, 74, 252, 165, 85, 180] => "UpdateRewardFunder".to_string(),
+        &[255, 196, 16, 107, 28, 202, 53, 128] => "PositionClose".to_string(),
+        &[75, 122, 154, 48, 140, 74, 123, 163] => "ClaimFee".to_string(),
+        &[185, 74, 252, 125, 27, 215, 188, 111] => "LbPairCreate".to_string(),
+        &[144, 142, 252, 84, 157, 53, 37, 121] => "PositionCreate".to_string(),
+        &[48, 76, 241, 117, 144, 215, 242, 44] => "FeeParameterUpdate".to_string(),
+        &[99, 249, 17, 121, 166, 156, 207, 215] => "IncreaseObservation".to_string(),
+        &[231, 189, 65, 149, 102, 215, 154, 244] => "WithdrawIneligibleReward".to_string(),
+        &[39, 115, 48, 204, 246, 47, 66, 57] => "UpdatePositionOperator".to_string(),
+        &[176, 165, 93, 114, 250, 229, 146, 255] => "UpdatePositionLockReleaseSlot".to_string(),
+        &[59, 138, 76, 68, 138, 131, 176, 67] => "GoToABin".to_string(),
+        &[133, 214, 66, 224, 64, 12, 7, 191] => "UpdatePositionLockReleasePoint".to_string(),
+        &[128, 151, 123, 106, 17, 102, 113, 142] => "CompositionFee".to_string(),
+        &[157, 239, 42, 204, 30, 56, 223, 46] => "IncreasePositionLength".to_string(),
+        &[52, 118, 235, 85, 172, 169, 15, 128] => "DecreasePositionLength".to_string(),
+        &[88, 88, 178, 135, 194, 146, 91, 243] => "DynamicFeeParameterUpdate".to_string(),
+        // Keep special case for unknown event with hardcoded discriminator
+        d if d == &[179, 72, 71, 30, 59, 19, 170, 3] => "UnknownEvent1".to_string(),
+        _ => {
+            // Just log the unknown discriminator and use a generic name
+            log::info!("Unknown event discriminator: {}", hex::encode(discriminator));
+            format!("Unknown_{}", hex::encode(discriminator))
+        }
+    };
+    
+    event_wrapper.event_name = event_name.clone();
+
+    // Use a match against the event name instead of comparing to hardcoded discriminators
+    match event_name.as_str() {
+        "Swap" => {
+            // Always create the struct, using defaults if data is short
+            let fields = pb_event_log_wrapper::EventFields::SwapLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbSwapLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
+                    end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
+                    amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
+                    amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
+                    swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
+                    fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
+                    protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
+                    fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
+                    host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "AddLiquidity" => {
+            let amounts = Vec::new(); // Add logic later if needed
+            let fields = pb_event_log_wrapper::EventFields::AddLiquidityLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbAddLiquidityLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                    amounts: amounts, // Keep as potentially empty vec
+                    active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "RemoveLiquidity" => {
+            let amounts = Vec::new(); // Add logic later if needed
+            let fields = pb_event_log_wrapper::EventFields::RemoveLiquidityLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbRemoveLiquidityLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                    amounts: amounts, // Keep as potentially empty vec
+                    active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "ClaimReward" => {
+            let fields = pb_event_log_wrapper::EventFields::ClaimRewardLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbClaimRewardLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                    reward_index: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
+                    total_reward: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "FundReward" => {
+            let fields = pb_event_log_wrapper::EventFields::FundRewardLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbFundRewardLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    funder: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    reward_index: Some(if event_data.len() >= 72 { parse_i64(event_data, 64).unwrap_or(0) } else { 0 }),
+                    amount: Some(if event_data.len() >= 80 { parse_i64(event_data, 72).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "InitializeReward" => {
+            let fields = pb_event_log_wrapper::EventFields::InitializeRewardLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbInitializeRewardLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    reward_mint: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    funder: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                    reward_index: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
+                    reward_duration: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "UpdateRewardDuration" => {
+            let fields = pb_event_log_wrapper::EventFields::UpdateRewardDurationLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbUpdateRewardDurationLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    reward_index: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
+                    old_reward_duration: Some(if event_data.len() >= 48 { parse_i64(event_data, 40).unwrap_or(0) } else { 0 }),
+                    new_reward_duration: Some(if event_data.len() >= 56 { parse_i64(event_data, 48).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "UpdateRewardFunder" => {
+            let fields = pb_event_log_wrapper::EventFields::UpdateRewardFunderLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbUpdateRewardFunderLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    reward_index: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
+                    old_funder: if event_data.len() >= 72 { bytes_to_pubkey_str(event_data, 40).unwrap_or_default() } else { "".to_string() },
+                    new_funder: if event_data.len() >= 104 { bytes_to_pubkey_str(event_data, 72).unwrap_or_default() } else { "".to_string() },
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "PositionClose" => {
+            let fields = pb_event_log_wrapper::EventFields::PositionCloseLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbPositionCloseLogFields {
+                    position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    owner: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "ClaimFee" => {
+            let fields = pb_event_log_wrapper::EventFields::ClaimFeeLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbClaimFeeLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                    fee_x: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
+                    fee_y: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "LbPairCreate" => {
+            let fields = pb_event_log_wrapper::EventFields::LbPairCreateLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbLbPairCreateLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    bin_step: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
+                    token_x: if event_data.len() >= 68 { bytes_to_pubkey_str(event_data, 36).unwrap_or_default() } else { "".to_string() },
+                    token_y: if event_data.len() >= 100 { bytes_to_pubkey_str(event_data, 68).unwrap_or_default() } else { "".to_string() }, // Corrected offset check
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "PositionCreate" => {
+            let fields = pb_event_log_wrapper::EventFields::PositionCreateLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbPositionCreateLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "FeeParameterUpdate" => {
+            let fields = pb_event_log_wrapper::EventFields::FeeParameterUpdateLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbFeeParameterUpdateLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    protocol_share: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
+                    base_factor: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "IncreaseObservation" => {
+            let fields = pb_event_log_wrapper::EventFields::IncreaseObservationLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbIncreaseObservationLogFields {
+                    oracle: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    new_observation_length: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "WithdrawIneligibleReward" => {
+            let fields = pb_event_log_wrapper::EventFields::WithdrawIneligibleRewardLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbWithdrawIneligibleRewardLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    reward_mint: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    amount: Some(if event_data.len() >= 72 { parse_i64(event_data, 64).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "UpdatePositionOperator" => {
+            let fields = pb_event_log_wrapper::EventFields::UpdatePositionOperatorLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbUpdatePositionOperatorLogFields {
+                    position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    old_operator: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    new_operator: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "UpdatePositionLockReleaseSlot" => {
+            let fields = pb_event_log_wrapper::EventFields::UpdatePositionLockReleaseSlotLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbUpdatePositionLockReleaseSlotLogFields {
+                    position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    current_slot: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
+                    new_lock_release_slot: Some(if event_data.len() >= 48 { parse_i64(event_data, 40).unwrap_or(0) } else { 0 }),
+                    old_lock_release_slot: Some(if event_data.len() >= 56 { parse_i64(event_data, 48).unwrap_or(0) } else { 0 }),
+                    sender: if event_data.len() >= 88 { bytes_to_pubkey_str(event_data, 56).unwrap_or_default() } else { "".to_string() },
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "GoToABin" => {
+            let fields = pb_event_log_wrapper::EventFields::GoToABinLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbGoToABinLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    from_bin_id: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
+                    to_bin_id: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "UpdatePositionLockReleasePoint" => {
+            let fields = pb_event_log_wrapper::EventFields::UpdatePositionLockReleasePointLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbUpdatePositionLockReleasePointLogFields {
+                    position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    current_point: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
+                    new_lock_release_point: Some(if event_data.len() >= 48 { parse_i64(event_data, 40).unwrap_or(0) } else { 0 }),
+                    old_lock_release_point: Some(if event_data.len() >= 56 { parse_i64(event_data, 48).unwrap_or(0) } else { 0 }),
+                    sender: if event_data.len() >= 88 { bytes_to_pubkey_str(event_data, 56).unwrap_or_default() } else { "".to_string() },
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "UnknownEvent1" => {
+            let fields = pb_event_log_wrapper::EventFields::UnknownEvent1LogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbUnknownEvent1LogFields {
+                    vault: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    escrow: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                    amount: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
+                    vault_total_claimed_token: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "CompositionFee" => {
+            let fields = pb_event_log_wrapper::EventFields::CompositionFeeLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbCompositionFeeLogFields {
+                    from: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    bin_id: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
+                    token_x_fee_amount: Some(if event_data.len() >= 44 { parse_u64(event_data, 36).unwrap_or(0) } else { 0 }),
+                    token_y_fee_amount: Some(if event_data.len() >= 52 { parse_u64(event_data, 44).unwrap_or(0) } else { 0 }),
+                    protocol_token_x_fee_amount: Some(if event_data.len() >= 60 { parse_u64(event_data, 52).unwrap_or(0) } else { 0 }),
+                    protocol_token_y_fee_amount: Some(if event_data.len() >= 68 { parse_u64(event_data, 60).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+        },
+        
+        "IncreasePositionLength" => {
+            let fields = pb_event_log_wrapper::EventFields::IncreasePositionLengthLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbIncreasePositionLengthLogFields {
+                    position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    new_length: Some(if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+
+            log::info!("Processing IncreasePositionLength event: position={}, new_length={}",
+                      if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                      if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 });
+        },
+        
+        "DecreasePositionLength" => {
+            let fields = pb_event_log_wrapper::EventFields::DecreasePositionLengthLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbDecreasePositionLengthLogFields {
+                    position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    new_length: Some(if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+
+            log::info!("Processing DecreasePositionLength event: position={}, new_length={}",
+                      if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                      if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 });
+        },
+        
+        "DynamicFeeParameterUpdate" => {
+            let fields = pb_event_log_wrapper::EventFields::DynamicFeeParameterUpdateLogFields(
+                crate::pb::sf::solana::meteora_dlmm::v1::PbDynamicFeeParameterUpdateLogFields {
+                    lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                    filter_period: Some(if event_data.len() >= 36 { parse_u32(event_data, 32).unwrap_or(0) } else { 0 }),
+                    decay_period: Some(if event_data.len() >= 40 { parse_u32(event_data, 36).unwrap_or(0) } else { 0 }),
+                    reduction_factor: Some(if event_data.len() >= 44 { parse_u32(event_data, 40).unwrap_or(0) } else { 0 }),
+                    variable_fee_control: Some(if event_data.len() >= 48 { parse_u32(event_data, 44).unwrap_or(0) } else { 0 }),
+                    max_volatility_accumulator: Some(if event_data.len() >= 52 { parse_u32(event_data, 48).unwrap_or(0) } else { 0 }),
+                }
+            );
+            event_wrapper.event_fields = Some(fields);
+
+            log::info!("Processing DynamicFeeParameterUpdate event: lb_pair={}",
+                      if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() });
+        },
+        
+        _ => {
+            // Unknown event - fields remain None
+        }
+    }
+
+    // Add handlers for V2 events that were recognized by compute_event_discriminator
+    // but aren't in the main match statement yet
+    if event_wrapper.event_fields.is_none() {
+        match event_name.as_str() {
+            // V2 Events
+            "ClaimFee2" => {
+                let fields = pb_event_log_wrapper::EventFields::ClaimFeeLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbClaimFeeLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                        owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                        fee_x: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
+                        fee_y: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: ClaimFee2");
+            },
+            
+            "ClaimReward2" => {
+                let fields = pb_event_log_wrapper::EventFields::ClaimRewardLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbClaimRewardLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                        owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                        reward_index: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
+                        total_reward: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: ClaimReward2");
+            },
+            
+            "Swap2" => {
+                let fields = pb_event_log_wrapper::EventFields::SwapLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbSwapLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                        start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
+                        end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
+                        amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
+                        amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
+                        swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
+                        fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
+                        protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
+                        fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
+                        host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: Swap2");
+            },
+            
+            "SwapExactOut2" | "SwapWithPriceImpact2" => {
+                let fields = pb_event_log_wrapper::EventFields::SwapLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbSwapLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                        start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
+                        end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
+                        amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
+                        amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
+                        swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
+                        fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
+                        protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
+                        fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
+                        host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: {}", event_name);
+            },
+            
+            "AddLiquidity2" | "AddLiquidityByStrategy2" | "AddLiquidityOneSidePrecise2" => {
+                let amounts = Vec::new(); // Add logic later if needed
+                let fields = pb_event_log_wrapper::EventFields::AddLiquidityLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbAddLiquidityLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                        position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                        amounts: amounts, // Keep as potentially empty vec
+                        active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: {}", event_name);
+            },
+            
+            "RemoveLiquidity2" | "RemoveLiquidityByRange2" => {
+                let amounts = Vec::new(); // Add logic later if needed
+                let fields = pb_event_log_wrapper::EventFields::RemoveLiquidityLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbRemoveLiquidityLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                        position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
+                        amounts: amounts, // Keep as potentially empty vec
+                        active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: {}", event_name);
+            },
+            
+            "ClosePosition2" | "ClosePositionIfEmpty" => {
+                let fields = pb_event_log_wrapper::EventFields::PositionCloseLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbPositionCloseLogFields {
+                        position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        owner: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: {}", event_name);
+            },
+            
+            "UpdateFeesAndRewards" => {
+                let fields = pb_event_log_wrapper::EventFields::FeeParameterUpdateLogFields(
+                    crate::pb::sf::solana::meteora_dlmm::v1::PbFeeParameterUpdateLogFields {
+                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
+                        protocol_share: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
+                        base_factor: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
+                    }
+                );
+                event_wrapper.event_fields = Some(fields);
+                log::info!("Processed V2 event: UpdateFeesAndRewards");
+            },
+            
+            "SetRewardEmissions" => {
+                // If we have a proto message type for this, use it
+                // For now, just log the event
+                log::info!("Recognized SetRewardEmissions event, but no specific handler implemented yet");
+            },
+            
+            "TransferPositionOwner" => {
+                // If we have a proto message type for this, use it
+                // For now, just log the event
+                log::info!("Recognized TransferPositionOwner event, but no specific handler implemented yet");
+            },
+            
+            _ => {
+                // No additional handler found for this event type
             }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_ADD_LIQUIDITY_DISCRIMINATOR {
-        event_wrapper.event_name = "AddLiquidity".to_string();
-        let amounts = Vec::new(); // Add logic later if needed
-        let fields = pb_event_log_wrapper::EventFields::AddLiquidityLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbAddLiquidityLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                amounts: amounts, // Keep as potentially empty vec
-                active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_REMOVE_LIQUIDITY_DISCRIMINATOR {
-        event_wrapper.event_name = "RemoveLiquidity".to_string();
-        let amounts = Vec::new(); // Add logic later if needed
-        let fields = pb_event_log_wrapper::EventFields::RemoveLiquidityLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbRemoveLiquidityLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                amounts: amounts, // Keep as potentially empty vec
-                active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_CLAIM_REWARD_DISCRIMINATOR {
-        event_wrapper.event_name = "ClaimReward".to_string();
-        let fields = pb_event_log_wrapper::EventFields::ClaimRewardLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbClaimRewardLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                reward_index: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
-                total_reward: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_FUND_REWARD_DISCRIMINATOR {
-        event_wrapper.event_name = "FundReward".to_string();
-        let fields = pb_event_log_wrapper::EventFields::FundRewardLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbFundRewardLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                funder: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                reward_index: Some(if event_data.len() >= 72 { parse_i64(event_data, 64).unwrap_or(0) } else { 0 }),
-                amount: Some(if event_data.len() >= 80 { parse_i64(event_data, 72).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_INITIALIZE_REWARD_DISCRIMINATOR {
-        event_wrapper.event_name = "InitializeReward".to_string();
-        let fields = pb_event_log_wrapper::EventFields::InitializeRewardLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbInitializeRewardLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                reward_mint: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                funder: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                reward_index: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
-                reward_duration: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_UPDATE_REWARD_DURATION_DISCRIMINATOR {
-        event_wrapper.event_name = "UpdateRewardDuration".to_string();
-        let fields = pb_event_log_wrapper::EventFields::UpdateRewardDurationLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbUpdateRewardDurationLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                reward_index: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
-                old_reward_duration: Some(if event_data.len() >= 48 { parse_i64(event_data, 40).unwrap_or(0) } else { 0 }),
-                new_reward_duration: Some(if event_data.len() >= 56 { parse_i64(event_data, 48).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_UPDATE_REWARD_FUNDER_DISCRIMINATOR {
-        event_wrapper.event_name = "UpdateRewardFunder".to_string();
-        let fields = pb_event_log_wrapper::EventFields::UpdateRewardFunderLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbUpdateRewardFunderLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                reward_index: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
-                old_funder: if event_data.len() >= 72 { bytes_to_pubkey_str(event_data, 40).unwrap_or_default() } else { "".to_string() },
-                new_funder: if event_data.len() >= 104 { bytes_to_pubkey_str(event_data, 72).unwrap_or_default() } else { "".to_string() },
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_POSITION_CLOSE_DISCRIMINATOR {
-        event_wrapper.event_name = "PositionClose".to_string();
-        let fields = pb_event_log_wrapper::EventFields::PositionCloseLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbPositionCloseLogFields {
-                position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                owner: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_CLAIM_FEE_DISCRIMINATOR {
-        event_wrapper.event_name = "ClaimFee".to_string();
-        let fields = pb_event_log_wrapper::EventFields::ClaimFeeLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbClaimFeeLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                fee_x: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
-                fee_y: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_LB_PAIR_CREATE_DISCRIMINATOR {
-        event_wrapper.event_name = "LbPairCreate".to_string();
-        let fields = pb_event_log_wrapper::EventFields::LbPairCreateLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbLbPairCreateLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                bin_step: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                token_x: if event_data.len() >= 68 { bytes_to_pubkey_str(event_data, 36).unwrap_or_default() } else { "".to_string() },
-                token_y: if event_data.len() >= 100 { bytes_to_pubkey_str(event_data, 68).unwrap_or_default() } else { "".to_string() }, // Corrected offset check
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_POSITION_CREATE_DISCRIMINATOR {
-        event_wrapper.event_name = "PositionCreate".to_string();
-        let fields = pb_event_log_wrapper::EventFields::PositionCreateLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbPositionCreateLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_FEE_PARAMETER_UPDATE_DISCRIMINATOR {
-        event_wrapper.event_name = "FeeParameterUpdate".to_string();
-        let fields = pb_event_log_wrapper::EventFields::FeeParameterUpdateLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbFeeParameterUpdateLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                protocol_share: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                base_factor: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_INCREASE_OBSERVATION_DISCRIMINATOR {
-        event_wrapper.event_name = "IncreaseObservation".to_string();
-        let fields = pb_event_log_wrapper::EventFields::IncreaseObservationLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbIncreaseObservationLogFields {
-                oracle: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                new_observation_length: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_WITHDRAW_INELIGIBLE_REWARD_DISCRIMINATOR {
-        event_wrapper.event_name = "WithdrawIneligibleReward".to_string();
-        let fields = pb_event_log_wrapper::EventFields::WithdrawIneligibleRewardLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbWithdrawIneligibleRewardLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                reward_mint: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                amount: Some(if event_data.len() >= 72 { parse_i64(event_data, 64).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_UPDATE_POSITION_OPERATOR_DISCRIMINATOR {
-        event_wrapper.event_name = "UpdatePositionOperator".to_string();
-        let fields = pb_event_log_wrapper::EventFields::UpdatePositionOperatorLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbUpdatePositionOperatorLogFields {
-                position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                old_operator: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                new_operator: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_UPDATE_POSITION_LOCK_RELEASE_SLOT_DISCRIMINATOR {
-        event_wrapper.event_name = "UpdatePositionLockReleaseSlot".to_string();
-        let fields = pb_event_log_wrapper::EventFields::UpdatePositionLockReleaseSlotLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbUpdatePositionLockReleaseSlotLogFields {
-                position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                current_slot: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
-                new_lock_release_slot: Some(if event_data.len() >= 48 { parse_i64(event_data, 40).unwrap_or(0) } else { 0 }),
-                old_lock_release_slot: Some(if event_data.len() >= 56 { parse_i64(event_data, 48).unwrap_or(0) } else { 0 }),
-                sender: if event_data.len() >= 88 { bytes_to_pubkey_str(event_data, 56).unwrap_or_default() } else { "".to_string() },
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_GO_TO_A_BIN_DISCRIMINATOR {
-        event_wrapper.event_name = "GoToABin".to_string();
-        let fields = pb_event_log_wrapper::EventFields::GoToABinLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbGoToABinLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                from_bin_id: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                to_bin_id: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_UPDATE_POSITION_LOCK_RELEASE_POINT_DISCRIMINATOR {
-        event_wrapper.event_name = "UpdatePositionLockReleasePoint".to_string();
-        let fields = pb_event_log_wrapper::EventFields::UpdatePositionLockReleasePointLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbUpdatePositionLockReleasePointLogFields {
-                position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                current_point: Some(if event_data.len() >= 40 { parse_i64(event_data, 32).unwrap_or(0) } else { 0 }),
-                new_lock_release_point: Some(if event_data.len() >= 48 { parse_i64(event_data, 40).unwrap_or(0) } else { 0 }),
-                old_lock_release_point: Some(if event_data.len() >= 56 { parse_i64(event_data, 48).unwrap_or(0) } else { 0 }),
-                sender: if event_data.len() >= 88 { bytes_to_pubkey_str(event_data, 56).unwrap_or_default() } else { "".to_string() },
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_UNKNOWN_EVENT1_DISCRIMINATOR {
-        event_wrapper.event_name = "UnknownEvent1".to_string();
-        let fields = pb_event_log_wrapper::EventFields::UnknownEvent1LogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbUnknownEvent1LogFields {
-                vault: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                escrow: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                amount: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
-                vault_total_claimed_token: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_COMPOSITION_FEE_DISCRIMINATOR {
-        event_wrapper.event_name = "CompositionFee".to_string();
-        let fields = pb_event_log_wrapper::EventFields::CompositionFeeLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbCompositionFeeLogFields {
-                from: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                bin_id: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                token_x_fee_amount: Some(if event_data.len() >= 44 { parse_u64(event_data, 36).unwrap_or(0) } else { 0 }),
-                token_y_fee_amount: Some(if event_data.len() >= 52 { parse_u64(event_data, 44).unwrap_or(0) } else { 0 }),
-                protocol_token_x_fee_amount: Some(if event_data.len() >= 60 { parse_u64(event_data, 52).unwrap_or(0) } else { 0 }),
-                protocol_token_y_fee_amount: Some(if event_data.len() >= 68 { parse_u64(event_data, 60).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-    } else if discriminator == EVENT_INCREASE_POSITION_LENGTH_DISCRIMINATOR {
-        event_wrapper.event_name = "IncreasePositionLength".to_string();
-        let fields = pb_event_log_wrapper::EventFields::IncreasePositionLengthLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbIncreasePositionLengthLogFields {
-                position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                new_length: Some(if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-        log::info!("Processing IncreasePositionLength event: position={}, new_length={}",
-                   if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                   if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 });
-
-    } else if discriminator == EVENT_DECREASE_POSITION_LENGTH_DISCRIMINATOR {
-        event_wrapper.event_name = "DecreasePositionLength".to_string();
-        let fields = pb_event_log_wrapper::EventFields::DecreasePositionLengthLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbDecreasePositionLengthLogFields {
-                position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                new_length: Some(if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-        log::info!("Processing DecreasePositionLength event: position={}, new_length={}",
-                   if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                   if event_data.len() >= 40 { parse_u64(event_data, 32).unwrap_or(0) } else { 0 });
-
-    } else if discriminator == EVENT_DYNAMIC_FEE_PARAMETER_UPDATE_DISCRIMINATOR {
-        event_wrapper.event_name = "DynamicFeeParameterUpdate".to_string();
-        let fields = pb_event_log_wrapper::EventFields::DynamicFeeParameterUpdateLogFields(
-            crate::pb::sf::solana::meteora_dlmm::v1::PbDynamicFeeParameterUpdateLogFields {
-                lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                volatility_accumulator: Some(if event_data.len() >= 36 { parse_u32(event_data, 32).unwrap_or(0) } else { 0 }),
-                volatility_reference: Some(if event_data.len() >= 40 { parse_u32(event_data, 36).unwrap_or(0) } else { 0 }),
-                index_reference: Some(if event_data.len() >= 44 { parse_u32(event_data, 40).unwrap_or(0) } else { 0 }),
-            }
-        );
-        event_wrapper.event_fields = Some(fields);
-
-        log::info!("Processing DynamicFeeParameterUpdate event: lb_pair={}, volatility_accumulator={}",
-                   if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                   if event_data.len() >= 36 { parse_u32(event_data, 32).unwrap_or(0) } else { 0 });
-
-    } else {
-        log::info!("Unknown event discriminator: {}", hex::encode(discriminator));
-        event_wrapper.event_name = format!("Unknown_{}", hex::encode(discriminator));
-        // Keep event_fields as None for unknown events
+        }
     }
 
     // Log that we identified an event only if fields were set
@@ -1830,7 +2021,10 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
 
     // Set the event wrapper as the instruction args
     args.instruction_args = Some(instruction_args::InstructionArgs::EventLog(event_wrapper));
-
+    
+    log::info!("Successfully processed event log: {}", event_name);
+    
+    // Return the updated args
     Some(args)
 } 
 
@@ -1970,3 +2164,49 @@ fn parse_bin_liquidity_distribution_vec(data: &[u8], start_offset: usize) -> (Ve
 }
 
 // --- End Helper Functions ---
+
+/// Compute an 8-byte event discriminator using the format "event:{name}"
+pub fn compute_event_discriminator(name: &str) -> [u8; 8] {
+    // Precomputed lookup table for known events, based on hardcoded discriminators in process_event_log
+    match name {
+        "Swap" => [81, 108, 227, 190, 205, 208, 10, 196],
+        "AddLiquidity" => [31, 94, 125, 90, 227, 52, 61, 186],
+        "RemoveLiquidity" => [116, 244, 97, 232, 103, 31, 152, 58],
+        "ClaimReward" => [148, 116, 134, 204, 22, 171, 85, 95],
+        "FundReward" => [246, 228, 58, 130, 145, 170, 79, 204],
+        "InitializeReward" => [211, 153, 88, 62, 149, 60, 177, 70],
+        "UpdateRewardDuration" => [223, 245, 224, 153, 49, 29, 163, 172],
+        "UpdateRewardFunder" => [224, 178, 174, 74, 252, 165, 85, 180],
+        "PositionClose" => [255, 196, 16, 107, 28, 202, 53, 128],
+        "ClaimFee" => [75, 122, 154, 48, 140, 74, 123, 163],
+        "LbPairCreate" => [185, 74, 252, 125, 27, 215, 188, 111],
+        "PositionCreate" => [144, 142, 252, 84, 157, 53, 37, 121],
+        "FeeParameterUpdate" => [48, 76, 241, 117, 144, 215, 242, 44],
+        "IncreaseObservation" => [99, 249, 17, 121, 166, 156, 207, 215],
+        "WithdrawIneligibleReward" => [231, 189, 65, 149, 102, 215, 154, 244],
+        "UpdatePositionOperator" => [39, 115, 48, 204, 246, 47, 66, 57],
+        "UpdatePositionLockReleaseSlot" => [176, 165, 93, 114, 250, 229, 146, 255],
+        "GoToABin" => [59, 138, 76, 68, 138, 131, 176, 67],
+        "UpdatePositionLockReleasePoint" => [133, 214, 66, 224, 64, 12, 7, 191],
+        "CompositionFee" => [128, 151, 123, 106, 17, 102, 113, 142],
+        "IncreasePositionLength" => [157, 239, 42, 204, 30, 56, 223, 46],
+        "DecreasePositionLength" => [52, 118, 235, 85, 172, 169, 15, 128],
+        "DynamicFeeParameterUpdate" => [88, 88, 178, 135, 194, 146, 91, 243],
+        // For any new events, use the standard calculation method
+        _ => {
+            // Standard computation for events not in our lookup table
+            // For Meteora/Anchor event logs, the discriminator is calculated by:
+            // - Taking the first 8 bytes of the SHA256 hash of "event:" + event_name (not snake_cased)
+            let prefixed_name = format!("event:{}", name);
+            
+            let mut hasher = Sha256::new();
+            hasher.update(prefixed_name.as_bytes());
+            let result = hasher.finalize();
+            let mut discriminator = [0u8; 8];
+            discriminator.copy_from_slice(&result[..8]);
+            
+            log::debug!("Computed discriminator for {}: {}", name, hex::encode(&discriminator));
+            discriminator
+        }
+    }
+}

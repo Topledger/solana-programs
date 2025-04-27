@@ -57,6 +57,7 @@ pub fn map_accounts(
         },
         
         InstructionType::InitializePermissionLbPair => {
+            // Mapping based on user-provided example
             assign_if_exists(&mut role_by_index, 0, "base");
             assign_if_exists(&mut role_by_index, 1, "lbPair");
             assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension");
@@ -189,6 +190,19 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 8, "tokenProgram");
             assign_if_exists(&mut role_by_index, 9, "eventAuthority");
             assign_if_exists(&mut role_by_index, 10, "program");
+        },
+
+        InstructionType::FundReward => {
+            // Updated mapping based on provided IDL
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "rewardVault");
+            assign_if_exists(&mut role_by_index, 2, "rewardMint");
+            assign_if_exists(&mut role_by_index, 3, "funderTokenAccount");
+            assign_if_exists(&mut role_by_index, 4, "funder");
+            assign_if_exists(&mut role_by_index, 5, "binArray"); // Added based on IDL
+            assign_if_exists(&mut role_by_index, 6, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 7, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 8, "program");
         },
         
         // V2 Swap variants share similar base accounts

@@ -2,12 +2,16 @@ mod instructions;
 mod prepare_input_accounts;
 
 pub mod pb;
-use pb::sf::solana::meteora_dlmm::v1::{Instructions, Meta};
+
+use crate::pb::sf::solana::meteora_dlmm::v1::{Instructions, Meta};
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, CompiledInstruction};
 use substreams::log;
 use bs58;
+use crate::instructions::process_instruction;
 
-const METEORA_DLMM_PROGRAM_ID: &str = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
+pub const METEORA_DLMM_PROGRAM_ID: &str = "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo";
+// Discriminator for FundReward instruction (first 8 bytes)
+pub const FUND_REWARD_DISCRIMINATOR: &[u8] = &[246, 228, 58, 130, 145, 170, 79, 204];
 
 #[substreams::handlers::map]
 fn map_block(
@@ -44,6 +48,13 @@ fn map_block(
             continue; // Skip transactions without signatures
         };
         
+        let target_tx_id = "5yeyRkoLnshKGqPDoAmV71tEPwLThtfUSwYc5vFMaRMdjWo3upv3ErDtdYShQb9AbAWWKBxsh6qcF3KWtPBDqDyf";
+        let is_target_tx = tx_id == target_tx_id;
+        
+        if is_target_tx {
+            log::info!("TARGET TX [{}] FOUND.", target_tx_id);
+        }
+        
         // Get resolved accounts
         let accounts = transaction.resolved_accounts();
         let account_keys: Vec<String> = accounts.iter()
@@ -56,18 +67,22 @@ fn map_block(
         
         // Process outer instructions
         for (ix_index, ix) in message.instructions.iter().enumerate() {
-            // Skip if not a Meteora DLMM instruction
             let program_id_index = ix.program_id_index as usize;
             if program_id_index >= account_keys.len() {
+                log::info!("[{}] Outer Ix [{}] program_id_index {} out of bounds", tx_id, ix_index, program_id_index);
                 continue;
             }
-            
             let program_id = &account_keys[program_id_index];
-            if program_id != METEORA_DLMM_PROGRAM_ID {
-                continue;
-            }
             
-            // Process Meteora DLMM instruction
+            // Log ALL outer instruction details if it's the target transaction
+            if is_target_tx {
+                log::info!("  TARGET TX [{}]: Outer Ix [{}]: Program={}, Data={}",
+                         target_tx_id, ix_index, program_id, hex::encode(&ix.data));
+            }
+
+            // --- REMOVED PROGRAM ID CHECK FOR OUTER --- 
+            // Always process outer instructions regardless of program ID for now, 
+            // filtering happens in process_instruction
             if let Some(meta) = instructions::process_instruction(
                 ix,
                 &account_keys,
@@ -86,47 +101,48 @@ fn map_block(
         
         // Process inner instructions
         if let Some(meta) = &transaction.meta {
-            for inner_ix_group in &meta.inner_instructions {
-                let outer_instruction_index = inner_ix_group.index as usize;
-                if outer_instruction_index >= message.instructions.len() {
-                    continue;
-                }
+            for inner_ins in &meta.inner_instructions {
+                let outer_idx = inner_ins.index as usize;
                 
-                // Calculate outer_program ID for this set of inner instructions
-                let outer_program_opt: Option<String> = message.instructions.get(outer_instruction_index)
-                    .and_then(|parent_inst| account_keys.get(parent_inst.program_id_index as usize).cloned());
+                // Simplified approach for logging the outer transaction context
+                log::info!("Processing inner instructions for tx: {}, outer_idx: {}",
+                         tx_id, outer_idx);
                 
-                for (inner_ix_index, inner_ix) in inner_ix_group.instructions.iter().enumerate() {
-                    // Skip if not a Meteora DLMM inner instruction
-                    let program_id_index = inner_ix.program_id_index as usize;
+                for (idx, ins) in inner_ins.instructions.iter().enumerate() {
+                    // Get program ID from account keys using program_id_index
+                    let program_id_index = ins.program_id_index as usize;
                     if program_id_index >= account_keys.len() {
                         continue;
                     }
                     
                     let program_id = &account_keys[program_id_index];
-                    if program_id != METEORA_DLMM_PROGRAM_ID {
-                        continue;
+
+                    // Log inner instruction details if it's the target transaction
+                    if is_target_tx {
+                        log::info!("    TARGET TX [{}]: Inner Ix [{}][{}]: Program={}, Data={}",
+                                 target_tx_id, outer_idx, idx, program_id, hex::encode(&ins.data));
                     }
-                    
-                    // Convert InnerInstruction to CompiledInstruction
-                    let compiled_inner_inst = CompiledInstruction {
-                        program_id_index: inner_ix.program_id_index,
-                        accounts: inner_ix.accounts.clone(),
-                        data: inner_ix.data.clone(),
+
+                    // --- REMOVED PROGRAM ID CHECK FOR INNER --- 
+                    // Create CompiledInstruction from InnerInstruction
+                    let compiled_inst = CompiledInstruction {
+                        program_id_index: ins.program_id_index,
+                        accounts: ins.accounts.clone(),
+                        data: ins.data.clone(),
                     };
                     
-                    // Process Meteora DLMM inner instruction
+                    // Process Meteora DLMM instruction or EventLog
                     if let Some(meta) = instructions::process_instruction(
-                        &compiled_inner_inst,
+                        &compiled_inst,
                         &account_keys,
                         block_slot,
                         block_time,
                         &tx_id,
-                        outer_instruction_index as u32,
+                        idx as u32,
                         true, // is_inner_instruction
-                        Some(inner_ix_index as u32), // inner_instruction_index
+                        Some(outer_idx as u32),
                         signer_opt.as_deref(),
-                        outer_program_opt.as_deref(),
+                        None,
                     ) {
                         processed_instructions.push(meta);
                     }
@@ -140,3 +156,4 @@ fn map_block(
     
     Ok(Instructions { instructions: processed_instructions })
 }
+

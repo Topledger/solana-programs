@@ -23,6 +23,7 @@ hex = "0.4.3"
 log = "0.4.20"
 num-traits = "0.2"
 sha2 = "0.10.7"
+lazy_static = "1.4.0"
 
 [build-dependencies]
 prost-build = "0.13"

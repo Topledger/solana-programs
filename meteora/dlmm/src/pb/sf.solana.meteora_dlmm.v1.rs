@@ -121,7 +121,7 @@ pub struct FlatArg {
 pub struct InstructionArgs {
     #[prost(
         oneof = "instruction_args::InstructionArgs",
-        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117"
+        tags = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119"
     )]
     pub instruction_args: ::core::option::Option<instruction_args::InstructionArgs>,
 }
@@ -303,6 +303,10 @@ pub mod instruction_args {
         /// No args
         #[prost(message, tag = "117")]
         CloseClaimProtocolFeeOperator(super::PbCloseClaimProtocolFeeOperatorLayout),
+        #[prost(message, tag = "118")]
+        SetActivationPoint(super::PbSetActivationPointLayout),
+        #[prost(message, tag = "119")]
+        ClaimReward2(super::PbClaimReward2Layout),
     }
 }
 /// Common types
@@ -331,6 +335,31 @@ pub struct PbInitializeRewardParam {
     pub open_time: u64,
     #[prost(uint64, tag = "6")]
     pub end_time: u64,
+}
+/// New message for InitPermissionPairIx struct (Based on user example)
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbInitPermissionPairIx {
+    /// i32
+    #[prost(int32, optional, tag = "1")]
+    pub active_id: ::core::option::Option<i32>,
+    /// u16 -> u32
+    #[prost(uint32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<u32>,
+    /// u16 -> u32
+    #[prost(uint32, optional, tag = "3")]
+    pub base_factor: ::core::option::Option<u32>,
+    /// i32
+    #[prost(int32, optional, tag = "4")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    /// i32
+    #[prost(int32, optional, tag = "5")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    /// u64
+    #[prost(uint64, optional, tag = "6")]
+    pub lock_duration: ::core::option::Option<u64>,
+    /// u8 -> u32
+    #[prost(uint32, optional, tag = "7")]
+    pub activation_type: ::core::option::Option<u32>,
 }
 /// Meteora DLMM specific layouts
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -494,10 +523,11 @@ pub struct PbInitializeLbPairLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePermissionLbPairLayout {
-    #[prost(int32, optional, tag = "1")]
-    pub active_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "2")]
-    pub bin_step: ::core::option::Option<i32>,
+    /// Changed to hold the nested struct
+    ///
+    /// active_id and bin_step removed from here
+    #[prost(message, optional, tag = "1")]
+    pub ix_data: ::core::option::Option<PbInitPermissionPairIx>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePositionLayout {
@@ -680,56 +710,77 @@ pub struct PbClosePresetParameterLayout {}
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePresetParameterLayout {
     /// Fields moved from PbInitializePresetParameterIxLayout
-    #[prost(int32, optional, tag = "1")]
-    pub bin_step: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "2")]
-    pub base_factor: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "3")]
-    pub filter_period: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "4")]
-    pub decay_period: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "5")]
-    pub reduction_factor: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "6")]
-    pub variable_fee_control: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "7")]
-    pub max_volatility_accumulator: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "8")]
-    pub min_bin_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "9")]
-    pub max_bin_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "10")]
-    pub protocol_share: ::core::option::Option<i32>,
+    /// Based on InitPresetParametersIx in IDL
+    ///
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "1")]
+    pub bin_step: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "2")]
+    pub base_factor: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "3")]
+    pub filter_period: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "4")]
+    pub decay_period: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "5")]
+    pub reduction_factor: ::core::option::Option<u32>,
+    /// u32 in IDL
+    #[prost(uint32, optional, tag = "6")]
+    pub variable_fee_control: ::core::option::Option<u32>,
+    /// u32 in IDL
+    #[prost(uint32, optional, tag = "7")]
+    pub max_volatility_accumulator: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32 (min/max bin id removed)
+    #[prost(uint32, optional, tag = "8")]
+    pub protocol_share: ::core::option::Option<u32>,
 }
 /// Flattened structure for InitializePresetParameterV2
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePresetParameterV2Layout {
     /// Fields moved from PbInitializePresetParameterV2IxLayout
-    #[prost(int32, optional, tag = "1")]
-    pub bin_step: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "2")]
-    pub base_factor: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "3")]
-    pub filter_period: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "4")]
-    pub decay_period: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "5")]
-    pub reduction_factor: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "6")]
-    pub variable_fee_control: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "7")]
-    pub max_volatility_accumulator: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "8")]
-    pub min_bin_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "9")]
-    pub max_bin_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "10")]
-    pub protocol_share: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "11")]
-    pub host_fee: ::core::option::Option<i32>,
+    /// Based on InitPresetParameters2Ix in IDL
+    ///
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "1")]
+    pub index: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "3")]
+    pub base_factor: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "4")]
+    pub filter_period: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "5")]
+    pub decay_period: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "6")]
+    pub reduction_factor: ::core::option::Option<u32>,
+    /// u32 in IDL
+    #[prost(uint32, optional, tag = "7")]
+    pub variable_fee_control: ::core::option::Option<u32>,
+    /// u32 in IDL
+    #[prost(uint32, optional, tag = "8")]
+    pub max_volatility_accumulator: ::core::option::Option<u32>,
+    /// u16 in IDL -> u32
+    #[prost(uint32, optional, tag = "9")]
+    pub protocol_share: ::core::option::Option<u32>,
+    /// u8 in IDL -> u32
+    #[prost(uint32, optional, tag = "10")]
+    pub base_fee_power_factor: ::core::option::Option<u32>,
 }
+/// Renamed from SetPairStatusLayout/SetPairStatusPermissionlessLayout
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
-pub struct PbTogglePairStatusLayout {}
+pub struct PbTogglePairStatusLayout {
+    /// u8 in IDL -> u32
+    #[prost(uint32, optional, tag = "1")]
+    pub status: ::core::option::Option<u32>,
+}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbUpdateWhitelistedWalletLayout {
     /// Assuming u16 maps to int32
@@ -784,6 +835,28 @@ pub struct PbSetPreActivationSwapAddressLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbIdlWriteLayout {}
+/// New layout for SetActivationPoint
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbSetActivationPointLayout {
+    /// u64 in IDL
+    #[prost(uint64, optional, tag = "1")]
+    pub activation_point: ::core::option::Option<u64>,
+}
+/// New layout for ClaimReward2
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbClaimReward2Layout {
+    /// u64 in IDL
+    #[prost(uint64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<u64>,
+    /// i32 in IDL
+    #[prost(int32, optional, tag = "2")]
+    pub min_bin_id: ::core::option::Option<i32>,
+    /// i32 in IDL
+    #[prost(int32, optional, tag = "3")]
+    pub max_bin_id: ::core::option::Option<i32>,
+    #[prost(message, optional, tag = "4")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
+}
 /// Renamed from PbSwapLogLayout, removed event_name, added optional
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbSwapLogFields {
@@ -1052,11 +1125,15 @@ pub struct PbDynamicFeeParameterUpdateLogFields {
     #[prost(string, tag = "1")]
     pub lb_pair: ::prost::alloc::string::String,
     #[prost(uint32, optional, tag = "2")]
-    pub volatility_accumulator: ::core::option::Option<u32>,
+    pub filter_period: ::core::option::Option<u32>,
     #[prost(uint32, optional, tag = "3")]
-    pub volatility_reference: ::core::option::Option<u32>,
+    pub decay_period: ::core::option::Option<u32>,
     #[prost(uint32, optional, tag = "4")]
-    pub index_reference: ::core::option::Option<u32>,
+    pub reduction_factor: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "5")]
+    pub variable_fee_control: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "6")]
+    pub max_volatility_accumulator: ::core::option::Option<u32>,
 }
 /// Wrapper for all event types
 #[derive(Clone, PartialEq, ::prost::Message)]
