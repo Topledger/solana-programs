@@ -147,19 +147,20 @@ message InstructionArgs {
     PbAddLiquidity2Layout add_liquidity2 = 104;
     PbAddLiquidityByStrategy2Layout add_liquidity_by_strategy2 = 105;
     PbAddLiquidityOneSidePrecise2Layout add_liquidity_one_side_precise2 = 106;
-    PbRemoveLiquidity2Layout remove_liquidity2 = 107;
-    PbRemoveLiquidityByRange2Layout remove_liquidity_by_range2 = 108;
-    PbSwap2Layout swap2 = 109;
-    PbSwapExactOut2Layout swap_exact_out2 = 110;
-    PbSwapWithPriceImpact2Layout swap_with_price_impact2 = 111;
-    PbClosePosition2Layout close_position2 = 112;
-    PbUpdateFeesAndReward2Layout update_fees_and_reward2 = 113; // Maps to UpdateFeesAndRewards in enum
-    PbClosePositionIfEmptyLayout close_position_if_empty = 114;
-    PbInitializeTokenBadgeLayout initialize_token_badge = 115; // No args, but keep for completeness
-    PbCreateClaimProtocolFeeOperatorLayout create_claim_protocol_fee_operator = 116; // No args
-    PbCloseClaimProtocolFeeOperatorLayout close_claim_protocol_fee_operator = 117; // No args
-    PbSetActivationPointLayout set_activation_point = 118;
-    PbClaimReward2Layout claim_reward2 = 119;
+    PbAddLiquidityByStrategyOneSide2Layout add_liquidity_by_strategy_one_side2 = 107;
+    PbRemoveLiquidity2Layout remove_liquidity2 = 108;
+    PbRemoveLiquidityByRange2Layout remove_liquidity_by_range2 = 109;
+    PbSwap2Layout swap2 = 110;
+    PbSwapExactOut2Layout swap_exact_out2 = 111;
+    PbSwapWithPriceImpact2Layout swap_with_price_impact2 = 112;
+    PbClosePosition2Layout close_position2 = 113;
+    PbUpdateFeesAndReward2Layout update_fees_and_reward2 = 114; // Maps to UpdateFeesAndRewards in enum
+    PbClosePositionIfEmptyLayout close_position_if_empty = 115;
+    PbInitializeTokenBadgeLayout initialize_token_badge = 116; // No args, but keep for completeness
+    PbCreateClaimProtocolFeeOperatorLayout create_claim_protocol_fee_operator = 117; // No args
+    PbCloseClaimProtocolFeeOperatorLayout close_claim_protocol_fee_operator = 118; // No args
+    PbSetActivationPointLayout set_activation_point = 119;
+    PbClaimReward2Layout claim_reward2 = 120;
   }
 }
 
@@ -365,7 +366,7 @@ message PbAddLiquidityOneSideLayout {
   repeated PbBinLiquidityDistributionByWeightLayout bin_liquidity_dist = 4;
 }
 message PbAddLiquidityByStrategyOneSideLayout { 
-  optional PbLiquidityParameterLayout liquidity_parameter = 1;
+  optional PbLiquidityParameterByStrategyOneSide liquidity_parameter = 1;
 }
 message PbAddLiquidityOneSidePreciseLayout { 
   // Fields moved from Python's AddLiquidityOneSidePreciseParameterLayout
@@ -744,6 +745,12 @@ message PbAddLiquidityOneSidePrecise2Layout {
   optional PbRemainingAccountsInfo remaining_accounts_info = 2;
 }
 
+message PbAddLiquidityByStrategyOneSide2Layout {
+  // Corrected AGAIN back to the specific type for this instruction
+  optional PbLiquidityParameterByStrategyOneSide liquidity_parameter = 1;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 2;
+}
+
 message PbRemoveLiquidity2Layout {
   repeated PbBinLiquidityReduction bin_liquidity_removal = 1;
   optional PbRemainingAccountsInfo remaining_accounts_info = 2;
@@ -861,7 +868,7 @@ message PbStrategyParameters {
   optional int32 min_bin_id = 1;
   optional int32 max_bin_id = 2;
   optional PbStrategyType strategy_type = 3;
-  // parameters (fixed array) omitted for simplicity, parse if needed
+  repeated uint32 parameters = 4; // Field for numeric array representation
 }
 
 // Corresponds to StrategyType enum in IDL
@@ -894,4 +901,12 @@ message PbCompressedBinDepositAmountLayout { // Keep Layout name
 message PbBinLiquidityReduction {
   optional int32 bin_id = 1;
   optional uint32 bps_to_remove = 2; // u16 in IDL
+}
+
+// Corresponds to LiquidityParameterByStrategyOneSide struct in IDL
+message PbLiquidityParameterByStrategyOneSide {
+  optional uint64 amount = 1;
+  optional int32 active_id = 2;
+  optional int32 max_active_bin_slippage = 3;
+  optional PbStrategyParameters strategy_parameters = 4;
 } 

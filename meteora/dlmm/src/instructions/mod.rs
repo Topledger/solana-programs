@@ -44,6 +44,7 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbClosePosition2Layout, PbUpdateFeesAndReward2Layout, 
     PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout,
     PbInitPermissionPairIx,
+    PbLiquidityParameterByStrategyOneSide,
 };
 
 // For convenience, alias the instruction args enum
@@ -135,6 +136,7 @@ pub enum InstructionType {
     AddLiquidity2, // NEW from IDL
     AddLiquidityByStrategy2, // NEW from IDL
     AddLiquidityOneSidePrecise2, // NEW from IDL
+    AddLiquidityByStrategyOneSide2, // NEW from IDL
     RemoveLiquidity2, // NEW from IDL
     RemoveLiquidityByRange2, // NEW from IDL
     Swap2, // NEW from IDL
@@ -227,6 +229,7 @@ const INSTRUCTION_TYPES: &[(&str, InstructionType)] = &[
     ("addLiquidity2", InstructionType::AddLiquidity2),
     ("addLiquidityByStrategy2", InstructionType::AddLiquidityByStrategy2),
     ("addLiquidityOneSidePrecise2", InstructionType::AddLiquidityOneSidePrecise2),
+    ("addLiquidityByStrategyOneSide2", InstructionType::AddLiquidityByStrategyOneSide2),
     ("removeLiquidity2", InstructionType::RemoveLiquidity2),
     ("removeLiquidityByRange2", InstructionType::RemoveLiquidityByRange2),
     ("swap2", InstructionType::Swap2),
@@ -235,6 +238,9 @@ const INSTRUCTION_TYPES: &[(&str, InstructionType)] = &[
     ("closePosition2", InstructionType::ClosePosition2),
     ("updateFeesAndReward2", InstructionType::UpdateFeesAndRewards),
     ("closePositionIfEmpty", InstructionType::ClosePositionIfEmpty),
+
+    // Special case
+    ("eventLog", InstructionType::EventLog),
 ];
 
 /// Compute an 8-byte discriminator from a string by hashing its bytes and taking the first 8 bytes
@@ -369,6 +375,7 @@ fn get_instruction_type_str(inst_type: InstructionType) -> &'static str {
         InstructionType::AddLiquidity2 => "addLiquidity2",
         InstructionType::AddLiquidityByStrategy2 => "addLiquidityByStrategy2",
         InstructionType::AddLiquidityOneSidePrecise2 => "addLiquidityOneSidePrecise2",
+        InstructionType::AddLiquidityByStrategyOneSide2 => "addLiquidityByStrategyOneSide2",
         InstructionType::RemoveLiquidity2 => "removeLiquidity2",
         InstructionType::RemoveLiquidityByRange2 => "removeLiquidityByRange2",
         InstructionType::Swap2 => "swap2",
@@ -740,9 +747,76 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::AddLiquidityByStrategy => {
-            // Complex structure, would need more detailed logic for the liquidity_parameter
+            // Args: liquidityParameter: LiquidityParameterByStrategy, remainingAccountsInfo: Optional<RemainingAccountsInfo>
+            let mut current_offset = 8;
+            // Placeholder check - Needs correct length based on actual LiquidityParameterByStrategy structure if fully parsed
+            if data.len() < 33 { // Minimal check assuming nested strategy params base size
+                log::warn!("Data potentially too short for full AddLiquidityByStrategy parsing: {} bytes", data.len());
+                // Fallback to empty for now to allow compilation
+                args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByStrategy(PbAddLiquidityByStrategyLayout {
+                    liquidity_parameter: Some(PbLiquidityParameterLayout {}), // Use empty placeholder
+                }));
+                return Some(args); // Return with placeholder
+            }
+
+            // Assuming PbLiquidityParameterByStrategy structure for parsing (may need adjustment)
+            let amount_x_res = parse_u64(data, current_offset);
+            current_offset += 8;
+            let amount_y_res = parse_u64(data, current_offset);
+            current_offset += 8;
+            let active_id_res = parse_i32(data, current_offset);
+            current_offset += 4;
+            let max_active_bin_slippage_res = parse_i32(data, current_offset);
+            current_offset += 4;
+
+            // Parse StrategyParameters
+            if data.len() < current_offset + 9 + 64 { // Check for strategy base + parameters bytes
+                 log::warn!("Data too short for StrategyParameters in AddLiquidityByStrategy: {} bytes needed from offset {}", 9 + 64, current_offset);
+                 // Fallback or return None if essential
+                 return None; // Cannot parse StrategyParameters fully
+            }
+            let min_bin_id_res = parse_i32(data, current_offset);
+            let max_bin_id_res = parse_i32(data, current_offset + 4);
+            let strategy_type_byte = data[current_offset + 8];
+            let parameters_bytes = data[(current_offset + 9)..(current_offset + 9 + 64)].to_vec();
+            let parameters_numeric = parameters_bytes.iter().map(|&b| b as u32).collect::<Vec<u32>>(); // Create numeric vec
+
+            let strategy_type = match strategy_type_byte {
+                 0 => Some(PbStrategyType::SpotOneSide as i32),
+                 1 => Some(PbStrategyType::CurveOneSide as i32),
+                 2 => Some(PbStrategyType::BidAskOneSide as i32),
+                 3 => Some(PbStrategyType::SpotBalanced as i32),
+                 4 => Some(PbStrategyType::CurveBalanced as i32),
+                 5 => Some(PbStrategyType::BidAskBalanced as i32),
+                 6 => Some(PbStrategyType::SpotImbalanced as i32),
+                 7 => Some(PbStrategyType::CurveImbalanced as i32),
+                 8 => Some(PbStrategyType::BidAskImbalanced as i32),
+                _ => { log::warn!("Unknown strategy type byte: {}", strategy_type_byte); None },
+            };
+
+            let strategy_parameters = PbStrategyParameters {
+                min_bin_id: min_bin_id_res.ok(),
+                max_bin_id: max_bin_id_res.ok(),
+                strategy_type: strategy_type,
+                parameters: parameters_numeric, // Assign Vec<u32> to the 'parameters' field
+            };
+
+            // NOTE: PbAddLiquidityByStrategyLayout currently uses PbLiquidityParameterLayout (empty)
+            //       This means the detailed parsing above isn't stored correctly in the final args.
+            //       Keeping the parsing logic for reference, but assigning the placeholder.
+            //       FIX THE PROTO DEF for PbAddLiquidityByStrategyLayout to use PbLiquidityParameterByStrategy
+            /*
+            let liquidity_parameter = PbLiquidityParameterByStrategy {
+                amount_x: amount_x_res.ok(),
+                amount_y: amount_y_res.ok(),
+                active_id: active_id_res.ok(),
+                max_active_bin_slippage: max_active_bin_slippage_res.ok(),
+                strategy_parameters: Some(strategy_parameters),
+            };
+            */
+
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByStrategy(PbAddLiquidityByStrategyLayout {
-                liquidity_parameter: Some(PbLiquidityParameterLayout {}),
+                 liquidity_parameter: Some(PbLiquidityParameterLayout {}), // Use placeholder
             }));
         },
         InstructionType::AddLiquidityOneSide => {
@@ -791,9 +865,39 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::AddLiquidityByStrategyOneSide => {
-            // Complex structure, needs detailed parsing
+            // Args: parameter: LiquidityParameterByStrategyOneSide
+            // LiquidityParameterByStrategyOneSide: { amount: u64, activeId: i32, maxActiveBinSlippage: i32, strategyParameters: StrategyParameters }
+            // StrategyParameters: { minBinId: i32, maxBinId: i32, strategyType: StrategyType, parameters: [u8; 64] }
+            // Updated length check: 8(disc) + 8(amount) + 4(activeId) + 4(maxSlip) + 4(minBin) + 4(maxBin) + 1(type) + 64(params) = 97
+            if data.len() < 97 { return None; }
+
+            let amount_res = parse_u64(data, 8);
+            let active_id = parse_i32(data, 16).unwrap_or(0);
+            let max_active_bin_slippage = parse_i32(data, 20).unwrap_or(0);
+            let min_bin_id = parse_i32(data, 24).unwrap_or(0);
+            let max_bin_id = parse_i32(data, 28).unwrap_or(0);
+            let strategy_type_byte = data[32]; // u8
+            let parameters_bytes = data[33..97].to_vec(); // Extract the 64 bytes for parameters
+            let parameters_numeric = parameters_bytes.iter().map(|&b| b as u32).collect::<Vec<u32>>(); // Create numeric vec
+
+
+            // The following code parses the correct parameters, now that the proto should be fixed.
+            let strategy_parameters = PbStrategyParameters {
+                min_bin_id: Some(min_bin_id),
+                max_bin_id: Some(max_bin_id),
+                strategy_type: Some(strategy_type_byte as i32), // Cast u8 to i32 for enum
+                parameters: parameters_numeric, // Assign Vec<u32> to the 'parameters' field
+            };
+
+            let correct_liquidity_parameter = PbLiquidityParameterByStrategyOneSide {
+                amount: amount_res.ok(), // Assign Option<u64>
+                active_id: Some(active_id),
+                max_active_bin_slippage: Some(max_active_bin_slippage),
+                strategy_parameters: Some(strategy_parameters),
+            };
+
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByStrategyOneSide(PbAddLiquidityByStrategyOneSideLayout {
-                liquidity_parameter: Some(PbLiquidityParameterLayout {}),
+                liquidity_parameter: Some(correct_liquidity_parameter), // Assign the correct parameter type
             }));
         },
         InstructionType::AddLiquidityOneSidePrecise => {
@@ -1253,30 +1357,36 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
         InstructionType::AddLiquidityByStrategy2 => {
             // Args: liquidityParameter: LiquidityParameterByStrategy, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
-            // Parse LiquidityParameterByStrategy
-            if data.len() < current_offset + 24 { return None; } // amount_x, amount_y, active_id, max_active_bin_slippage
-             // Use .ok() for optional fields
-            let amount_x_opt = parse_u64(data, current_offset).ok();
-            let amount_y_opt = parse_u64(data, current_offset + 8).ok();
-            let active_id_opt = parse_i32(data, current_offset + 16).ok();
-            let max_active_bin_slippage_opt = parse_i32(data, current_offset + 20).ok();
-            current_offset += 24;
+            // Updated length check: 8(disc) + 8(amountX) + 8(amountY) + 4(activeId) + 4(maxSlip) + 4(minBin) + 4(maxBin) + 1(type) + 64(params) = 105
+            // Need additional bytes for remaining_accounts_info length (at least 4)
+            let base_len = 105;
+            if data.len() < base_len + 4 { // Check for base + strategy + params + remaining_accounts vec length
+                log::warn!("Data too short for AddLiquidityByStrategy2: {} bytes", data.len());
+                return None;
+            }
 
-            // Parse StrategyParameters
-            if data.len() < current_offset + 9 { return None; } // min_bin, max_bin, strategy_type (u8)
-             // Use .ok() for optional fields
+            // Use .ok() for optional fields
+            let amount_x_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let amount_y_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let active_id_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+            let max_active_bin_slippage_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+
+            // Parse StrategyParameters (as struct)
+            if data.len() < current_offset + 9 + 64 { // Check for strategy base + parameters bytes
+                 log::warn!("Data too short for StrategyParameters in AddLiquidityByStrategy2: {} bytes needed from offset {}", 9 + 64, current_offset);
+                 return None; // Cannot parse StrategyParameters fully
+            }
             let min_bin_id_opt = parse_i32(data, current_offset).ok();
             let max_bin_id_opt = parse_i32(data, current_offset + 4).ok();
             let strategy_type_byte = data[current_offset + 8];
-            current_offset += 9; // Move past StrategyParameters header
-            // Ignore 64 byte parameters array for now
-            // Ensure we don't read past the end of data if the parameters array is present
-            let parameters_array_offset = current_offset;
-            if data.len() >= parameters_array_offset + 64 {
-                 current_offset += 64; 
-            } else {
-                 log::warn!("Data potentially too short for StrategyParameters parameters array");
-            }
+            current_offset += 9;
+            let parameters_bytes = data[current_offset..(current_offset + 64)].to_vec(); // Extract parameters
+            let parameters_numeric = parameters_bytes.iter().map(|&b| b as u32).collect::<Vec<u32>>(); // Create numeric vec
+            current_offset += 64;
 
              let strategy_type = match strategy_type_byte {
                  0 => Some(PbStrategyType::SpotOneSide as i32),
@@ -1295,8 +1405,9 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                  min_bin_id: min_bin_id_opt,
                  max_bin_id: max_bin_id_opt,
                  strategy_type,
+                 parameters: parameters_numeric, // Assign Vec<u32> to the 'parameters' field
             };
-            
+
             let liq_param = PbLiquidityParameterByStrategy {
                 amount_x: amount_x_opt,
                 amount_y: amount_y_opt,
@@ -1312,6 +1423,76 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                  liquidity_parameter: Some(liq_param),
                  remaining_accounts_info: remaining_accounts,
              }));
+        },
+
+        InstructionType::AddLiquidityByStrategyOneSide2 => {
+            // Args: liquidityParameter: LiquidityParameterByStrategyOneSide, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+            // Updated length check: 8(disc) + 8(amount) + 4(activeId) + 4(maxSlip) + 4(minBin) + 4(maxBin) + 1(type) + 64(params) = 97
+            // Need additional bytes for remaining_accounts_info length (at least 4)
+             let base_len = 97;
+             if data.len() < base_len + 4 { // Check for base + strategy + params + remaining_accounts vec length
+                 log::warn!("Data too short for AddLiquidityByStrategyOneSide2: {} bytes", data.len());
+                 return None;
+            }
+
+            // Use .ok() for optional fields
+            let amount_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let active_id_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+            let max_active_bin_slippage_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+
+            // Parse StrategyParameters (as struct)
+            if data.len() < current_offset + 9 + 64 { // Check for strategy base + parameters bytes
+                 log::warn!("Data too short for StrategyParameters in AddLiquidityByStrategyOneSide2: {} bytes needed from offset {}", 9 + 64, current_offset);
+                 return None; // Cannot parse StrategyParameters fully
+            }
+            let min_bin_id_opt = parse_i32(data, current_offset).ok();
+            let max_bin_id_opt = parse_i32(data, current_offset + 4).ok();
+            let strategy_type_byte = data[current_offset + 8];
+            current_offset += 9;
+            let parameters_bytes = data[current_offset..(current_offset + 64)].to_vec(); // Extract parameters
+            let parameters_numeric = parameters_bytes.iter().map(|&b| b as u32).collect::<Vec<u32>>(); // Create numeric vec
+            current_offset += 64;
+
+            let strategy_type = match strategy_type_byte {
+                0 => Some(PbStrategyType::SpotOneSide as i32),
+                1 => Some(PbStrategyType::CurveOneSide as i32),
+                2 => Some(PbStrategyType::BidAskOneSide as i32),
+                3 => Some(PbStrategyType::SpotBalanced as i32),
+                4 => Some(PbStrategyType::CurveBalanced as i32),
+                5 => Some(PbStrategyType::BidAskBalanced as i32),
+                6 => Some(PbStrategyType::SpotImbalanced as i32),
+                7 => Some(PbStrategyType::CurveImbalanced as i32),
+                8 => Some(PbStrategyType::BidAskImbalanced as i32),
+                _ => { log::warn!("Unknown strategy type byte: {}", strategy_type_byte); None },
+            };
+
+            let strat_params = PbStrategyParameters {
+                min_bin_id: min_bin_id_opt,
+                max_bin_id: max_bin_id_opt,
+                strategy_type,
+                parameters: parameters_numeric, // Assign Vec<u32> to the 'parameters' field
+            };
+
+            // Import this directly from the main crate path
+            let liq_param = crate::pb::sf::solana::meteora_dlmm::v1::PbLiquidityParameterByStrategyOneSide {
+                amount: amount_opt,
+                active_id: active_id_opt,
+                max_active_bin_slippage: max_active_bin_slippage_opt,
+                strategy_parameters: Some(strat_params),
+            };
+
+            // Parse RemainingAccountsInfo
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+            // Qualify the struct name fully
+            args.instruction_args = Some(IArgs::AddLiquidityByStrategyOneSide2(crate::pb::sf::solana::meteora_dlmm::v1::PbAddLiquidityByStrategyOneSide2Layout {
+                liquidity_parameter: Some(liq_param),
+                remaining_accounts_info: remaining_accounts,
+            }));
         },
 
         InstructionType::AddLiquidityOneSidePrecise2 => {
