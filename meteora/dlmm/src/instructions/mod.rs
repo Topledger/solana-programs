@@ -1566,40 +1566,88 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
                     start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
                     end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
                     amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
-                    amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
-                    swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
-                    fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
-                    protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
-                    fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
-                    host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
+                    amount_out: Some(if event_data.len() >= 88 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
+                    swap_for_y: Some(if event_data.len() >= 89 { event_data[88] != 0 } else { false }),
+                    fee: Some(if event_data.len() >= 97 { parse_u64(event_data, 89).unwrap_or(0) } else { 0 }),
+                    protocol_fee: Some(if event_data.len() >= 105 { parse_u64(event_data, 97).unwrap_or(0) } else { 0 }),
+                    fee_bps: if event_data.len() >= 121 { parse_u128(event_data, 105).unwrap_or(0).to_string() } else { "0".to_string() },
+                    host_fee: Some(if event_data.len() >= 129 { parse_u64(event_data, 121).unwrap_or(0) } else { 0 }),
                 }
             );
             event_wrapper.event_fields = Some(fields);
         },
         
         "AddLiquidity" => {
-            let amounts = Vec::new(); // Add logic later if needed
+            // Calculate the offset for amounts (after lb_pair, from, position: 3*32 = 96)
+            let amounts_offset = 96;
+            let mut amounts = Vec::with_capacity(2);
+            if event_data.len() >= amounts_offset + 16 { // Check if data is long enough for two u64
+                if let Ok(amount0) = parse_u64(event_data, amounts_offset) {
+                    amounts.push(amount0);
+                } else {
+                    log::warn!("Failed to parse amount[0] for AddLiquidity event");
+                    amounts.push(0); // Default value
+                }
+                if let Ok(amount1) = parse_u64(event_data, amounts_offset + 8) {
+                    amounts.push(amount1);
+                } else {
+                    log::warn!("Failed to parse amount[1] for AddLiquidity event");
+                    amounts.push(0); // Default value
+                }
+            } else {
+                log::warn!("Event data too short for AddLiquidity amounts: len={}", event_data.len());
+                amounts.push(0); // Default values if data is too short
+                amounts.push(0);
+            }
+            
+            // Calculate offset for active_bin_id (after amounts: 96 + 16 = 112)
+            let active_bin_id_offset = 112;
+
             let fields = pb_event_log_wrapper::EventFields::AddLiquidityLogFields(
                 crate::pb::sf::solana::meteora_dlmm::v1::PbAddLiquidityLogFields {
                     lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
                     from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
                     position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                    amounts: amounts, // Keep as potentially empty vec
-                    active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
+                    amounts: amounts, // Use the parsed amounts
+                    active_bin_id: Some(if event_data.len() >= active_bin_id_offset + 4 { parse_i32(event_data, active_bin_id_offset).unwrap_or(0) } else { 0 }),
                 }
             );
             event_wrapper.event_fields = Some(fields);
         },
         
         "RemoveLiquidity" => {
-            let amounts = Vec::new(); // Add logic later if needed
+            // Calculate the offset for amounts (after lb_pair, from, position: 3*32 = 96)
+            let amounts_offset = 96;
+            let mut amounts = Vec::with_capacity(2);
+            if event_data.len() >= amounts_offset + 16 { // Check if data is long enough for two u64
+                if let Ok(amount0) = parse_u64(event_data, amounts_offset) {
+                    amounts.push(amount0);
+                } else {
+                    log::warn!("Failed to parse amount[0] for RemoveLiquidity event");
+                    amounts.push(0); // Default value
+                }
+                if let Ok(amount1) = parse_u64(event_data, amounts_offset + 8) {
+                    amounts.push(amount1);
+                } else {
+                    log::warn!("Failed to parse amount[1] for RemoveLiquidity event");
+                    amounts.push(0); // Default value
+                }
+            } else {
+                log::warn!("Event data too short for RemoveLiquidity amounts: len={}", event_data.len());
+                amounts.push(0); // Default values if data is too short
+                amounts.push(0);
+            }
+            
+             // Calculate offset for active_bin_id (after amounts: 96 + 16 = 112)
+            let active_bin_id_offset = 112;
+
             let fields = pb_event_log_wrapper::EventFields::RemoveLiquidityLogFields(
                 crate::pb::sf::solana::meteora_dlmm::v1::PbRemoveLiquidityLogFields {
                     lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
                     from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
                     position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                    amounts: amounts, // Keep as potentially empty vec
-                    active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
+                    amounts: amounts, // Use the parsed amounts
+                    active_bin_id: Some(if event_data.len() >= active_bin_id_offset + 4 { parse_i32(event_data, active_bin_id_offset).unwrap_or(0) } else { 0 }),
                 }
             );
             event_wrapper.event_fields = Some(fields);
@@ -1870,149 +1918,6 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
         }
     }
 
-    // Add handlers for V2 events that were recognized by compute_event_discriminator
-    // but aren't in the main match statement yet
-    if event_wrapper.event_fields.is_none() {
-        match event_name.as_str() {
-            // V2 Events
-            "ClaimFee2" => {
-                let fields = pb_event_log_wrapper::EventFields::ClaimFeeLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbClaimFeeLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                        owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                        fee_x: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
-                        fee_y: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: ClaimFee2");
-            },
-            
-            "ClaimReward2" => {
-                let fields = pb_event_log_wrapper::EventFields::ClaimRewardLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbClaimRewardLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        position: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                        owner: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                        reward_index: Some(if event_data.len() >= 104 { parse_i64(event_data, 96).unwrap_or(0) } else { 0 }),
-                        total_reward: Some(if event_data.len() >= 112 { parse_i64(event_data, 104).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: ClaimReward2");
-            },
-            
-            "Swap2" => {
-                let fields = pb_event_log_wrapper::EventFields::SwapLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbSwapLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                        start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
-                        end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
-                        amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
-                        amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
-                        swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
-                        fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
-                        protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
-                        fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
-                        host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: Swap2");
-            },
-            
-            "SwapExactOut2" | "SwapWithPriceImpact2" => {
-                let fields = pb_event_log_wrapper::EventFields::SwapLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbSwapLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                        start_bin_id: Some(if event_data.len() >= 68 { parse_i32(event_data, 64).unwrap_or(0) } else { 0 }),
-                        end_bin_id: Some(if event_data.len() >= 72 { parse_i32(event_data, 68).unwrap_or(0) } else { 0 }),
-                        amount_in: Some(if event_data.len() >= 80 { parse_u64(event_data, 72).unwrap_or(0) } else { 0 }),
-                        amount_out: Some(if event_data.len() >= 84 { parse_u64(event_data, 80).unwrap_or(0) } else { 0 }),
-                        swap_for_y: Some(if event_data.len() >= 85 { event_data[84] != 0 } else { false }),
-                        fee: Some(if event_data.len() >= 93 { parse_u64(event_data, 85).unwrap_or(0) } else { 0 }),
-                        protocol_fee: Some(if event_data.len() >= 101 { parse_u64(event_data, 93).unwrap_or(0) } else { 0 }),
-                        fee_bps: if event_data.len() >= 105 { parse_u32(event_data, 101).unwrap_or(0).to_string() } else { "0".to_string() },
-                        host_fee: Some(if event_data.len() >= 113 { parse_u64(event_data, 105).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: {}", event_name);
-            },
-            
-            "AddLiquidity2" | "AddLiquidityByStrategy2" | "AddLiquidityOneSidePrecise2" => {
-                let amounts = Vec::new(); // Add logic later if needed
-                let fields = pb_event_log_wrapper::EventFields::AddLiquidityLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbAddLiquidityLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                        position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                        amounts: amounts, // Keep as potentially empty vec
-                        active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: {}", event_name);
-            },
-            
-            "RemoveLiquidity2" | "RemoveLiquidityByRange2" => {
-                let amounts = Vec::new(); // Add logic later if needed
-                let fields = pb_event_log_wrapper::EventFields::RemoveLiquidityLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbRemoveLiquidityLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        from: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                        position: if event_data.len() >= 96 { bytes_to_pubkey_str(event_data, 64).unwrap_or_default() } else { "".to_string() },
-                        amounts: amounts, // Keep as potentially empty vec
-                        active_bin_id: Some(if event_data.len() >= 100 { parse_i32(event_data, 96).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: {}", event_name);
-            },
-            
-            "ClosePosition2" | "ClosePositionIfEmpty" => {
-                let fields = pb_event_log_wrapper::EventFields::PositionCloseLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbPositionCloseLogFields {
-                        position: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        owner: if event_data.len() >= 64 { bytes_to_pubkey_str(event_data, 32).unwrap_or_default() } else { "".to_string() },
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: {}", event_name);
-            },
-            
-            "UpdateFeesAndRewards" => {
-                let fields = pb_event_log_wrapper::EventFields::FeeParameterUpdateLogFields(
-                    crate::pb::sf::solana::meteora_dlmm::v1::PbFeeParameterUpdateLogFields {
-                        lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                        protocol_share: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                        base_factor: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
-                    }
-                );
-                event_wrapper.event_fields = Some(fields);
-                log::info!("Processed V2 event: UpdateFeesAndRewards");
-            },
-            
-            "SetRewardEmissions" => {
-                // If we have a proto message type for this, use it
-                // For now, just log the event
-                log::info!("Recognized SetRewardEmissions event, but no specific handler implemented yet");
-            },
-            
-            "TransferPositionOwner" => {
-                // If we have a proto message type for this, use it
-                // For now, just log the event
-                log::info!("Recognized TransferPositionOwner event, but no specific handler implemented yet");
-            },
-            
-            _ => {
-                // No additional handler found for this event type
-            }
-        }
-    }
 
     // Log that we identified an event only if fields were set
     if event_wrapper.event_fields.is_some() {
