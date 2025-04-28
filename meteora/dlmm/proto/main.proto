@@ -462,7 +462,7 @@ message PbMigratePositionLayout {}
 message PbMigrateBinArrayLayout {}
 message PbUpdateFeesAndRewardsLayout {}
 message PbSetLockReleaseSlotLayout { 
-  optional int64 new_lock_release_slot = 1;
+  optional uint64 new_lock_release_slot = 1;
 }
 message PbSetActivationSlotLayout { 
   optional int64 activation_slot = 1;
@@ -472,7 +472,7 @@ message PbSetMaxSwappedAmountLayout {
   optional uint64 max_swapped_amount = 2; // Changed to uint64
 }
 message PbSetPreActivationDurationLayout { 
-  optional int64 pre_activation_duration = 1; // Assuming u64 maps to int64 (check Rust type)
+  optional uint64 pre_activation_duration = 1; // Changed to uint64
 }
 message PbSetPreActivationSwapAddressLayout { 
   optional string pre_activation_swap_address = 1;

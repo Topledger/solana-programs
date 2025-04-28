@@ -794,8 +794,8 @@ pub struct PbMigrateBinArrayLayout {}
 pub struct PbUpdateFeesAndRewardsLayout {}
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetLockReleaseSlotLayout {
-    #[prost(int64, optional, tag = "1")]
-    pub new_lock_release_slot: ::core::option::Option<i64>,
+    #[prost(uint64, optional, tag = "1")]
+    pub new_lock_release_slot: ::core::option::Option<u64>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetActivationSlotLayout {
@@ -813,9 +813,9 @@ pub struct PbSetMaxSwappedAmountLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetPreActivationDurationLayout {
-    /// Assuming u64 maps to int64 (check Rust type)
-    #[prost(int64, optional, tag = "1")]
-    pub pre_activation_duration: ::core::option::Option<i64>,
+    /// Changed to uint64
+    #[prost(uint64, optional, tag = "1")]
+    pub pre_activation_duration: ::core::option::Option<u64>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbSetPreActivationSwapAddressLayout {

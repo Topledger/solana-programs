@@ -678,9 +678,12 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::SetPreActivationDuration => {
-            if data.len() < 16 { return None; }
+            // Args: preActivationDuration (u64)
+            if data.len() < 16 { return None; } // 8 bytes disc + 8 bytes u64
+            let pre_activation_duration_opt = parse_u64(data, 8).ok();
+
             args.instruction_args = Some(instruction_args::InstructionArgs::SetPreActivationDuration(PbSetPreActivationDurationLayout {
-                pre_activation_duration: Some(parse_i64(data, 8).unwrap_or(0)),
+                pre_activation_duration: pre_activation_duration_opt,
             }));
         },
         InstructionType::SetPreActivationSwapAddress => {
@@ -690,9 +693,12 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::SetLockReleaseSlot => {
-            if data.len() < 16 { return None; }
+            // Args: newLockReleaseSlot (u64)
+            if data.len() < 16 { return None; } // 8 bytes disc + 8 bytes u64
+            let new_lock_release_slot_opt = parse_u64(data, 8).ok();
+
             args.instruction_args = Some(instruction_args::InstructionArgs::SetLockReleaseSlot(PbSetLockReleaseSlotLayout {
-                new_lock_release_slot: Some(parse_i64(data, 8).unwrap_or(0)),
+                new_lock_release_slot: new_lock_release_slot_opt,
             }));
         },
         InstructionType::WithdrawProtocolFee => {
