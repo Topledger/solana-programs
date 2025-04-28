@@ -182,7 +182,7 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 1, "position");
             assign_if_exists(&mut role_by_index, 2, "binArrayLower");
             assign_if_exists(&mut role_by_index, 3, "binArrayUpper");
-            assign_if_exists(&mut role_by_index, 4, "owner");
+            assign_if_exists(&mut role_by_index, 4, "sender");
             assign_if_exists(&mut role_by_index, 5, "rewardVault");
             assign_if_exists(&mut role_by_index, 6, "rewardMint");
             assign_if_exists(&mut role_by_index, 7, "userTokenAccount");
@@ -309,7 +309,7 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 1, "position");
             assign_if_exists(&mut role_by_index, 2, "binArrayLower");
             assign_if_exists(&mut role_by_index, 3, "binArrayUpper");
-            assign_if_exists(&mut role_by_index, 4, "owner");
+            assign_if_exists(&mut role_by_index, 4, "sender");
             assign_if_exists(&mut role_by_index, 5, "rewardVault");
             assign_if_exists(&mut role_by_index, 6, "rewardMint");
             assign_if_exists(&mut role_by_index, 7, "userTokenAccount");
@@ -478,6 +478,14 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 3, "toBinArray");
             assign_if_exists(&mut role_by_index, 4, "eventAuthority");
             assign_if_exists(&mut role_by_index, 5, "program");
+        },
+        
+        InstructionType::UpdateFeesAndRewards => {
+            assign_if_exists(&mut role_by_index, 0, "position");
+            assign_if_exists(&mut role_by_index, 1, "lbPair");
+            assign_if_exists(&mut role_by_index, 2, "binArrayLower");
+            assign_if_exists(&mut role_by_index, 3, "binArrayUpper");
+            assign_if_exists(&mut role_by_index, 4, "owner");
         },
         
         // Add more instruction types as needed

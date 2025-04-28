@@ -79,8 +79,8 @@ message InstructionArgs {
     PbSwapRouterBaseInLayout swap_router_base_in = 6;
     PbInitializeRewardLayout initialize_reward = 7;
     PbSetRewardEmissionsLayout set_reward_emissions = 8;
-    PbCollectRewardLayout collect_reward = 9;
-    PbCollectFeesLayout collect_fees = 10;
+    PbClaimRewardLayout claim_reward = 9;
+    PbClaimFeesLayout claim_fees = 10;
     PbTransferPositionOwnerLayout transfer_position_owner = 11;
     PbUpdateFeesLayout update_fees = 12;
     PbAddLiquidityLayout add_liquidity = 13; // Used for legacy AddLiquidity
@@ -242,11 +242,11 @@ message PbSetRewardEmissionsLayout {
   uint64 end_time = 4;
 }
 
-message PbCollectRewardLayout {
-  uint32 reward_index = 1;
+message PbClaimRewardLayout {
+  optional uint64 reward_index = 1;
 }
 
-message PbCollectFeesLayout {}
+message PbClaimFeesLayout {}
 
 message PbTransferPositionOwnerLayout {
   string new_owner = 1;

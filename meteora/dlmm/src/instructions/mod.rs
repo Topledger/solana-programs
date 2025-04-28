@@ -16,7 +16,7 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbInitializePositionLayout, PbInitializePositionPdaLayout, PbUpdatePositionOperatorLayout, 
     PbSwapWithPriceImpactLayout, PbSwapExactOutLayout, PbWithdrawProtocolFeeLayout, PbInitializeRewardLayout,
     PbSetRewardEmissionsLayout, PbFundRewardLayout, PbUpdateRewardFunderLayout, PbUpdateRewardDurationLayout,
-    PbCollectRewardLayout, PbCollectFeesLayout, PbClosePositionLayout, PbRemoveAllLiquidityLayout,
+    PbClaimRewardLayout, PbClaimFeesLayout, PbClosePositionLayout, PbRemoveAllLiquidityLayout,
     PbTransferPositionOwnerLayout, PbRemoveLiquidityByRangeLayout, PbAddLiquidityOneSidePreciseLayout,
     PbGoToABinLayout, PbWithdrawIneligibleRewardLayout, PbUpdateFeesAndRewardsLayout, PbEventLogWrapper,
     pb_event_log_wrapper, PbLiquidityParameterLayout, PbInitializeLbPairLayout, PbInitializePermissionLbPairLayout,
@@ -44,7 +44,7 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbClosePosition2Layout, PbUpdateFeesAndReward2Layout, 
     PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout,
     PbInitPermissionPairIx,
-    PbLiquidityParameterByStrategyOneSide,
+    PbLiquidityParameterByStrategyOneSide, PbClaimReward2Layout
 };
 
 // For convenience, alias the instruction args enum
@@ -978,12 +978,11 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             args.instruction_args = Some(instruction_args::InstructionArgs::RemoveLiquiditySingleSide(PbRemoveLiquiditySingleSideLayout {}));
         },
         InstructionType::ClaimLiquidity => {
-            // No arguments needed
             args.instruction_args = Some(instruction_args::InstructionArgs::ClaimLiquidity(PbClaimLiquidityLayout {}));
         },
         InstructionType::ClaimFee => {
-            // No arguments needed
-            args.instruction_args = Some(instruction_args::InstructionArgs::CollectFees(PbCollectFeesLayout {}));
+            // No arguments needed for V1 ClaimFee, but assign the empty struct to ensure "args" key appears.
+            args.instruction_args = Some(instruction_args::InstructionArgs::ClaimFees(PbClaimFeesLayout {}));
         },
 
         // Trading Operations
@@ -1106,12 +1105,38 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::ClaimReward => {
-            if data.len() < 12 { return None; }
+            if data.len() < 16 { return None; } // 8 bytes disc + 8 bytes u64
             
-            args.instruction_args = Some(instruction_args::InstructionArgs::CollectReward(PbCollectRewardLayout {
-                reward_index: parse_u32(data, 8).unwrap_or(0),
+            args.instruction_args = Some(instruction_args::InstructionArgs::ClaimReward(PbClaimRewardLayout {
+                reward_index: Some(parse_u64(data, 8).unwrap_or(0)), // Use u64 parser
             }));
         },
+
+        InstructionType::ClaimReward2 => {
+            // Args: rewardIndex: u64, minBinId: i32, maxBinId: i32, remainingAccountsInfo: RemainingAccountsInfo
+            let mut current_offset = 8;
+            if data.len() < current_offset + 16 { // Need 8 for u64, 4 for i32, 4 for i32
+                log::warn!("Data too short for ClaimReward2 base args: {} bytes", data.len());
+                return None;
+            }
+
+            let reward_index_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let min_bin_id_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+            let max_bin_id_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+
+            args.instruction_args = Some(IArgs::ClaimReward2(PbClaimReward2Layout {
+                reward_index: reward_index_opt, // Assign the Option<u64> directly
+                min_bin_id: min_bin_id_opt,
+                max_bin_id: max_bin_id_opt,
+                remaining_accounts_info: remaining_accounts,
+            }));
+        },
+        
         InstructionType::UpdateRewardFunder => {
             if data.len() < 48 { return None; }
             

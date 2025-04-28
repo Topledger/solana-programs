@@ -147,9 +147,9 @@ pub mod instruction_args {
         #[prost(message, tag = "8")]
         SetRewardEmissions(super::PbSetRewardEmissionsLayout),
         #[prost(message, tag = "9")]
-        CollectReward(super::PbCollectRewardLayout),
+        ClaimReward(super::PbClaimRewardLayout),
         #[prost(message, tag = "10")]
-        CollectFees(super::PbCollectFeesLayout),
+        ClaimFees(super::PbClaimFeesLayout),
         #[prost(message, tag = "11")]
         TransferPositionOwner(super::PbTransferPositionOwnerLayout),
         #[prost(message, tag = "12")]
@@ -433,12 +433,12 @@ pub struct PbSetRewardEmissionsLayout {
     pub end_time: u64,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
-pub struct PbCollectRewardLayout {
-    #[prost(uint32, tag = "1")]
-    pub reward_index: u32,
+pub struct PbClaimRewardLayout {
+    #[prost(uint64, optional, tag = "1")]
+    pub reward_index: ::core::option::Option<u64>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
-pub struct PbCollectFeesLayout {}
+pub struct PbClaimFeesLayout {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbTransferPositionOwnerLayout {
     #[prost(string, tag = "1")]
