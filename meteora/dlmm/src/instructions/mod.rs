@@ -893,42 +893,28 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             // Args: parameter: AddLiquiditySingleSidePreciseParameter
             // AddLiquiditySingleSidePreciseParameter: { bins: Vec<CompressedBinDepositAmount>, decompressMultiplier: u64 }
             // CompressedBinDepositAmount: { binId: i32, amount: u32 }
-            let mut current_offset = 8;
-            
-            // Parse decompress_multiplier from data
-            if data.len() < current_offset + 8 { return None; } 
-            let decompress_multiplier = parse_u64(data, current_offset).unwrap_or(0);
-            current_offset += 8;
-            
-            // Parse the bins array (Vec<CompressedBinDepositAmount>)
-            let mut bins = Vec::new();
-            if data.len() >= current_offset + 4 { // Check for vec length (u32)
-                if let Ok(vec_len) = parse_u32(data, current_offset) {
-                    current_offset += 4;
-                    for _ in 0..vec_len {
-                        if data.len() < current_offset + 8 { break; } // 4 bytes bin_id + 4 bytes amount (u32)
-                        let bin_id_res = parse_i32(data, current_offset);
-                        let amount_res = parse_u32(data, current_offset + 4); // Parse as u32
-                        if let (Ok(bin_id), Ok(amount)) = (bin_id_res, amount_res) {
-                            bins.push(PbCompressedBinDepositAmountLayout {
-                                bin_id: if bin_id == 0 { None } else { Some(bin_id) },
-                                amount: if amount == 0 { None } else { Some(amount) }, // Assign directly as u32
-                            });
-                        } else {
-                             log::warn!("Failed to parse CompressedBinDepositAmount element in AddLiquidityOneSidePrecise");
-                        }
-                        current_offset += 8; // Increment by correct size (i32 + u32)
-                    }
-                } else {
-                    log::warn!("Failed to parse Vec<CompressedBinDepositAmount> length in AddLiquidityOneSidePrecise");
-                }
-            }
-            
+
+            // Corrected Parsing Order:
+            let mut current_offset = 8; // Start after discriminator
+
+            // 1. Parse the bins array first
+            let (bins, next_offset_after_bins) = parse_compressed_bin_deposit_vec(data, current_offset);
+            current_offset = next_offset_after_bins;
+
+            // 2. Parse decompress_multiplier AFTER the bins array
+            let decompress_multiplier_opt = if data.len() >= current_offset + 8 {
+                parse_u64(data, current_offset).ok()
+            } else {
+                log::warn!("Data too short to parse decompress_multiplier for AddLiquidityOneSidePrecise");
+                None
+            };
+            // current_offset += 8; // Update offset if more fields followed
+
             log::debug!("Parsed {} bin deposit amounts for AddLiquidityOneSidePrecise", bins.len());
-            
+
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityOneSidePrecise(PbAddLiquidityOneSidePreciseLayout {
                 bins,
-                decompress_multiplier: if decompress_multiplier == 0 { None } else { Some(decompress_multiplier) },
+                decompress_multiplier: decompress_multiplier_opt, // Assign the Option<u64>
             }));
         },
         InstructionType::RemoveLiquidity => {
@@ -2321,7 +2307,7 @@ fn parse_compressed_bin_deposit_vec(data: &[u8], start_offset: usize) -> (Vec<Pb
              if let (Ok(bin_id), Ok(amount)) = (bin_id_res, amount_res) {
                  results.push(PbCompressedBinDepositAmountLayout { // Correct struct name
                      bin_id: if bin_id == 0 { None } else { Some(bin_id) },
-                     amount: if amount == 0 { None } else { Some(amount) },
+                     amount: Some(amount), // Always include amount
                  });
             } else {
                  log::warn!("Failed to parse CompressedBinDepositAmount element");
