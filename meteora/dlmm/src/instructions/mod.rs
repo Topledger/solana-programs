@@ -714,10 +714,23 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::WithdrawProtocolFee => {
-            if data.len() < 24 { return None; }
+            // Args: amountX (u64), amountY (u64), remainingAccountsInfo (Optional<...>) 
+            let mut current_offset = 8;
+            // Check length for base args: 8 disc + 8 amountX + 8 amountY = 24
+            if data.len() < 24 { return None; } 
+            
+            let amount_x_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let amount_y_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+
+            // Parse the optional RemainingAccountsInfo
+            let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+            
             args.instruction_args = Some(instruction_args::InstructionArgs::WithdrawProtocolFee(PbWithdrawProtocolFeeLayout {
-                amount_x: Some(parse_u64(data, 8).unwrap_or(0)),
-                amount_y: Some(parse_u64(data, 16).unwrap_or(0)),
+                amount_x: amount_x_opt,
+                amount_y: amount_y_opt,
+                remaining_accounts_info: remaining_accounts, // Assign parsed info
             }));
         },
         InstructionType::InitializeCustomizablePermissionlessLbPair => {

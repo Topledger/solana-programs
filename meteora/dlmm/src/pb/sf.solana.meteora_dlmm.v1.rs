@@ -640,12 +640,14 @@ pub struct PbUpdatePositionOperatorLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbClaimLiquidityLayout {}
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbWithdrawProtocolFeeLayout {
     #[prost(uint64, optional, tag = "1")]
     pub amount_x: ::core::option::Option<u64>,
     #[prost(uint64, optional, tag = "2")]
     pub amount_y: ::core::option::Option<u64>,
+    #[prost(message, optional, tag = "3")]
+    pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbUpdateFeeParametersLayout {

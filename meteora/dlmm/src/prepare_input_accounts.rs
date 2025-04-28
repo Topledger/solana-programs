@@ -550,6 +550,27 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 11, "program");
         },
         
+        InstructionType::WithdrawProtocolFee => {
+            // Based on V2 IDL (12 accounts)
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "reserveX");
+            assign_if_exists(&mut role_by_index, 2, "reserveY");
+            assign_if_exists(&mut role_by_index, 3, "tokenXMint");
+            assign_if_exists(&mut role_by_index, 4, "tokenYMint");
+            assign_if_exists(&mut role_by_index, 5, "receiverTokenX");
+            assign_if_exists(&mut role_by_index, 6, "receiverTokenY");
+            assign_if_exists(&mut role_by_index, 7, "claimFeeOperator"); // Renamed from feeOwner
+            assign_if_exists(&mut role_by_index, 8, "operator"); // Added signer
+            assign_if_exists(&mut role_by_index, 9, "tokenXProgram"); // Index updated
+            assign_if_exists(&mut role_by_index, 10, "tokenYProgram"); // Index updated
+            assign_if_exists(&mut role_by_index, 11, "memoProgram"); // Added
+        },
+
+        InstructionType::UpdateFeeParameters => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            // ... existing code ...
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions

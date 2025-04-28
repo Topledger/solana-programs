@@ -392,6 +392,7 @@ message PbClaimLiquidityLayout {}
 message PbWithdrawProtocolFeeLayout { 
   optional uint64 amount_x = 1;
   optional uint64 amount_y = 2;
+  optional PbRemainingAccountsInfo remaining_accounts_info = 3;
 }
 message PbUpdateFeeParametersLayout { 
   // Fields moved from PbFeeParameterLayout
