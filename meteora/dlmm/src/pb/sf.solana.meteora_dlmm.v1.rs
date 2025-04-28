@@ -802,14 +802,14 @@ pub struct PbSetActivationSlotLayout {
     #[prost(int64, optional, tag = "1")]
     pub activation_slot: ::core::option::Option<i64>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetMaxSwappedAmountLayout {
-    /// Assuming u64 maps to int64 (check Rust type)
-    #[prost(int64, optional, tag = "1")]
-    pub swap_cap_deactivate_slot: ::core::option::Option<i64>,
-    /// Assuming u128 maps to string
-    #[prost(string, optional, tag = "2")]
-    pub max_swapped_amount: ::core::option::Option<::prost::alloc::string::String>,
+    /// Changed to uint64
+    #[prost(uint64, optional, tag = "1")]
+    pub swap_cap_deactivate_slot: ::core::option::Option<u64>,
+    /// Changed to uint64
+    #[prost(uint64, optional, tag = "2")]
+    pub max_swapped_amount: ::core::option::Option<u64>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetPreActivationDurationLayout {

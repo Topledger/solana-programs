@@ -468,8 +468,8 @@ message PbSetActivationSlotLayout {
   optional int64 activation_slot = 1;
 }
 message PbSetMaxSwappedAmountLayout { 
-  optional int64 swap_cap_deactivate_slot = 1; // Assuming u64 maps to int64 (check Rust type)
-  optional string max_swapped_amount = 2; // Assuming u128 maps to string
+  optional uint64 swap_cap_deactivate_slot = 1; // Changed to uint64
+  optional uint64 max_swapped_amount = 2; // Changed to uint64
 }
 message PbSetPreActivationDurationLayout { 
   optional int64 pre_activation_duration = 1; // Assuming u64 maps to int64 (check Rust type)

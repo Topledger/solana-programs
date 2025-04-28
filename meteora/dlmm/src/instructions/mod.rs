@@ -666,10 +666,14 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::SetMaxSwappedAmount => {
-            if data.len() < 32 { return None; }
+            // Args: swapCapDeactivateSlot (u64), maxSwappedAmount (u64)
+            if data.len() < 24 { return None; } // 8 bytes disc + 8 bytes u64 + 8 bytes u64
+            let swap_cap_deactivate_slot_opt = parse_u64(data, 8).ok();
+            let max_swapped_amount_opt = parse_u64(data, 16).ok();
+
             args.instruction_args = Some(instruction_args::InstructionArgs::SetMaxSwappedAmount(PbSetMaxSwappedAmountLayout {
-                swap_cap_deactivate_slot: Some(parse_i64(data, 8).unwrap_or(0)),
-                max_swapped_amount: Some(parse_u128(data, 16).unwrap_or(0).to_string()),
+                swap_cap_deactivate_slot: swap_cap_deactivate_slot_opt,
+                max_swapped_amount: max_swapped_amount_opt,
             }));
         },
         InstructionType::SetPreActivationDuration => {

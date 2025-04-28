@@ -488,6 +488,15 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 4, "owner");
         },
         
+        InstructionType::SetMaxSwappedAmount => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+        },
+
+        InstructionType::SetPreActivationDuration => {
+            // ... existing code ...
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions
