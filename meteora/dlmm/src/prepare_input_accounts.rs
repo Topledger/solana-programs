@@ -135,16 +135,27 @@ pub fn map_accounts(
         },
         
         // Position management
-        InstructionType::InitializePosition | 
+        InstructionType::InitializePosition => {
+            assign_if_exists(&mut role_by_index, 0, "payer");
+            assign_if_exists(&mut role_by_index, 2, "position");
+            assign_if_exists(&mut role_by_index, 3, "lbPair");
+            assign_if_exists(&mut role_by_index, 4, "owner");
+            assign_if_exists(&mut role_by_index, 5, "systemProgram");
+            assign_if_exists(&mut role_by_index, 6, "rent");
+            assign_if_exists(&mut role_by_index, 7, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 8, "program");
+        },
+    
         InstructionType::InitializePositionPda => {
             assign_if_exists(&mut role_by_index, 0, "payer");
-            assign_if_exists(&mut role_by_index, 1, "position");
-            assign_if_exists(&mut role_by_index, 2, "lbPair");
-            assign_if_exists(&mut role_by_index, 3, "owner");
-            assign_if_exists(&mut role_by_index, 4, "systemProgram");
-            assign_if_exists(&mut role_by_index, 5, "rent");
-            assign_if_exists(&mut role_by_index, 6, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 7, "program");
+            assign_if_exists(&mut role_by_index, 1, "base");
+            assign_if_exists(&mut role_by_index, 2, "position");
+            assign_if_exists(&mut role_by_index, 3, "lbPair");
+            assign_if_exists(&mut role_by_index, 4, "owner");
+            assign_if_exists(&mut role_by_index, 5, "systemProgram");
+            assign_if_exists(&mut role_by_index, 6, "rent");
+            assign_if_exists(&mut role_by_index, 7, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 8, "program");
         },
         
         InstructionType::ClosePosition => {
@@ -484,6 +495,13 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 2, "funder");
             assign_if_exists(&mut role_by_index, 3, "systemProgram");
             assign_if_exists(&mut role_by_index, 4, "rent");
+        },
+
+        InstructionType::InitializeBinArray => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "binArray");
+            assign_if_exists(&mut role_by_index, 2, "funder");
+            assign_if_exists(&mut role_by_index, 3, "systemProgram");
         },
 
         InstructionType::MigrateBinArray => {
