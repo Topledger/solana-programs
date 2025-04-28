@@ -384,7 +384,6 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 9, "program");
         },
 
-        InstructionType::RemoveLiquidity2 | 
         InstructionType::RemoveLiquidityByRange2 => {
             // Similar to V1 RemoveLiquidity variants
             assign_if_exists(&mut role_by_index, 0, "position");
@@ -402,6 +401,25 @@ pub fn map_accounts(
             // Token programs likely passed via RemainingAccountsInfo for transfer hooks
             assign_if_exists(&mut role_by_index, 12, "eventAuthority");
             assign_if_exists(&mut role_by_index, 13, "program");
+        },
+
+        InstructionType::RemoveLiquidity2 => {
+            // Similar to V1 RemoveLiquidity variants
+            assign_if_exists(&mut role_by_index, 0, "position");
+            assign_if_exists(&mut role_by_index, 1, "lbPair");
+            assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension"); // If applicable
+            assign_if_exists(&mut role_by_index, 3, "userTokenX");
+            assign_if_exists(&mut role_by_index, 4, "userTokenY");
+            assign_if_exists(&mut role_by_index, 5, "reserveX");
+            assign_if_exists(&mut role_by_index, 6, "reserveY");
+            assign_if_exists(&mut role_by_index, 7, "tokenXMint");
+            assign_if_exists(&mut role_by_index, 8, "tokenYMint");
+            assign_if_exists(&mut role_by_index, 9, "sender");
+            assign_if_exists(&mut role_by_index, 10, "tokenXProgram");
+            assign_if_exists(&mut role_by_index, 11, "tokenYProgram"); 
+            assign_if_exists(&mut role_by_index, 12, "memoProgram"); 
+            assign_if_exists(&mut role_by_index, 13, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 14, "program");
         },
 
         InstructionType::ClosePosition2 => {
