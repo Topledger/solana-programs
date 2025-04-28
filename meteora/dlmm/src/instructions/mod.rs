@@ -396,9 +396,9 @@ pub fn process_instruction(
     block_slot: u64,
     block_time: i64,
     tx_id: &str,
-    instruction_index: u32,
+    outer_instruction_index: u32, // Renamed: Represents the top-level instruction index
     is_inner_instruction: bool,
-    inner_instruction_index: Option<u32>,
+    actual_inner_index: Option<u32>, // Renamed: Represents the index within the inner block, if applicable
     signer_pubkey: Option<&str>,
     outer_program: Option<&str>,
 ) -> Option<Meta> {
@@ -473,9 +473,9 @@ pub fn process_instruction(
         block_slot,               // Not optional
         block_time,               // Not optional
         block_date,               // Not optional
-        instruction_index: Some(instruction_index),        // Wrap in Some
+        instruction_index: Some(outer_instruction_index), // This now correctly gets the outer index
         is_inner_instruction: Some(is_inner_instruction),     // Wrap in Some
-        inner_instruction_index: Some(inner_instruction_index.unwrap_or(0)), // Optional: Use default, wrap in Some()
+        inner_instruction_index: actual_inner_index, // This now correctly gets the inner index (already Option<u32>)
         signer: Some(signer_pubkey.map_or(String::new(), String::from)), // Optional: Use default, wrap in Some()
         outer_program: Some(outer_program.map_or(String::new(), String::from)), // Optional: Use default, wrap in Some()
         instruction_type: instruction_type_str.to_string(), // Not optional
@@ -929,80 +929,35 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::AddLiquidityOneSidePrecise => {
-            // Args: parameter: AddLiquiditySingleSidePreciseParameter
-            // AddLiquiditySingleSidePreciseParameter: { bins: Vec<CompressedBinDepositAmount>, decompressMultiplier: u64 }
-            // CompressedBinDepositAmount: { binId: i32, amount: u32 }
+            // Args: bins: Vec<CompressedBinDepositAmount>, decompressMultiplier: u64
+            let mut current_offset = 8;
+            let (bins, next_offset) = parse_compressed_bin_deposit_vec(data, current_offset);
+            current_offset = next_offset;
 
-            // Corrected Parsing Order:
-            let mut current_offset = 8; // Start after discriminator
+            if data.len() < current_offset + 8 { return None; } // decompress_multiplier (u64)
+            let decompress_multiplier_opt = parse_u64(data, current_offset).ok();
 
-            // 1. Parse the bins array first
-            let (bins, next_offset_after_bins) = parse_compressed_bin_deposit_vec(data, current_offset);
-            current_offset = next_offset_after_bins;
-
-            // 2. Parse decompress_multiplier AFTER the bins array
-            let decompress_multiplier_opt = if data.len() >= current_offset + 8 {
-                parse_u64(data, current_offset).ok()
-            } else {
-                log::warn!("Data too short to parse decompress_multiplier for AddLiquidityOneSidePrecise");
-                None
-            };
-            // current_offset += 8; // Update offset if more fields followed
-
-            log::debug!("Parsed {} bin deposit amounts for AddLiquidityOneSidePrecise", bins.len());
-
-            args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityOneSidePrecise(PbAddLiquidityOneSidePreciseLayout {
+            args.instruction_args = Some(IArgs::AddLiquidityOneSidePrecise(PbAddLiquidityOneSidePreciseLayout {
                 bins,
-                decompress_multiplier: decompress_multiplier_opt, // Assign the Option<u64>
+                decompress_multiplier: decompress_multiplier_opt,
             }));
         },
         InstructionType::RemoveLiquidity => {
-            if data.len() < 48 { return None; }
+            // Args: binLiquidityRemoval: Vec<BinLiquidityReduction>
+            let mut current_offset = 8; // Start after discriminator
             
-            let tick_lower_index = parse_i32(data, 8).unwrap_or(0);
-            let tick_upper_index = parse_i32(data, 12).unwrap_or(0);
-            let liquidity_amount = parse_u128(data, 16).unwrap_or(0).to_string();
-            let token_min_a = parse_u64(data, 32).unwrap_or(0);
-            let token_min_b = parse_u64(data, 40).unwrap_or(0);
-            
-            // Parse bin_liquidity_removal array if available
-            let mut bin_liquidity_removal = Vec::new();
-            
-            // Check if we have more data for bin_liquidity_removal array
-            if data.len() > 48 {
-                // First, there should be a byte indicating the length of the array
-                let removal_array_len = data[48] as usize;
-                let mut offset = 49; // Start from the next byte
-                
-                for _ in 0..removal_array_len {
-                    // Each removal should be at least a bytes vector, assume it follows a length-prefixed format
-                    if offset < data.len() {
-                        let element_len = data[offset] as usize;
-                        offset += 1;
-                        
-                        if offset + element_len <= data.len() {
-                            // Extract the bytes element
-                            let element_bytes = data[offset..(offset + element_len)].to_vec();
-                            bin_liquidity_removal.push(element_bytes);
-                            offset += element_len;
-                        } else {
-                            break; // Not enough data to parse this element
-                        }
-                    } else {
-                        break; // Not enough data for the next length byte
-                    }
-                }
+            // Check for vector length (at least 4 bytes)
+            if data.len() < current_offset + 4 { 
+                log::warn!("Data too short for RemoveLiquidity vector length: {} bytes", data.len());
+                return None; 
             }
-            
-            log::debug!("Parsed {} bin liquidity removal elements for RemoveLiquidity", bin_liquidity_removal.len());
-            
-            args.instruction_args = Some(instruction_args::InstructionArgs::RemoveLiquidity(PbRemoveLiquidityLayout {
-                tick_lower_index,
-                tick_upper_index,
-                liquidity_amount,
-                token_min_a,
-                token_min_b,
-                bin_liquidity_removal,
+
+            // Parse the vector of BinLiquidityReduction directly
+            let (reductions, _next_offset) = parse_bin_liquidity_reduction_vec(data, current_offset);
+
+            args.instruction_args = Some(IArgs::RemoveLiquidity(PbRemoveLiquidityLayout {
+                // Only include the parsed vector
+                bin_liquidity_removal: reductions,
             }));
         },
         InstructionType::RemoveAllLiquidity => {
@@ -2330,13 +2285,13 @@ fn parse_bin_liquidity_reduction_vec(data: &[u8], start_offset: usize) -> (Vec<P
             let bps_res = parse_u16(data, current_offset + 4);
             if let (Ok(bin_id), Ok(bps)) = (bin_id_res, bps_res) {
                  results.push(PbBinLiquidityReduction {
-                     bin_id: if bin_id == 0 { None } else { Some(bin_id) },
-                     bps_to_remove: if bps == 0 { None } else { Some(bps as u32) },
+                     bin_id: bin_id, // Assign directly, proto field is int32
+                     bps_to_remove: bps as u32, // Assign directly and cast, proto field is uint32
                  });
             } else {
                  log::warn!("Failed to parse BinLiquidityReduction element");
             }
-            current_offset += 6;
+            current_offset += 6; // Size of BinLiquidityReduction (i32 + u16)
         }
     } else {
          log::warn!("Failed to parse Vec<BinLiquidityReduction> length");
@@ -2353,18 +2308,19 @@ fn parse_compressed_bin_deposit_vec(data: &[u8], start_offset: usize) -> (Vec<Pb
     if let Ok(vec_len) = parse_u32(data, current_offset) {
         current_offset += 4;
         for _ in 0..vec_len {
-            if data.len() < current_offset + 8 { break; } // 4 bytes bin_id + 4 bytes amount (u32)
+            // Size of CompressedBinDepositAmount is i32 (4) + u128 (16) = 20 bytes
+            if data.len() < current_offset + 20 { break; } 
             let bin_id_res = parse_i32(data, current_offset);
-            let amount_res = parse_u32(data, current_offset + 4);
+            let amount_res = parse_u128(data, current_offset + 4); // Parse u128
              if let (Ok(bin_id), Ok(amount)) = (bin_id_res, amount_res) {
                  results.push(PbCompressedBinDepositAmountLayout { // Correct struct name
-                     bin_id: if bin_id == 0 { None } else { Some(bin_id) },
-                     amount: Some(amount), // Always include amount
+                     bin_id: bin_id, // Assign directly, proto field is int32
+                     amount_total: amount.to_string(), // Assign amount_total as string
                  });
             } else {
                  log::warn!("Failed to parse CompressedBinDepositAmount element");
             }
-            current_offset += 8;
+            current_offset += 20; // Update offset by correct size (4 + 16)
         }
     } else {
          log::warn!("Failed to parse Vec<CompressedBinDepositAmount> length");

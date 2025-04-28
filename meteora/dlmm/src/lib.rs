@@ -84,16 +84,16 @@ fn map_block(
             // Always process outer instructions regardless of program ID for now, 
             // filtering happens in process_instruction
             if let Some(meta) = instructions::process_instruction(
-                ix,
+                ix,                     // Outer instruction
                 &account_keys,
                 block_slot,
                 block_time,
                 &tx_id,
-                ix_index as u32,
-                false, // is_inner_instruction
-                None,  // inner_instruction_index
+                ix_index as u32,        // Pass outer index as outer_instruction_index
+                false,                  // is_inner_instruction
+                None,                   // actual_inner_index is None for outer
                 signer_opt.as_deref(),
-                None,  // outer_program is None for outer instructions
+                None,                   // outer_program is None for outer instructions
             ) {
                 processed_instructions.push(meta);
             }
@@ -104,9 +104,16 @@ fn map_block(
             for inner_ins in &meta.inner_instructions {
                 let outer_idx = inner_ins.index as usize;
                 
+                // Find the outer instruction corresponding to this inner instruction block
+                let outer_instruction_opt = message.instructions.get(outer_idx);
+                let outer_program_id_opt = outer_instruction_opt.and_then(|outer_ix| {
+                    let outer_program_idx = outer_ix.program_id_index as usize;
+                    account_keys.get(outer_program_idx).map(|s| s.as_str())
+                });
+
                 // Simplified approach for logging the outer transaction context
-                log::info!("Processing inner instructions for tx: {}, outer_idx: {}",
-                         tx_id, outer_idx);
+                log::info!("Processing inner instructions for tx: {}, outer_idx: {}, outer_program: {:?}",
+                         tx_id, outer_idx, outer_program_id_opt);
                 
                 for (idx, ins) in inner_ins.instructions.iter().enumerate() {
                     // Get program ID from account keys using program_id_index
@@ -133,16 +140,16 @@ fn map_block(
                     
                     // Process Meteora DLMM instruction or EventLog
                     if let Some(meta) = instructions::process_instruction(
-                        &compiled_inst,
+                        &compiled_inst,         // Inner instruction
                         &account_keys,
                         block_slot,
                         block_time,
                         &tx_id,
-                        idx as u32,
-                        true, // is_inner_instruction
-                        Some(outer_idx as u32),
+                        outer_idx as u32,       // Pass outer index as outer_instruction_index
+                        true,                   // is_inner_instruction
+                        Some(idx as u32),       // Pass inner index as actual_inner_index
                         signer_opt.as_deref(),
-                        None,
+                        outer_program_id_opt,   // Pass the outer program ID
                     ) {
                         processed_instructions.push(meta);
                     }

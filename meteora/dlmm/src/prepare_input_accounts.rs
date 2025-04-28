@@ -289,18 +289,18 @@ pub fn map_accounts(
             // Similar to V1 ClaimFee
             assign_if_exists(&mut role_by_index, 0, "lbPair");
             assign_if_exists(&mut role_by_index, 1, "position");
-            assign_if_exists(&mut role_by_index, 2, "binArrayLower");
-            assign_if_exists(&mut role_by_index, 3, "binArrayUpper");
-            assign_if_exists(&mut role_by_index, 4, "sender");
-            assign_if_exists(&mut role_by_index, 5, "reserveX");
-            assign_if_exists(&mut role_by_index, 6, "reserveY");
-            assign_if_exists(&mut role_by_index, 7, "userTokenX");
-            assign_if_exists(&mut role_by_index, 8, "userTokenY");
-            assign_if_exists(&mut role_by_index, 9, "tokenXMint");
-            assign_if_exists(&mut role_by_index, 10, "tokenYMint");
-            // Token programs likely passed via RemainingAccountsInfo for transfer hooks
-            assign_if_exists(&mut role_by_index, 11, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 12, "program");
+            assign_if_exists(&mut role_by_index, 2, "sender");
+            assign_if_exists(&mut role_by_index, 3, "reserveX");
+            assign_if_exists(&mut role_by_index, 4, "reserveY");
+            assign_if_exists(&mut role_by_index, 5, "userTokenX");
+            assign_if_exists(&mut role_by_index, 6, "userTokenY");
+            assign_if_exists(&mut role_by_index, 7, "tokenXMint");
+            assign_if_exists(&mut role_by_index, 8, "tokenYMint");
+            assign_if_exists(&mut role_by_index, 9, "tokenProgramX");
+            assign_if_exists(&mut role_by_index, 10, "tokenProgramY");
+            assign_if_exists(&mut role_by_index, 11, "memoProgram");
+            assign_if_exists(&mut role_by_index, 12, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 13, "program");
         },
 
         InstructionType::ClaimReward2 => {

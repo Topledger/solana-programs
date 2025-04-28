@@ -468,19 +468,8 @@ pub struct PbAddLiquidityLayout {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbRemoveLiquidityLayout {
-    #[prost(int32, tag = "1")]
-    pub tick_lower_index: i32,
-    #[prost(int32, tag = "2")]
-    pub tick_upper_index: i32,
-    #[prost(string, tag = "3")]
-    pub liquidity_amount: ::prost::alloc::string::String,
-    #[prost(uint64, tag = "4")]
-    pub token_min_a: u64,
-    #[prost(uint64, tag = "5")]
-    pub token_min_b: u64,
-    /// Assuming vec!\[\] in Rust maps to repeated bytes
-    #[prost(bytes = "vec", repeated, tag = "6")]
-    pub bin_liquidity_removal: ::prost::alloc::vec::Vec<::prost::alloc::vec::Vec<u8>>,
+    #[prost(message, repeated, tag = "1")]
+    pub bin_liquidity_removal: ::prost::alloc::vec::Vec<PbBinLiquidityReduction>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializeConfigLayout {
@@ -1440,24 +1429,24 @@ pub struct PbAddLiquiditySingleSidePreciseParameter2 {
 /// Corresponds to CompressedBinDepositAmount struct in IDL (Use Layout name)
 ///
 /// Keep Layout name
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbCompressedBinDepositAmountLayout {
-    #[prost(int32, optional, tag = "1")]
-    pub bin_id: ::core::option::Option<i32>,
-    /// u32 in IDL
-    #[prost(uint32, optional, tag = "2")]
-    pub amount: ::core::option::Option<u32>,
+    /// Assuming i32 in Rust
+    #[prost(int32, tag = "1")]
+    pub bin_id: i32,
+    /// u128 -> string
+    #[prost(string, tag = "2")]
+    pub amount_total: ::prost::alloc::string::String,
 }
-/// Corresponds to BinLiquidityReduction struct in IDL
+/// New message definition based on cStruct("binId" / Int32sl, "bpsToRemove" / Int16ul)
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbBinLiquidityReduction {
-    #[prost(int32, optional, tag = "1")]
-    pub bin_id: ::core::option::Option<i32>,
-    /// u16 in IDL
-    #[prost(uint32, optional, tag = "2")]
-    pub bps_to_remove: ::core::option::Option<u32>,
+    #[prost(int32, tag = "1")]
+    pub bin_id: i32,
+    /// Protobuf uses uint32 for u16
+    #[prost(uint32, tag = "2")]
+    pub bps_to_remove: u32,
 }
-/// Corresponds to LiquidityParameterByStrategyOneSide struct in IDL
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbLiquidityParameterByStrategyOneSide {
     #[prost(uint64, optional, tag = "1")]

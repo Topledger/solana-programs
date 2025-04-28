@@ -267,12 +267,7 @@ message PbAddLiquidityLayout {
 }
 
 message PbRemoveLiquidityLayout {
-  int32 tick_lower_index = 1;
-  int32 tick_upper_index = 2;
-  string liquidity_amount = 3;
-  uint64 token_min_a = 4;
-  uint64 token_min_b = 5;
-  repeated bytes bin_liquidity_removal = 6;  // Assuming vec![] in Rust maps to repeated bytes
+  repeated PbBinLiquidityReduction bin_liquidity_removal = 1;
 }
 
 message PbInitializeConfigLayout {
@@ -889,17 +884,16 @@ message PbAddLiquiditySingleSidePreciseParameter2 {
 
 // Corresponds to CompressedBinDepositAmount struct in IDL (Use Layout name)
 message PbCompressedBinDepositAmountLayout { // Keep Layout name
-  optional int32 bin_id = 1;
-  optional uint32 amount = 2; // u32 in IDL 
+  int32 bin_id = 1; // Assuming i32 in Rust
+  string amount_total = 2; // u128 -> string
 }
 
-// Corresponds to BinLiquidityReduction struct in IDL
+// New message definition based on cStruct("binId" / Int32sl, "bpsToRemove" / Int16ul)
 message PbBinLiquidityReduction {
-  optional int32 bin_id = 1;
-  optional uint32 bps_to_remove = 2; // u16 in IDL
+  int32 bin_id = 1;
+  uint32 bps_to_remove = 2; // Protobuf uses uint32 for u16
 }
 
-// Corresponds to LiquidityParameterByStrategyOneSide struct in IDL
 message PbLiquidityParameterByStrategyOneSide {
   optional uint64 amount = 1;
   optional int32 active_id = 2;
