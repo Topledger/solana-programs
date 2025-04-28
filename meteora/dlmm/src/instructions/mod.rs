@@ -664,10 +664,17 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::UpdateWhitelistedWallet => {
-            if data.len() < 42 { return None; }
+            // Args: idx (u8), wallet (PubKey)
+            // Check length: 8 (disc) + 1 (idx) + 32 (wallet) = 41 bytes
+            if data.len() < 41 { return None; } 
+            
+            let idx_res = parse_u8(data, 8); // Int8ul -> u8
+            let wallet_res = bytes_to_pubkey_str(data, 9); // Pubkey starts at offset 9 (8 + 1)
+
             args.instruction_args = Some(instruction_args::InstructionArgs::UpdateWhitelistedWallet(PbUpdateWhitelistedWalletLayout {
-                idx: Some(parse_i16(data, 8).unwrap_or(0) as i32),
-                wallet: Some(bytes_to_pubkey_str(data, 10).unwrap_or_default()),
+                // Proto field is i32, cast from u8
+                idx: idx_res.ok().map(|v| v as i32), 
+                wallet: wallet_res.ok(), // Assign Option<String>
             }));
         },
         InstructionType::IncreaseOracleLength => {
@@ -810,23 +817,32 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
 
         // Liquidity Operations
         InstructionType::AddLiquidity => {
-            if data.len() < 32 { return None; }
+            // Args: liquidityParameter: LiquidityParameterLayout
+            // LiquidityParameterLayout: amountX(u64), amountY(u64), binLiquidityDist(Vec<BinLiquidityDistributionLayout>)
+            // Offsets: disc(8), amountX(8), amountY(8), vecLen(4) -> 8+8+8+4 = 28 bytes minimum before vector data
+            let mut current_offset = 8;
+            if data.len() < 28 { 
+                log::warn!("Data too short for AddLiquidity base args: {} bytes, expected 28", data.len());
+                return None; 
+            }
             
-            let tick_lower_index = parse_i32(data, 8).unwrap_or(0);
-            let tick_upper_index = parse_i32(data, 12).unwrap_or(0);
-            let liquidity_amount = parse_u128(data, 16).unwrap_or(0).to_string();
-            let token_max_a = parse_u64(data, 32).unwrap_or(0);
-            let token_max_b = parse_u64(data, 40).unwrap_or(0);
-            
-            // Liquidity parameter would be bytes slice, skip for now
+            let amount_x_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let amount_y_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+
+            // Parse the vector
+            let (bin_dist_vec, _next_offset) = parse_bin_liquidity_distribution_vec(data, current_offset);
+
+            // Create the parameter struct
+            let liquidity_parameter = PbLiquidityParameter {
+                amount_x: amount_x_opt,
+                amount_y: amount_y_opt,
+                bin_liquidity_dist: bin_dist_vec,
+            };
             
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidity(PbAddLiquidityLayout {
-                tick_lower_index,
-                tick_upper_index,
-                liquidity_amount,
-                token_max_a,
-                token_max_b,
-                liquidity_parameter: None,
+                liquidity_parameter: Some(liquidity_parameter),
             }));
         },
         InstructionType::AddLiquidityByWeight => {
@@ -1810,6 +1826,10 @@ fn parse_u16(data: &[u8], offset: usize) -> Result<u16, &'static str> {
     if offset + 2 > data.len() { return Err(r#"Data too short for u16"#); }
     data[offset..offset+2].try_into().map(u16::from_le_bytes).map_err(|_| r#"Slice len mismatch for u16"#)
 }
+fn parse_u8(data: &[u8], offset: usize) -> Result<u8, &'static str> {
+    if offset + 1 > data.len() { return Err(r#"Data too short for u8"#); }
+    Ok(data[offset])
+}
 
 fn parse_event_wrapper<F, T>(
     event_data: &[u8],
@@ -2455,28 +2475,39 @@ fn parse_compressed_bin_deposit_vec(data: &[u8], start_offset: usize) -> (Vec<Pb
 fn parse_bin_liquidity_distribution_vec(data: &[u8], start_offset: usize) -> (Vec<PbBinLiquidityDistribution>, usize) {
     let mut results = Vec::new();
     let mut current_offset = start_offset;
-    if data.len() < current_offset + 4 { return (results, current_offset); } // Check for len
+    // Need 4 bytes for vector length
+    if data.len() < current_offset + 4 {
+        log::warn!("Data too short for Vec<BinLiquidityDistribution> length at offset {}", current_offset);
+        return (results, current_offset);
+    }
 
     if let Ok(vec_len) = parse_u32(data, current_offset) {
         current_offset += 4;
-        for _ in 0..vec_len {
-             if data.len() < current_offset + 8 { break; } // 4 bytes bin_id + 2 bytes dist_x + 2 bytes dist_y
+        log::debug!("Parsing Vec<BinLiquidityDistribution> with length: {}", vec_len);
+        for i in 0..vec_len {
+            // Each element: binId(i32, 4) + distX(u16, 2) + distY(u16, 2) = 8 bytes
+            if data.len() < current_offset + 8 {
+                log::warn!("Data too short for BinLiquidityDistribution element #{} at offset {}", i, current_offset);
+                break;
+            }
             let bin_id_res = parse_i32(data, current_offset);
             let dist_x_res = parse_u16(data, current_offset + 4);
             let dist_y_res = parse_u16(data, current_offset + 6);
-             if let (Ok(bin_id), Ok(dist_x), Ok(dist_y)) = (bin_id_res, dist_x_res, dist_y_res) {
-                 results.push(PbBinLiquidityDistribution {
-                     bin_id: if bin_id == 0 { None } else { Some(bin_id) },
-                     distribution_x: if dist_x == 0 { None } else { Some(dist_x as u32) },
-                     distribution_y: if dist_y == 0 { None } else { Some(dist_y as u32) },
-                 });
+
+            if let (Ok(bin_id), Ok(dist_x), Ok(dist_y)) = (bin_id_res, dist_x_res, dist_y_res) {
+                results.push(PbBinLiquidityDistribution {
+                    bin_id: Some(bin_id),
+                    distribution_x: Some(dist_x as u32), // Cast u16 to u32
+                    distribution_y: Some(dist_y as u32), // Cast u16 to u32
+                });
+                 log::trace!("Parsed BinDist[{}]: bin_id={}, distX={}, distY={}", i, bin_id, dist_x, dist_y);
             } else {
-                 log::warn!("Failed to parse BinLiquidityDistribution element");
+                log::warn!("Failed to parse BinLiquidityDistribution element #{}", i);
             }
-            current_offset += 8;
+            current_offset += 8; // Move offset forward by 8 bytes
         }
     } else {
-         log::warn!("Failed to parse Vec<BinLiquidityDistribution> length");
+        log::warn!("Failed to parse Vec<BinLiquidityDistribution> length at offset {}", start_offset);
     }
     (results, current_offset)
 }

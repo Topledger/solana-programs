@@ -258,12 +258,7 @@ message PbUpdateFeesLayout {
 }
 
 message PbAddLiquidityLayout {
-  int32 tick_lower_index = 1;
-  int32 tick_upper_index = 2;
-  string liquidity_amount = 3;
-  uint64 token_max_a = 4;
-  uint64 token_max_b = 5;
-  optional bytes liquidity_parameter = 6;
+  optional PbLiquidityParameter liquidity_parameter = 1;
 }
 
 message PbRemoveLiquidityLayout {

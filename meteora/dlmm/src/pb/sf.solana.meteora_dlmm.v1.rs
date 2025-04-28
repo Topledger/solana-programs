@@ -453,18 +453,8 @@ pub struct PbUpdateFeesLayout {
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbAddLiquidityLayout {
-    #[prost(int32, tag = "1")]
-    pub tick_lower_index: i32,
-    #[prost(int32, tag = "2")]
-    pub tick_upper_index: i32,
-    #[prost(string, tag = "3")]
-    pub liquidity_amount: ::prost::alloc::string::String,
-    #[prost(uint64, tag = "4")]
-    pub token_max_a: u64,
-    #[prost(uint64, tag = "5")]
-    pub token_max_b: u64,
-    #[prost(bytes = "vec", optional, tag = "6")]
-    pub liquidity_parameter: ::core::option::Option<::prost::alloc::vec::Vec<u8>>,
+    #[prost(message, optional, tag = "1")]
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameter>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbRemoveLiquidityLayout {
