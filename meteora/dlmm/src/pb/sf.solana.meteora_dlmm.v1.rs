@@ -493,13 +493,15 @@ pub struct PbInitializeCustomizablePermissionlessLbPairLayout {
     #[prost(message, optional, tag = "1")]
     pub params: ::core::option::Option<PbCustomizableParams>,
 }
-/// Meteora DLMM specific layouts
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializeLbPairLayout {
+    /// Use direct fields instead of nested structure
+    /// optional PbInitLbPairIx ix_data = 1;
     #[prost(int32, optional, tag = "1")]
     pub active_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "2")]
-    pub bin_step: ::core::option::Option<i32>,
+    /// Represents Int16ul
+    #[prost(uint32, optional, tag = "2")]
+    pub bin_step: ::core::option::Option<u32>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializePermissionLbPairLayout {

@@ -2,7 +2,7 @@
 all: build
 
 .PHONY: build
-build: clean protogen
+build: 
 	cargo build --target wasm32-unknown-unknown --release
 
 .PHONY: protogen

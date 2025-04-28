@@ -286,10 +286,17 @@ message PbInitializeCustomizablePermissionlessLbPairLayout {
   optional PbCustomizableParams params = 1;
 }
 
-// Meteora DLMM specific layouts
+// Create nested structure for InitializeLbPair args
+// message PbInitLbPairIx {
+//   optional int32 active_id = 1;
+//   optional uint32 bin_step = 2; 
+// }
+
 message PbInitializeLbPairLayout {
+  // Use direct fields instead of nested structure
+  // optional PbInitLbPairIx ix_data = 1;
   optional int32 active_id = 1;
-  optional int32 bin_step = 2;
+  optional uint32 bin_step = 2; // Represents Int16ul
 }
 
 message PbInitializePermissionLbPairLayout {

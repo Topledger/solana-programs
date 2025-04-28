@@ -1,4 +1,4 @@
-TraceID: d339219ec6731b214e91c4e7206768f2
+TraceID: 4c5f00774e206fdbed1aef33e421d669
 {
   "@module": "map_block",
   "@block": 335588588,
@@ -16,6 +16,12 @@ TraceID: d339219ec6731b214e91c4e7206768f2
         "signer": "3r7vuetEm4L2D5MkyMmt9ZhfLMeujByvBJpTaL1k6pZT",
         "outerProgram": "",
         "instructionType": "initializeLbPair",
+        "args": {
+          "initializeLbPair": {
+            "activeId": 0,
+            "binStep": 1
+          }
+        },
         "inputAccounts": {
           "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
           "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
@@ -411,17 +417,18 @@ TraceID: d339219ec6731b214e91c4e7206768f2
         },
         "inputAccounts": {
           "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-          "binArrayLower": "6fuHUNhrxfUJe9WrgcSfmqtuHbyQgm3Bh8KauxtdFbv3",
-          "binArrayUpper": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-          "eventAuthority": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
           "lbPair": "DPJaNVwa7BZddQmkFEnTkWUVA6ECcGgKbH1JPNvLijgu",
+          "memoProgram": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
           "position": "6hpr83j7G2kLrN2L1Nz1fcrniQNEEqb6NHFv5F2BmPsa",
-          "program": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
           "reserveX": "9SihHAGSkLek6PBwoVvHyAkSHGSr4jDeHtEjD3QTRGsM",
           "reserveY": "Dg8rPuWb6mocoLmNgqkvavEf8sfAzPPnczccPRq12yRy",
-          "sender": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "sender": "6fuHUNhrxfUJe9WrgcSfmqtuHbyQgm3Bh8KauxtdFbv3",
           "tokenXMint": "BQX1cjcRHXmrqNtoFWwmE5bZj7RPneTmqXB979b2pump",
+          "tokenXProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
           "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
           "userTokenX": "3eoaMstR7riJAgGsPKUdd4AqjwZiDSfRxD63B72d2S6v",
           "userTokenY": "CeP3EXKZPBd2tdZfYNkPFHBHyEZb6eYeNh9BtrPKyyzS"
         }
@@ -485,11 +492,11 @@ TraceID: d339219ec6731b214e91c4e7206768f2
           "closePositionIfEmpty": {}
         },
         "inputAccounts": {
-          "eventAuthority": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-          "owner": "6fuHUNhrxfUJe9WrgcSfmqtuHbyQgm3Bh8KauxtdFbv3",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
           "position": "6hpr83j7G2kLrN2L1Nz1fcrniQNEEqb6NHFv5F2BmPsa",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
           "rentReceiver": "6fuHUNhrxfUJe9WrgcSfmqtuHbyQgm3Bh8KauxtdFbv3",
-          "systemProgram": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6"
+          "sender": "6fuHUNhrxfUJe9WrgcSfmqtuHbyQgm3Bh8KauxtdFbv3"
         }
       },
       {
@@ -591,17 +598,18 @@ TraceID: d339219ec6731b214e91c4e7206768f2
         },
         "inputAccounts": {
           "binArrayBitmapExtension": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-          "binArrayLower": "A4DnEdk3T5jFsEzsnUWMi36njTrQ8QodZCy6DUa3kULg",
-          "binArrayUpper": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-          "eventAuthority": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
           "lbPair": "DPJaNVwa7BZddQmkFEnTkWUVA6ECcGgKbH1JPNvLijgu",
+          "memoProgram": "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr",
           "position": "HbXMXA7QPKFvJvAsbZdhKFbaDVQivsDY7Xeiiy3znGnP",
-          "program": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
           "reserveX": "9SihHAGSkLek6PBwoVvHyAkSHGSr4jDeHtEjD3QTRGsM",
           "reserveY": "Dg8rPuWb6mocoLmNgqkvavEf8sfAzPPnczccPRq12yRy",
-          "sender": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "sender": "A4DnEdk3T5jFsEzsnUWMi36njTrQ8QodZCy6DUa3kULg",
           "tokenXMint": "BQX1cjcRHXmrqNtoFWwmE5bZj7RPneTmqXB979b2pump",
+          "tokenXProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
           "tokenYMint": "So11111111111111111111111111111111111111112",
+          "tokenYProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
           "userTokenX": "6Ua8E8xsuGcKiv1PnyGu3LE85ahcbafHXk7dQZnpBSG3",
           "userTokenY": "4uVnP7ynguZgu8iVjUkmWBZFuft5ZUvRQyDSqpE9np3Z"
         }
@@ -665,11 +673,11 @@ TraceID: d339219ec6731b214e91c4e7206768f2
           "closePositionIfEmpty": {}
         },
         "inputAccounts": {
-          "eventAuthority": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
-          "owner": "A4DnEdk3T5jFsEzsnUWMi36njTrQ8QodZCy6DUa3kULg",
+          "eventAuthority": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6",
           "position": "HbXMXA7QPKFvJvAsbZdhKFbaDVQivsDY7Xeiiy3znGnP",
+          "program": "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
           "rentReceiver": "A4DnEdk3T5jFsEzsnUWMi36njTrQ8QodZCy6DUa3kULg",
-          "systemProgram": "D1ZN9Wj1fRSUQfCjhvnu1hqDMT7hzjzBBpi12nVniYD6"
+          "sender": "A4DnEdk3T5jFsEzsnUWMi36njTrQ8QodZCy6DUa3kULg"
         }
       },
       {

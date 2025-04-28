@@ -517,6 +517,11 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 1, "creator");
         },
         
+        InstructionType::SetPreActivationSwapAddress => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "creator");
+        },
+        
         InstructionType::SetActivationPoint => {
             assign_if_exists(&mut role_by_index, 0, "lbPair");
             assign_if_exists(&mut role_by_index, 1, "admin");

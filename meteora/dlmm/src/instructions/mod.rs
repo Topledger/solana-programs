@@ -518,10 +518,22 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
     match inst_type {
         // Core Pool Operations
         InstructionType::InitializeLbPair => {
-            if data.len() < 16 { return None; }
+            // Check length: 8 bytes (discriminator) + 4 bytes (activeId) + 2 bytes (binStep) = 14 bytes
+            if data.len() < 14 {
+                log::warn!("Data too short for InitializeLbPair: {} bytes, expected at least 14", data.len());
+                return None;
+            }
+            log::info!("Processing InitializeLbPair. Data (len {}): {}", data.len(), hex::encode(data));
+
+            let active_id_res = parse_i32(data, 8); // Read 4 bytes from offset 8
+            let bin_step_res = parse_u16(data, 12); // Read 2 bytes from offset 12 (8 + 4)
+
+            log::info!("Parsed InitializeLbPair: active_id={:?}, bin_step={:?}", active_id_res, bin_step_res);
+
+            // Use direct fields in layout
             args.instruction_args = Some(instruction_args::InstructionArgs::InitializeLbPair(PbInitializeLbPairLayout {
-                active_id: Some(parse_i32(data, 8).unwrap_or(0)),
-                bin_step: Some(parse_i32(data, 12).unwrap_or(0)),
+                active_id: active_id_res.ok(), // Assign Option<i32>
+                bin_step: bin_step_res.ok().map(|v| v as u32), // Assign Option<u16> -> Option<u32>
             }));
         },
         InstructionType::InitializePermissionLbPair => {
@@ -687,7 +699,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::SetPreActivationSwapAddress => {
-            if data.len() < 40 { return None; }
+            if data.len() < 40 { return None; } // 8 disc + 32 pubkey
             args.instruction_args = Some(instruction_args::InstructionArgs::SetPreActivationSwapAddress(PbSetPreActivationSwapAddressLayout {
                 pre_activation_swap_address: Some(bytes_to_pubkey_str(data, 8).unwrap_or_default()),
             }));
