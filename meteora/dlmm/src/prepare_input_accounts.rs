@@ -511,6 +511,21 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 4, "program");
         },
         
+        InstructionType::RemoveLiquiditySingleSide => {
+            assign_if_exists(&mut role_by_index, 0, "position");
+            assign_if_exists(&mut role_by_index, 1, "lbPair");
+            assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension");
+            assign_if_exists(&mut role_by_index, 3, "userToken");
+            assign_if_exists(&mut role_by_index, 4, "reserve");
+            assign_if_exists(&mut role_by_index, 5, "tokenMint");
+            assign_if_exists(&mut role_by_index, 6, "binArrayLower");
+            assign_if_exists(&mut role_by_index, 7, "binArrayUpper");
+            assign_if_exists(&mut role_by_index, 8, "sender");
+            assign_if_exists(&mut role_by_index, 9, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 10, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 11, "program");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions
