@@ -335,7 +335,16 @@ message PbLiquidityParameterLayout {
 // Specific layout for BinLiquidityDistributionByWeight
 message PbBinLiquidityDistributionByWeightLayout {
   optional int32 bin_id = 1;
-  optional uint32 weight = 2; // Changed from int32 to uint32 to match IDL u16
+  optional uint32 weight = 2; // u16 in IDL -> uint32
+}
+
+// Corresponds to LiquidityParameterByWeight struct in IDL
+message PbLiquidityParameterByWeight {
+  optional uint64 amount_x = 1;
+  optional uint64 amount_y = 2;
+  optional int32 active_id = 3;
+  optional int32 max_active_bin_slippage = 4;
+  repeated PbBinLiquidityDistributionByWeightLayout bin_liquidity_dist = 5;
 }
 
 // Removed PbLiquidityOneSideParameterLayout as it's being flattened
@@ -350,7 +359,7 @@ message PbInitializeBinArrayLayout {
 }
 message PbInitializeBinArrayBitmapExtensionLayout {}
 message PbAddLiquidityByWeightLayout { 
-  optional PbLiquidityParameterLayout liquidity_parameter = 1;
+  optional PbLiquidityParameterByWeight liquidity_parameter = 1;
 }
 message PbAddLiquidityByStrategyLayout { 
   optional PbLiquidityParameterByStrategy liquidity_parameter = 1;
@@ -472,7 +481,7 @@ message PbSetLockReleaseSlotLayout {
   optional uint64 new_lock_release_slot = 1;
 }
 message PbSetActivationSlotLayout { 
-  optional int64 activation_slot = 1;
+  optional uint64 activation_slot = 1;
 }
 message PbSetMaxSwappedAmountLayout { 
   optional uint64 swap_cap_deactivate_slot = 1; // Changed to uint64

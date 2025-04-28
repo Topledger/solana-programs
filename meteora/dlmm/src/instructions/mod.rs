@@ -45,7 +45,7 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout,
     PbInitPermissionPairIx,
     PbLiquidityParameterByStrategyOneSide, PbClaimReward2Layout,
-    PbSetActivationPointLayout,
+    PbSetActivationPointLayout, PbLiquidityParameterByWeight
 };
 
 // For convenience, alias the instruction args enum
@@ -685,9 +685,11 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             args.instruction_args = Some(instruction_args::InstructionArgs::MigrateBinArray(PbMigrateBinArrayLayout {}));
         },
         InstructionType::SetActivationSlot => {
-            if data.len() < 16 { return None; }
+            // Args: activationSlot (u64)
+            if data.len() < 16 { return None; } // 8 disc + 8 u64
+            let activation_slot_opt = parse_u64(data, 8).ok(); // Use parse_u64
             args.instruction_args = Some(instruction_args::InstructionArgs::SetActivationSlot(PbSetActivationSlotLayout {
-                activation_slot: Some(parse_i64(data, 8).unwrap_or(0)),
+                activation_slot: activation_slot_opt, // Assign Option<u64>
             }));
         },
         InstructionType::SetMaxSwappedAmount => {
@@ -828,9 +830,38 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::AddLiquidityByWeight => {
-            // Complex structure, would need more detailed logic for the liquidity_parameter
+            // Args: liquidityParameter: LiquidityParameterByWeight
+            // LiquidityParameterByWeight: amountX(u64), amountY(u64), activeId(i32), maxActiveBinSlippage(i32), binLiquidityDist(Vec<BinLiquidityDistributionByWeight>)
+            // Offsets: disc(8), amountX(8), amountY(8), activeId(4), maxSlip(4), vecLen(4) -> 8+8+8+4+4+4 = 36 bytes minimum before vector data
+            let mut current_offset = 8;
+            if data.len() < 36 {
+                log::warn!("Data too short for AddLiquidityByWeight base args: {} bytes, expected 36", data.len());
+                return None;
+            }
+
+            let amount_x_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let amount_y_opt = parse_u64(data, current_offset).ok();
+            current_offset += 8;
+            let active_id_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+            let max_active_bin_slippage_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+
+            // Parse the vector
+            let (bin_dist_vec, _next_offset) = parse_bin_liquidity_dist_by_weight_vec(data, current_offset);
+
+            // Create the parameter struct
+            let liquidity_parameter = PbLiquidityParameterByWeight {
+                amount_x: amount_x_opt,
+                amount_y: amount_y_opt,
+                active_id: active_id_opt,
+                max_active_bin_slippage: max_active_bin_slippage_opt,
+                bin_liquidity_dist: bin_dist_vec,
+            };
+
             args.instruction_args = Some(instruction_args::InstructionArgs::AddLiquidityByWeight(PbAddLiquidityByWeightLayout {
-                liquidity_parameter: Some(PbLiquidityParameterLayout {}),
+                 liquidity_parameter: Some(liquidity_parameter),
             }));
         },
         InstructionType::AddLiquidityByStrategy => {
@@ -2496,4 +2527,45 @@ pub fn compute_event_discriminator(name: &str) -> [u8; 8] {
             discriminator
         }
     }
+}
+
+// Helper function to parse Vec<PbBinLiquidityDistributionByWeightLayout>
+// Returns the parsed vector and the offset after parsing
+fn parse_bin_liquidity_dist_by_weight_vec(data: &[u8], start_offset: usize) -> (Vec<PbBinLiquidityDistributionByWeightLayout>, usize) {
+    let mut results = Vec::new();
+    let mut current_offset = start_offset;
+    // Need 4 bytes for vector length
+    if data.len() < current_offset + 4 {
+        log::warn!("Data too short for Vec<BinLiquidityDistributionByWeight> length at offset {}", current_offset);
+        return (results, current_offset);
+    }
+
+    if let Ok(vec_len) = parse_u32(data, current_offset) {
+        current_offset += 4;
+        log::debug!("Parsing Vec<BinLiquidityDistributionByWeight> with length: {}", vec_len);
+        for i in 0..vec_len {
+            // Each element is binId (i32, 4 bytes) + weight (u16, 2 bytes) = 6 bytes
+            if data.len() < current_offset + 6 {
+                log::warn!("Data too short for BinLiquidityDistributionByWeight element #{} at offset {}", i, current_offset);
+                break; // Stop parsing if data is insufficient
+            }
+            let bin_id_res = parse_i32(data, current_offset);
+            let weight_res = parse_u16(data, current_offset + 4);
+
+            if let (Ok(bin_id), Ok(weight)) = (bin_id_res, weight_res) {
+                results.push(PbBinLiquidityDistributionByWeightLayout {
+                    bin_id: Some(bin_id),
+                    weight: Some(weight as u32), // Cast u16 to u32
+                });
+                log::trace!("Parsed BinDistWeight[{}]: bin_id={}, weight={}", i, bin_id, weight);
+            } else {
+                log::warn!("Failed to parse BinLiquidityDistributionByWeight element #{}", i);
+                // Optionally push default or skip
+            }
+            current_offset += 6; // Move offset forward by 6 bytes
+        }
+    } else {
+        log::warn!("Failed to parse Vec<BinLiquidityDistributionByWeight> length at offset {}", start_offset);
+    }
+    (results, current_offset)
 }

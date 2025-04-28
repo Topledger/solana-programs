@@ -552,9 +552,25 @@ pub struct PbLiquidityParameterLayout {}
 pub struct PbBinLiquidityDistributionByWeightLayout {
     #[prost(int32, optional, tag = "1")]
     pub bin_id: ::core::option::Option<i32>,
-    /// Changed from int32 to uint32 to match IDL u16
+    /// u16 in IDL -> uint32
     #[prost(uint32, optional, tag = "2")]
     pub weight: ::core::option::Option<u32>,
+}
+/// Corresponds to LiquidityParameterByWeight struct in IDL
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct PbLiquidityParameterByWeight {
+    #[prost(uint64, optional, tag = "1")]
+    pub amount_x: ::core::option::Option<u64>,
+    #[prost(uint64, optional, tag = "2")]
+    pub amount_y: ::core::option::Option<u64>,
+    #[prost(int32, optional, tag = "3")]
+    pub active_id: ::core::option::Option<i32>,
+    #[prost(int32, optional, tag = "4")]
+    pub max_active_bin_slippage: ::core::option::Option<i32>,
+    #[prost(message, repeated, tag = "5")]
+    pub bin_liquidity_dist: ::prost::alloc::vec::Vec<
+        PbBinLiquidityDistributionByWeightLayout,
+    >,
 }
 /// Placeholder definitions for missing layouts with fields added
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
@@ -566,10 +582,10 @@ pub struct PbInitializeBinArrayLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbInitializeBinArrayBitmapExtensionLayout {}
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbAddLiquidityByWeightLayout {
     #[prost(message, optional, tag = "1")]
-    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterLayout>,
+    pub liquidity_parameter: ::core::option::Option<PbLiquidityParameterByWeight>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbAddLiquidityByStrategyLayout {
@@ -798,8 +814,8 @@ pub struct PbSetLockReleaseSlotLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetActivationSlotLayout {
-    #[prost(int64, optional, tag = "1")]
-    pub activation_slot: ::core::option::Option<i64>,
+    #[prost(uint64, optional, tag = "1")]
+    pub activation_slot: ::core::option::Option<u64>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbSetMaxSwappedAmountLayout {

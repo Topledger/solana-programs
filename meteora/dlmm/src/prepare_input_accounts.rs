@@ -593,6 +593,11 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 3, "program");
         },
         
+        InstructionType::SetActivationSlot => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions
