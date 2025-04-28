@@ -111,9 +111,6 @@ fn map_block(
                     account_keys.get(outer_program_idx).map(|s| s.as_str())
                 });
 
-                // Simplified approach for logging the outer transaction context
-                log::info!("Processing inner instructions for tx: {}, outer_idx: {}, outer_program: {:?}",
-                         tx_id, outer_idx, outer_program_id_opt);
                 
                 for (idx, ins) in inner_ins.instructions.iter().enumerate() {
                     // Get program ID from account keys using program_id_index

@@ -504,15 +504,12 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                 }))
             });
         }
-        log::info!("Unknown instruction discriminator: {}", hex::encode(discriminator));
         return None;
     }
 
     let inst_type = inst_type_opt.unwrap();
     let inst_name = get_instruction_type_str(inst_type);
 
-    // Common pattern: log the specific instruction type we're processing
-    log::debug!("Processing {} instruction", inst_name);
 
     // Parse based on instruction type
     match inst_type {
@@ -1608,15 +1605,22 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
         InstructionType::AddLiquidityOneSidePrecise2 => {
             // Args: liquidityParameter: AddLiquiditySingleSidePreciseParameter2, remainingAccountsInfo: RemainingAccountsInfo
             let mut current_offset = 8;
+            log::debug!("Parsing AddLiquidityOneSidePrecise2 starting at offset {}", current_offset);
             // Parse AddLiquiditySingleSidePreciseParameter2
             let (bins, next_offset_bins) = parse_compressed_bin_deposit_vec(data, current_offset);
             current_offset = next_offset_bins;
+            log::debug!("Parsed {} bins. Offset now: {}", bins.len(), current_offset);
 
-            if data.len() < current_offset + 16 { return None; } // decompress_multiplier (u64), max_amount (u64)
+            if data.len() < current_offset + 16 {
+                log::warn!("Data too short for decompress_multiplier and max_amount. Len: {}, Expected at least: {}", data.len(), current_offset + 16);
+                return None;
+            } // decompress_multiplier (u64), max_amount (u64)
              // Use .ok() for optional fields
             let decompress_multiplier_opt = parse_u64(data, current_offset).ok();
             let max_amount_opt = parse_u64(data, current_offset + 8).ok();
             current_offset += 16;
+            log::debug!("Parsed decompress_multiplier={:?}, max_amount={:?}. Offset now: {}", decompress_multiplier_opt, max_amount_opt, current_offset);
+
 
             let liq_param = PbAddLiquiditySingleSidePreciseParameter2 {
                 bins: bins,
@@ -1627,11 +1631,14 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
 
             // Parse RemainingAccountsInfo
             let remaining_accounts = parse_remaining_accounts_info(data, current_offset);
+            log::debug!("Parsed remaining_accounts_info: {:?}", remaining_accounts);
+
 
             args.instruction_args = Some(IArgs::AddLiquidityOneSidePrecise2(PbAddLiquidityOneSidePrecise2Layout {
                 liquidity_parameter: Some(liq_param),
                 remaining_accounts_info: remaining_accounts,
             }));
+            log::debug!("Finished parsing AddLiquidityOneSidePrecise2");
         },
 
         InstructionType::RemoveLiquidity2 => {
@@ -2386,6 +2393,13 @@ fn parse_remaining_accounts_info(data: &[u8], start_offset: usize) -> Option<PbR
     }
     let slices_len = slices_len_res.unwrap() as usize;
     let mut current_offset = start_offset + 4;
+
+    // If the length is zero, it means the optional structure is not present.
+    if slices_len == 0 {
+        log::debug!("RemainingAccountsInfo vector length is 0 at offset {}. Returning None.", start_offset);
+        return None;
+    }
+
     let mut parsed_slices = Vec::with_capacity(slices_len);
 
     for i in 0..slices_len {
@@ -2457,22 +2471,22 @@ fn parse_compressed_bin_deposit_vec(data: &[u8], start_offset: usize) -> (Vec<Pb
     if let Ok(vec_len) = parse_u32(data, current_offset) {
         current_offset += 4;
         for _ in 0..vec_len {
-            // Size of CompressedBinDepositAmount is i32 (4) + u128 (16) = 20 bytes
-            if data.len() < current_offset + 20 { break; } 
+            // Size of CompressedBinDepositAmount is i32 (4) + u32 (4) = 8 bytes
+            if data.len() < current_offset + 8 { break; } 
             let bin_id_res = parse_i32(data, current_offset);
-            let amount_res = parse_u128(data, current_offset + 4); // Parse u128
+            let amount_res = parse_u32(data, current_offset + 4); // Parse u32 based on IDL/Python layout
              if let (Ok(bin_id), Ok(amount)) = (bin_id_res, amount_res) {
                  results.push(PbCompressedBinDepositAmountLayout { // Correct struct name
                      bin_id: bin_id, // Assign directly, proto field is int32
-                     amount_total: amount.to_string(), // Assign amount_total as string
+                     amount_total: amount.to_string(), // Assign amount_total as string (using parsed u32)
                  });
             } else {
                  log::warn!("Failed to parse CompressedBinDepositAmount element");
             }
-            current_offset += 20; // Update offset by correct size (4 + 16)
+            current_offset += 8; // Update offset by correct size (4 + 4)
         }
     } else {
-         log::warn!("Failed to parse Vec<CompressedBinDepositAmount> length");
+         // log::warn!("Failed to parse Vec<CompressedBinDepositAmount> length"); // Removed log
     }
     (results, current_offset)
 }
