@@ -497,6 +497,11 @@ pub fn map_accounts(
             // ... existing code ...
         },
         
+        InstructionType::SetActivationPoint => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions

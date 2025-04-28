@@ -44,7 +44,8 @@ use crate::pb::sf::solana::meteora_dlmm::v1::{
     PbClosePosition2Layout, PbUpdateFeesAndReward2Layout, 
     PbClosePositionIfEmptyLayout, PbInitializePresetParameterV2Layout,
     PbInitPermissionPairIx,
-    PbLiquidityParameterByStrategyOneSide, PbClaimReward2Layout
+    PbLiquidityParameterByStrategyOneSide, PbClaimReward2Layout,
+    PbSetActivationPointLayout,
 };
 
 // For convenience, alias the instruction args enum
@@ -1181,11 +1182,13 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             args.instruction_args = Some(instruction_args::InstructionArgs::IdlWrite(PbIdlWriteLayout {}));
         },
         InstructionType::SetActivationPoint => {
-            if data.len() < 16 { return None; }
-            // Since there's no specific layout defined for this instruction in the proto,
-            // we'll log it and return None for now
-            log::info!("Processing SetActivationPoint instruction (not fully implemented)");
-            return None;
+            // Args: activationPoint (u64)
+            if data.len() < 16 { return None; } // 8 bytes disc + 8 bytes u64
+            let activation_point_opt = parse_u64(data, 8).ok();
+
+            args.instruction_args = Some(IArgs::SetActivationPoint(PbSetActivationPointLayout {
+                activation_point: activation_point_opt,
+            }));
         },
         InstructionType::UpdateFeesAndRewards => {
             // No arguments needed
