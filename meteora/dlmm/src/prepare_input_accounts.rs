@@ -571,6 +571,26 @@ pub fn map_accounts(
             // ... existing code ...
         },
         
+        InstructionType::MigratePosition => {
+            assign_if_exists(&mut role_by_index, 0, "positionV2");
+            assign_if_exists(&mut role_by_index, 1, "positionV1");
+            assign_if_exists(&mut role_by_index, 2, "lbPair");
+            assign_if_exists(&mut role_by_index, 3, "binArrayLower");
+            assign_if_exists(&mut role_by_index, 4, "binArrayUpper");
+            assign_if_exists(&mut role_by_index, 5, "owner");
+            assign_if_exists(&mut role_by_index, 6, "systemProgram");
+            assign_if_exists(&mut role_by_index, 7, "rentReceiver");
+            assign_if_exists(&mut role_by_index, 8, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 9, "program");
+        },
+        
+        InstructionType::UpdatePositionOperator => {
+            assign_if_exists(&mut role_by_index, 0, "position");
+            assign_if_exists(&mut role_by_index, 1, "owner");
+            assign_if_exists(&mut role_by_index, 2, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 3, "program");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions
