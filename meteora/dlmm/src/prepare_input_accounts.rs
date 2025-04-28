@@ -405,13 +405,10 @@ pub fn map_accounts(
         InstructionType::ClosePosition2 => {
             // Similar to V1 ClosePosition
             assign_if_exists(&mut role_by_index, 0, "position");
-            assign_if_exists(&mut role_by_index, 1, "lbPair");
-            assign_if_exists(&mut role_by_index, 2, "binArrayLower");
-            assign_if_exists(&mut role_by_index, 3, "binArrayUpper");
-            assign_if_exists(&mut role_by_index, 4, "sender"); // Or owner
-            assign_if_exists(&mut role_by_index, 5, "rentReceiver");
-            assign_if_exists(&mut role_by_index, 6, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 7, "program");
+            assign_if_exists(&mut role_by_index, 1, "sender");
+            assign_if_exists(&mut role_by_index, 2, "rentReceiver");
+            assign_if_exists(&mut role_by_index, 3, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 4, "program");
         },
 
         // UpdateFeesAndReward2 is handled by UpdateFeesAndRewards mapping
@@ -437,13 +434,10 @@ pub fn map_accounts(
         },
         InstructionType::CreateClaimProtocolFeeOperator => {
             // Guessing accounts
-            assign_if_exists(&mut role_by_index, 0, "claimOperator"); // Account being created
-            assign_if_exists(&mut role_by_index, 1, "admin");         // Authority
-            assign_if_exists(&mut role_by_index, 2, "payer");
+            assign_if_exists(&mut role_by_index, 0, "claimFeeOperator"); // Account being created
+            assign_if_exists(&mut role_by_index, 1, "operator");         // Authority
+            assign_if_exists(&mut role_by_index, 2, "admin");
             assign_if_exists(&mut role_by_index, 3, "systemProgram");
-            assign_if_exists(&mut role_by_index, 4, "rent");
-            assign_if_exists(&mut role_by_index, 5, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 6, "program");
         },
         InstructionType::CloseClaimProtocolFeeOperator => {
             // Guessing accounts
