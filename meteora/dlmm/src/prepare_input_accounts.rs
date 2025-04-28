@@ -459,6 +459,27 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 2, "rentReceiver");
         },
         
+        InstructionType::InitializeBinArrayBitmapExtension => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension");
+            assign_if_exists(&mut role_by_index, 2, "funder");
+            assign_if_exists(&mut role_by_index, 3, "systemProgram");
+            assign_if_exists(&mut role_by_index, 4, "rent");
+        },
+
+        InstructionType::MigrateBinArray => {
+            assign_if_exists(&mut role_by_index, 0, "binArray");
+        },
+        
+        InstructionType::GoToABin => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension");
+            assign_if_exists(&mut role_by_index, 2, "fromBinArray");
+            assign_if_exists(&mut role_by_index, 3, "toBinArray");
+            assign_if_exists(&mut role_by_index, 4, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 5, "program");
+        },
+        
         // Add more instruction types as needed
         _ => {
             // Default to generic account labels for unmapped instructions

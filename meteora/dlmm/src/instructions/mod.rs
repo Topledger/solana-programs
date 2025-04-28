@@ -475,7 +475,7 @@ pub fn process_instruction(
         block_date,               // Not optional
         instruction_index: Some(outer_instruction_index), // This now correctly gets the outer index
         is_inner_instruction: Some(is_inner_instruction),     // Wrap in Some
-        inner_instruction_index: actual_inner_index, // This now correctly gets the inner index (already Option<u32>)
+        inner_instruction_index: Some(actual_inner_index.unwrap_or(0)), // Explicitly wrap, using 0 if None
         signer: Some(signer_pubkey.map_or(String::new(), String::from)), // Optional: Use default, wrap in Some()
         outer_program: Some(outer_program.map_or(String::new(), String::from)), // Optional: Use default, wrap in Some()
         instruction_type: instruction_type_str.to_string(), // Not optional
