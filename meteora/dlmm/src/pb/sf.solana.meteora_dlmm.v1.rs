@@ -771,12 +771,11 @@ pub struct PbInitializePresetParameterV2Layout {
     pub base_fee_power_factor: ::core::option::Option<u32>,
 }
 /// Renamed from SetPairStatusLayout/SetPairStatusPermissionlessLayout
+///
+/// Removed status field as args should be empty
+/// optional uint32 status = 1; // u8 in IDL -> u32
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
-pub struct PbTogglePairStatusLayout {
-    /// u8 in IDL -> u32
-    #[prost(uint32, optional, tag = "1")]
-    pub status: ::core::option::Option<u32>,
-}
+pub struct PbTogglePairStatusLayout {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbUpdateWhitelistedWalletLayout {
     /// Assuming u16 maps to int32

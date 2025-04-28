@@ -489,6 +489,16 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 2, "rentReceiver");
         },
         
+        InstructionType::TogglePairStatus => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+        },
+        
+        InstructionType::UpdateWhitelistedWallet => {
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "admin");
+        },
+        
         InstructionType::InitializeBinArrayBitmapExtension => {
             assign_if_exists(&mut role_by_index, 0, "lbPair");
             assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension");
@@ -616,11 +626,6 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 1, "admin");
         },
         
-        InstructionType::UpdateWhitelistedWallet => {
-            assign_if_exists(&mut role_by_index, 0, "lbPair");
-            assign_if_exists(&mut role_by_index, 1, "admin");
-        },
-
         InstructionType::IncreaseOracleLength => {
             assign_if_exists(&mut role_by_index, 0, "lbPair");
             assign_if_exists(&mut role_by_index, 1, "admin");

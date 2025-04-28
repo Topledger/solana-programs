@@ -658,10 +658,8 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             args.instruction_args = Some(instruction_args::InstructionArgs::UpdateFeeOwner(PbUpdateFeeOwnerLayout {}));
         },
         InstructionType::TogglePairStatus => {
-            if data.len() < 9 { return None; }
-            args.instruction_args = Some(instruction_args::InstructionArgs::TogglePairStatus(PbTogglePairStatusLayout {
-                status: Some(if data.len() >= 9 { if data[8] != 0 { 1u32 } else { 0u32 } } else { 0u32 }),
-            }));
+            // No arguments for this instruction
+            args.instruction_args = Some(instruction_args::InstructionArgs::TogglePairStatus(PbTogglePairStatusLayout {}));
         },
         InstructionType::UpdateWhitelistedWallet => {
             // Args: idx (u8), wallet (PubKey)

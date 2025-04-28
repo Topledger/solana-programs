@@ -460,7 +460,8 @@ message PbInitializePresetParameterV2Layout {
 
 // Renamed from SetPairStatusLayout/SetPairStatusPermissionlessLayout 
 message PbTogglePairStatusLayout {
-  optional uint32 status = 1; // u8 in IDL -> u32
+  // Removed status field as args should be empty
+  // optional uint32 status = 1; // u8 in IDL -> u32
 }
 message PbUpdateWhitelistedWalletLayout { 
   optional int32 idx = 1; // Assuming u16 maps to int32
