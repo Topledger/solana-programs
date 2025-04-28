@@ -635,10 +635,22 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             args.instruction_args = Some(instruction_args::InstructionArgs::CloseLbPair(PbCloseLbPairLayout {}));
         },
         InstructionType::UpdateFeeParameters => {
-            if data.len() < 16 { return None; }
+            // Args: feeParameter { protocolShare (u16), baseFactor (u16) }
+            // Check length: 8 (disc) + 2 (protocolShare) + 2 (baseFactor) = 12 bytes
+            if data.len() < 12 { return None; } 
+            
+            // Parse nested fields
+            let protocol_share_res = parse_u16(data, 8); // Int16ul -> u16
+            let base_factor_res = parse_u16(data, 10); // Int16ul -> u16
+
+            // Create nested struct
+            let fee_parameter = crate::pb::sf::solana::meteora_dlmm::v1::PbFeeParameterLayout {
+                protocol_share: protocol_share_res.ok().map(|v| v as u32), // Cast u16 to u32
+                base_factor: base_factor_res.ok().map(|v| v as u32), // Cast u16 to u32
+            };
+
             args.instruction_args = Some(instruction_args::InstructionArgs::UpdateFeeParameters(PbUpdateFeeParametersLayout {
-                protocol_share: Some(parse_i32(data, 8).unwrap_or(0)),
-                base_factor: Some(parse_i32(data, 12).unwrap_or(0)),
+                fee_parameter: Some(fee_parameter), // Assign nested struct
             }));
         },
         InstructionType::UpdateFeeOwner => {
@@ -2114,11 +2126,18 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
         },
         
         "FeeParameterUpdate" => {
+            // Layout: lbPair(32), protocolShare(u16), baseFactor(u16)
+            // Total size: 32 + 2 + 2 = 36 bytes
+            let protocol_share_offset = 32;
+            let base_factor_offset = 34;
+            const MIN_LEN: usize = 36;
+
             let fields = pb_event_log_wrapper::EventFields::FeeParameterUpdateLogFields(
                 crate::pb::sf::solana::meteora_dlmm::v1::PbFeeParameterUpdateLogFields {
                     lb_pair: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                    protocol_share: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                    base_factor: Some(if event_data.len() >= 40 { parse_i32(event_data, 36).unwrap_or(0) } else { 0 }),
+                    // Parse as u16 (Int16ul), map to Option<u32> for proto
+                    protocol_share: if event_data.len() >= protocol_share_offset + 2 { parse_u16(event_data, protocol_share_offset).ok().map(|v| v as u32) } else { None },
+                    base_factor: if event_data.len() >= base_factor_offset + 2 { parse_u16(event_data, base_factor_offset).ok().map(|v| v as u32) } else { None },
                 }
             );
             event_wrapper.event_fields = Some(fields);

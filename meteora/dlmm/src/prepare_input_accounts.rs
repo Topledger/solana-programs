@@ -568,7 +568,9 @@ pub fn map_accounts(
 
         InstructionType::UpdateFeeParameters => {
             assign_if_exists(&mut role_by_index, 0, "lbPair");
-            // ... existing code ...
+            assign_if_exists(&mut role_by_index, 1, "admin");
+            assign_if_exists(&mut role_by_index, 2, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 3, "program");
         },
         
         InstructionType::MigratePosition => {

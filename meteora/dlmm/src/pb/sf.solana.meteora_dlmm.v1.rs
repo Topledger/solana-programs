@@ -651,14 +651,9 @@ pub struct PbWithdrawProtocolFeeLayout {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbUpdateFeeParametersLayout {
-    /// Fields moved from PbFeeParameterLayout
-    ///
-    /// Assuming i16 maps to int32
-    #[prost(int32, optional, tag = "1")]
-    pub protocol_share: ::core::option::Option<i32>,
-    /// Assuming i16 maps to int32
-    #[prost(int32, optional, tag = "2")]
-    pub base_factor: ::core::option::Option<i32>,
+    /// Use the nested structure
+    #[prost(message, optional, tag = "1")]
+    pub fee_parameter: ::core::option::Option<PbFeeParameterLayout>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct PbUpdateFeeOwnerLayout {}
@@ -1022,10 +1017,10 @@ pub struct PbPositionCreateLogFields {
 pub struct PbFeeParameterUpdateLogFields {
     #[prost(string, tag = "1")]
     pub lb_pair: ::prost::alloc::string::String,
-    #[prost(int32, optional, tag = "2")]
-    pub protocol_share: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "3")]
-    pub base_factor: ::core::option::Option<i32>,
+    #[prost(uint32, optional, tag = "2")]
+    pub protocol_share: ::core::option::Option<u32>,
+    #[prost(uint32, optional, tag = "3")]
+    pub base_factor: ::core::option::Option<u32>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbIncreaseObservationLogFields {
@@ -1461,6 +1456,16 @@ pub struct PbLiquidityParameterByStrategyOneSide {
     pub max_active_bin_slippage: ::core::option::Option<i32>,
     #[prost(message, optional, tag = "4")]
     pub strategy_parameters: ::core::option::Option<PbStrategyParameters>,
+}
+/// Nested structure for fee parameters
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct PbFeeParameterLayout {
+    /// Represents Int16ul
+    #[prost(uint32, optional, tag = "1")]
+    pub protocol_share: ::core::option::Option<u32>,
+    /// Represents Int16ul
+    #[prost(uint32, optional, tag = "2")]
+    pub base_factor: ::core::option::Option<u32>,
 }
 /// Corresponds to AccountsType enum in IDL
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]

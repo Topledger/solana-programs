@@ -395,9 +395,8 @@ message PbWithdrawProtocolFeeLayout {
   optional PbRemainingAccountsInfo remaining_accounts_info = 3;
 }
 message PbUpdateFeeParametersLayout { 
-  // Fields moved from PbFeeParameterLayout
-  optional int32 protocol_share = 1; // Assuming i16 maps to int32
-  optional int32 base_factor = 2; // Assuming i16 maps to int32
+  // Use the nested structure
+  optional PbFeeParameterLayout fee_parameter = 1;
 }
 message PbUpdateFeeOwnerLayout {}
 message PbFundRewardLayout { 
@@ -607,8 +606,8 @@ message PbPositionCreateLogFields {
 
 message PbFeeParameterUpdateLogFields {
   string lb_pair = 1;
-  optional int32 protocol_share = 2;
-  optional int32 base_factor = 3;
+  optional uint32 protocol_share = 2;
+  optional uint32 base_factor = 3;
 }
 
 message PbIncreaseObservationLogFields {
@@ -907,4 +906,10 @@ message PbLiquidityParameterByStrategyOneSide {
   optional int32 active_id = 2;
   optional int32 max_active_bin_slippage = 3;
   optional PbStrategyParameters strategy_parameters = 4;
+}
+
+// Nested structure for fee parameters
+message PbFeeParameterLayout {
+  optional uint32 protocol_share = 1; // Represents Int16ul
+  optional uint32 base_factor = 2; // Represents Int16ul
 } 
