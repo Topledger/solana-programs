@@ -321,22 +321,22 @@ pub fn map_accounts(
         InstructionType::AddLiquidity2 | 
         InstructionType::AddLiquidityByStrategy2 | 
         InstructionType::AddLiquidityOneSidePrecise2 => {
-            // Similar to V1 AddLiquidity variants
+            // Based on V2 IDL for addLiquidityByStrategy2 (others might vary slightly)
             assign_if_exists(&mut role_by_index, 0, "position");
             assign_if_exists(&mut role_by_index, 1, "lbPair");
-            assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension"); // If applicable
-            assign_if_exists(&mut role_by_index, 3, "userTokenX"); // Or userToken for one-side
-            assign_if_exists(&mut role_by_index, 4, "userTokenY"); // Or userToken for one-side
-            assign_if_exists(&mut role_by_index, 5, "reserveX");   // Or reserve for one-side
-            assign_if_exists(&mut role_by_index, 6, "reserveY");   // Or reserve for one-side
-            assign_if_exists(&mut role_by_index, 7, "tokenXMint"); // Or tokenMint for one-side
-            assign_if_exists(&mut role_by_index, 8, "tokenYMint"); // Or tokenMint for one-side
-            assign_if_exists(&mut role_by_index, 9, "binArrayLower");
-            assign_if_exists(&mut role_by_index, 10, "binArrayUpper");
-            assign_if_exists(&mut role_by_index, 11, "sender"); // Or owner
-            // Token programs likely passed via RemainingAccountsInfo for transfer hooks
-            assign_if_exists(&mut role_by_index, 12, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 13, "program");
+            assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension");
+            assign_if_exists(&mut role_by_index, 3, "userTokenX");
+            assign_if_exists(&mut role_by_index, 4, "userTokenY");
+            assign_if_exists(&mut role_by_index, 5, "reserveX");
+            assign_if_exists(&mut role_by_index, 6, "reserveY");
+            assign_if_exists(&mut role_by_index, 7, "tokenXMint");
+            assign_if_exists(&mut role_by_index, 8, "tokenYMint");
+            assign_if_exists(&mut role_by_index, 9, "sender"); // Changed from binArrayLower
+            assign_if_exists(&mut role_by_index, 10, "tokenXProgram"); // Changed from binArrayUpper
+            assign_if_exists(&mut role_by_index, 11, "tokenYProgram"); // Changed from sender
+            assign_if_exists(&mut role_by_index, 12, "eventAuthority"); // Index adjusted
+            assign_if_exists(&mut role_by_index, 13, "program"); // Index adjusted
+            // Removed accounts not present in addLiquidityByStrategy2 base IDL
         },
 
         InstructionType::RemoveLiquidity2 | 

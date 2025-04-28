@@ -2182,14 +2182,24 @@ fn process_event_log(data: &[u8], mut args: InstructionArgs) -> Option<Instructi
         },
         
         "CompositionFee" => {
+            // Layout: from(32), binId(i16), tokenXFee(u64), tokenYFee(u64), protocolXFee(u64), protocolYFee(u64)
+            // Total size: 32 + 2 + 8 + 8 + 8 + 8 = 66 bytes
+            const MIN_LEN: usize = 66; 
+            let bin_id_offset = 32;
+            let token_x_offset = 34;
+            let token_y_offset = 42;
+            let protocol_x_offset = 50;
+            let protocol_y_offset = 58;
+
             let fields = pb_event_log_wrapper::EventFields::CompositionFeeLogFields(
                 crate::pb::sf::solana::meteora_dlmm::v1::PbCompositionFeeLogFields {
                     from: if event_data.len() >= 32 { bytes_to_pubkey_str(event_data, 0).unwrap_or_default() } else { "".to_string() },
-                    bin_id: Some(if event_data.len() >= 36 { parse_i32(event_data, 32).unwrap_or(0) } else { 0 }),
-                    token_x_fee_amount: Some(if event_data.len() >= 44 { parse_u64(event_data, 36).unwrap_or(0) } else { 0 }),
-                    token_y_fee_amount: Some(if event_data.len() >= 52 { parse_u64(event_data, 44).unwrap_or(0) } else { 0 }),
-                    protocol_token_x_fee_amount: Some(if event_data.len() >= 60 { parse_u64(event_data, 52).unwrap_or(0) } else { 0 }),
-                    protocol_token_y_fee_amount: Some(if event_data.len() >= 68 { parse_u64(event_data, 60).unwrap_or(0) } else { 0 }),
+                    // Parse as i16 (2 bytes) and cast to Option<i32> for proto
+                    bin_id: if event_data.len() >= bin_id_offset + 2 { parse_i16(event_data, bin_id_offset).ok().map(|v| v as i32) } else { None },
+                    token_x_fee_amount: if event_data.len() >= token_x_offset + 8 { parse_u64(event_data, token_x_offset).ok() } else { None },
+                    token_y_fee_amount: if event_data.len() >= token_y_offset + 8 { parse_u64(event_data, token_y_offset).ok() } else { None },
+                    protocol_token_x_fee_amount: if event_data.len() >= protocol_x_offset + 8 { parse_u64(event_data, protocol_x_offset).ok() } else { None },
+                    protocol_token_y_fee_amount: if event_data.len() >= protocol_y_offset + 8 { parse_u64(event_data, protocol_y_offset).ok() } else { None },
                 }
             );
             event_wrapper.event_fields = Some(fields);
