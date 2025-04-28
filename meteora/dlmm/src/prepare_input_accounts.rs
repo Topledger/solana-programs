@@ -338,21 +338,20 @@ pub fn map_accounts(
             // Similar to V1 ClaimReward
             assign_if_exists(&mut role_by_index, 0, "lbPair");
             assign_if_exists(&mut role_by_index, 1, "position");
-            assign_if_exists(&mut role_by_index, 2, "binArrayLower");
-            assign_if_exists(&mut role_by_index, 3, "binArrayUpper");
-            assign_if_exists(&mut role_by_index, 4, "sender");
-            assign_if_exists(&mut role_by_index, 5, "rewardVault");
-            assign_if_exists(&mut role_by_index, 6, "rewardMint");
-            assign_if_exists(&mut role_by_index, 7, "userTokenAccount");
+            assign_if_exists(&mut role_by_index, 2, "sender");
+            assign_if_exists(&mut role_by_index, 3, "rewardVault");
+            assign_if_exists(&mut role_by_index, 4, "rewardMint");
+            assign_if_exists(&mut role_by_index, 5, "userTokenAccount");
+            assign_if_exists(&mut role_by_index, 6, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 7, "memoProgram");
             // Token program likely passed via RemainingAccountsInfo for transfer hooks
             assign_if_exists(&mut role_by_index, 8, "eventAuthority");
             assign_if_exists(&mut role_by_index, 9, "program");
         },
 
         InstructionType::AddLiquidity2 | 
-        InstructionType::AddLiquidityByStrategy2 | 
-        InstructionType::AddLiquidityOneSidePrecise2 => {
-            // Based on V2 IDL for addLiquidityByStrategy2 (others might vary slightly)
+        InstructionType::AddLiquidityByStrategy2 => { 
+            // Based on V2 IDL (14 accounts)
             assign_if_exists(&mut role_by_index, 0, "position");
             assign_if_exists(&mut role_by_index, 1, "lbPair");
             assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension");
@@ -362,12 +361,25 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 6, "reserveY");
             assign_if_exists(&mut role_by_index, 7, "tokenXMint");
             assign_if_exists(&mut role_by_index, 8, "tokenYMint");
-            assign_if_exists(&mut role_by_index, 9, "sender"); // Changed from binArrayLower
-            assign_if_exists(&mut role_by_index, 10, "tokenXProgram"); // Changed from binArrayUpper
-            assign_if_exists(&mut role_by_index, 11, "tokenYProgram"); // Changed from sender
-            assign_if_exists(&mut role_by_index, 12, "eventAuthority"); // Index adjusted
-            assign_if_exists(&mut role_by_index, 13, "program"); // Index adjusted
-            // Removed accounts not present in addLiquidityByStrategy2 base IDL
+            assign_if_exists(&mut role_by_index, 9, "sender");
+            assign_if_exists(&mut role_by_index, 10, "tokenXProgram");
+            assign_if_exists(&mut role_by_index, 11, "tokenYProgram");
+            assign_if_exists(&mut role_by_index, 12, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 13, "program");
+        },
+
+        InstructionType::AddLiquidityOneSidePrecise2 => {
+            // Based on V2 IDL (10 accounts)
+            assign_if_exists(&mut role_by_index, 0, "position");
+            assign_if_exists(&mut role_by_index, 1, "lbPair");
+            assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension");
+            assign_if_exists(&mut role_by_index, 3, "userToken");
+            assign_if_exists(&mut role_by_index, 4, "reserve");
+            assign_if_exists(&mut role_by_index, 5, "tokenMint");
+            assign_if_exists(&mut role_by_index, 6, "sender");
+            assign_if_exists(&mut role_by_index, 7, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 8, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 9, "program");
         },
 
         InstructionType::RemoveLiquidity2 | 
@@ -435,12 +447,9 @@ pub fn map_accounts(
         },
         InstructionType::CloseClaimProtocolFeeOperator => {
             // Guessing accounts
-            assign_if_exists(&mut role_by_index, 0, "claimOperator"); // Account being closed
+            assign_if_exists(&mut role_by_index, 0, "claimFeeOperator"); // Account being closed
             assign_if_exists(&mut role_by_index, 1, "admin");         // Authority
             assign_if_exists(&mut role_by_index, 2, "rentReceiver");
-            assign_if_exists(&mut role_by_index, 3, "systemProgram");
-            assign_if_exists(&mut role_by_index, 4, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 5, "program");
         },
 
         // Event logs typically don't have associated accounts passed in the instruction
