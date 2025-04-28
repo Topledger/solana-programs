@@ -225,6 +225,26 @@ pub fn map_accounts(
             assign_if_exists(&mut role_by_index, 15, "program"); // Index adjusted
             // Additional accounts beyond index 15 are handled dynamically via RemainingAccountsInfo argument
         },
+
+        InstructionType::RemoveLiquidityByRange2 => {
+            // Mapping based on the V2 IDL (15 accounts)
+            assign_if_exists(&mut role_by_index, 0, "position");
+            assign_if_exists(&mut role_by_index, 1, "lbPair");
+            assign_if_exists(&mut role_by_index, 2, "binArrayBitmapExtension"); // Optional
+            assign_if_exists(&mut role_by_index, 3, "userTokenX");
+            assign_if_exists(&mut role_by_index, 4, "userTokenY");
+            assign_if_exists(&mut role_by_index, 5, "reserveX");
+            assign_if_exists(&mut role_by_index, 6, "reserveY");
+            assign_if_exists(&mut role_by_index, 7, "tokenXMint");
+            assign_if_exists(&mut role_by_index, 8, "tokenYMint");
+            assign_if_exists(&mut role_by_index, 9, "sender"); // Signer
+            assign_if_exists(&mut role_by_index, 10, "tokenXProgram");
+            assign_if_exists(&mut role_by_index, 11, "tokenYProgram");
+            assign_if_exists(&mut role_by_index, 12, "memoProgram");
+            assign_if_exists(&mut role_by_index, 13, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 14, "program");
+            // Remaining accounts handled by the instruction arguments (RemainingAccountsInfo)
+        },
         
         // Add Mappings for other V2 Instructions
 
@@ -376,11 +396,10 @@ pub fn map_accounts(
         InstructionType::ClosePositionIfEmpty => {
             // Guessing accounts based on name
             assign_if_exists(&mut role_by_index, 0, "position");
-            assign_if_exists(&mut role_by_index, 1, "owner");
+            assign_if_exists(&mut role_by_index, 1, "sender");
             assign_if_exists(&mut role_by_index, 2, "rentReceiver");
-            assign_if_exists(&mut role_by_index, 3, "systemProgram"); // Often needed for closing
-            assign_if_exists(&mut role_by_index, 4, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 5, "program");
+            assign_if_exists(&mut role_by_index, 3, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 4, "program");
         },
 
         InstructionType::InitializeTokenBadge => {
