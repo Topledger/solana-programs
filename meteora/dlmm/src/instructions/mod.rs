@@ -698,23 +698,62 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             }));
         },
         InstructionType::InitializeCustomizablePermissionlessLbPair => {
-            if data.len() < 40 { return None; }
+            // Args: params: CustomizableParams
+            // Total size = 8 (disc) + 83 (params) = 91 bytes minimum
+            let mut current_offset = 8;
+            let params_size = 83; // Calculated size of CustomizableParams
+            if data.len() < current_offset + params_size { 
+                log::warn!("Data too short for InitializeCustomizablePermissionlessLbPair params: {} bytes, expected at least {}", data.len() - current_offset, params_size);
+                return None; 
+            }
             
-            let active_id = parse_i32(data, 8).unwrap_or(0);
-            let bin_step = parse_i32(data, 12).unwrap_or(0);
-            let base_factor = parse_i32(data, 16).unwrap_or(0);
-            let activation_type = data[20] as u32; // Assuming u8 maps to uint32
-            let has_alpha_vault = data[21] != 0;   // Assuming bool
-            let activation_point = parse_i64(data, 24).unwrap_or(0);
+            // Parse CustomizableParams fields sequentially
+            let active_id_opt = parse_i32(data, current_offset).ok();
+            current_offset += 4;
+            let bin_step_opt = parse_u16(data, current_offset).ok().map(|v| v as u32); // Map u16 to u32
+            current_offset += 2;
+            let base_factor_opt = parse_u16(data, current_offset).ok().map(|v| v as u32); // Map u16 to u32
+            current_offset += 2;
+
+            let activation_type = data[current_offset]; // u8
+            current_offset += 1;
+            let has_alpha_vault = data[current_offset] != 0; // bool
+            current_offset += 1;
+
+            // Parse Option<u64> activation_point
+            let activation_point_present = data[current_offset] != 0;
+            let activation_point = if activation_point_present { parse_u64(data, current_offset + 1).ok() } else { None };
+            current_offset += 9; // 1 byte discriminant + 8 bytes value
+
+            let creator_pool_on_off_control = data[current_offset] != 0; // bool
+            current_offset += 1;
+            let base_fee_power_factor = data[current_offset]; // u8
+            current_offset += 1;
+
+            // Extract padding bytes but don't store them explicitly unless needed
+            let padding_bytes = data[current_offset..(current_offset + 62)].to_vec();
+            // current_offset += 62; // Update offset if needed
+
+            let padding_numeric = padding_bytes.iter().map(|&b| b as u32).collect::<Vec<u32>>();
+            // current_offset += 62; // Update offset if needed
+
+            // Construct the PbCustomizableParams struct
+            let params = PbCustomizableParams {
+                active_id: active_id_opt,
+                bin_step: bin_step_opt,
+                base_factor: base_factor_opt,
+                activation_type: Some(activation_type as u32), // Cast u8 to u32
+                has_alpha_vault: Some(has_alpha_vault),
+                activation_point: activation_point, 
+                creator_pool_on_off_control: Some(creator_pool_on_off_control),
+                base_fee_power_factor: Some(base_fee_power_factor as u32), // Cast u8 to u32
+                padding: padding_numeric.clone(), // Assign numeric Vec<u32> to the final padding field
+            };
             
+            // Assign the parsed params to the correct layout
             args.instruction_args = Some(instruction_args::InstructionArgs::InitializeCustomizablePermissionlessLbPair(
                 PbInitializeCustomizablePermissionlessLbPairLayout {
-                    active_id: Some(active_id),
-                    bin_step: Some(bin_step),
-                    base_factor: Some(base_factor),
-                    activation_type: Some(activation_type),
-                    has_alpha_vault: Some(has_alpha_vault),
-                    activation_point: Some(activation_point),
+                    params: Some(params), // Use the nested params struct
                 }
             ));
         },
@@ -1283,6 +1322,18 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
             let base_fee_power_factor = data[current_offset];
             // Ignore padding (62 bytes)
 
+            // Extract padding bytes but don't store them explicitly unless needed
+            let padding_bytes_v2 = if data.len() >= current_offset + 62 {
+                data[current_offset..(current_offset + 62)].to_vec()
+            } else {
+                log::warn!("Data too short for padding in InitializeCustomizablePermissionlessLbPair2");
+                vec![] // Return empty vec if data is short
+            };
+            // current_offset += 62; // Update offset if needed
+
+            let padding_numeric_v2 = padding_bytes_v2.iter().map(|&b| b as u32).collect::<Vec<u32>>();
+            // current_offset += 62; // Update offset if needed
+
             let params = PbCustomizableParams {
                  // Apply .ok() results
                 active_id: active_id_opt,
@@ -1294,6 +1345,7 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
                 activation_point: activation_point, // Already Option<u64>
                 creator_pool_on_off_control: Some(creator_pool_on_off_control),
                 base_fee_power_factor: Some(base_fee_power_factor as u32), // Assuming u8 maps to u32
+                padding: padding_numeric_v2.clone(), // Assign numeric Vec<u32> to the final padding field
             };
 
             args.instruction_args = Some(IArgs::InitializeCustomizablePermissionlessLbPair2(

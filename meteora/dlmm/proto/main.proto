@@ -286,14 +286,9 @@ message PbUpdateConfigLayout {
   optional uint64 value = 2;
 }
 
-// Parameters for InitializeCustomizablePermissionlessLbPair (Flattened)
+// Parameters for InitializeCustomizablePermissionlessLbPair (Corrected)
 message PbInitializeCustomizablePermissionlessLbPairLayout {
-  optional int32 active_id = 1;
-  optional int32 bin_step = 2;
-  optional int32 base_factor = 3;
-  optional uint32 activation_type = 4; // Assuming u8 maps to uint32
-  optional bool has_alpha_vault = 5;
-  optional int64 activation_point = 6; // Assuming i64 maps to int64
+  optional PbCustomizableParams params = 1;
 }
 
 // Meteora DLMM specific layouts
@@ -837,7 +832,8 @@ message PbCustomizableParams {
   optional uint64 activation_point = 6; // Option<u64> in IDL
   optional bool creator_pool_on_off_control = 7;
   optional uint32 base_fee_power_factor = 8; // u8 in IDL
-  // padding omitted
+  // Renamed padding_numeric to padding for final JSON output
+  repeated uint32 padding = 10; // [u8; 62] in IDL represented as numeric array
 }
 
 // Corresponds to LiquidityParameter struct in IDL

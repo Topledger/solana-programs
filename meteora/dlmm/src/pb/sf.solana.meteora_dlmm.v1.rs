@@ -498,23 +498,11 @@ pub struct PbUpdateConfigLayout {
     #[prost(uint64, optional, tag = "2")]
     pub value: ::core::option::Option<u64>,
 }
-/// Parameters for InitializeCustomizablePermissionlessLbPair (Flattened)
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+/// Parameters for InitializeCustomizablePermissionlessLbPair (Corrected)
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbInitializeCustomizablePermissionlessLbPairLayout {
-    #[prost(int32, optional, tag = "1")]
-    pub active_id: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "2")]
-    pub bin_step: ::core::option::Option<i32>,
-    #[prost(int32, optional, tag = "3")]
-    pub base_factor: ::core::option::Option<i32>,
-    /// Assuming u8 maps to uint32
-    #[prost(uint32, optional, tag = "4")]
-    pub activation_type: ::core::option::Option<u32>,
-    #[prost(bool, optional, tag = "5")]
-    pub has_alpha_vault: ::core::option::Option<bool>,
-    /// Assuming i64 maps to int64
-    #[prost(int64, optional, tag = "6")]
-    pub activation_point: ::core::option::Option<i64>,
+    #[prost(message, optional, tag = "1")]
+    pub params: ::core::option::Option<PbCustomizableParams>,
 }
 /// Meteora DLMM specific layouts
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
@@ -1233,7 +1221,7 @@ pub struct PbClaimFee2Layout {
     #[prost(message, optional, tag = "3")]
     pub remaining_accounts_info: ::core::option::Option<PbRemainingAccountsInfo>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbInitializeCustomizablePermissionlessLbPair2Layout {
     #[prost(message, optional, tag = "1")]
     pub params: ::core::option::Option<PbCustomizableParams>,
@@ -1360,7 +1348,7 @@ pub struct PbRemainingAccountsInfo {
     pub slices: ::prost::alloc::vec::Vec<PbRemainingAccountsSlice>,
 }
 /// Corresponds to CustomizableParams struct in IDL
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbCustomizableParams {
     #[prost(int32, optional, tag = "1")]
     pub active_id: ::core::option::Option<i32>,
@@ -1383,6 +1371,11 @@ pub struct PbCustomizableParams {
     /// u8 in IDL
     #[prost(uint32, optional, tag = "8")]
     pub base_fee_power_factor: ::core::option::Option<u32>,
+    /// Renamed padding_numeric to padding for final JSON output
+    ///
+    /// \[u8; 62\] in IDL represented as numeric array
+    #[prost(uint32, repeated, tag = "10")]
+    pub padding: ::prost::alloc::vec::Vec<u32>,
 }
 /// Corresponds to LiquidityParameter struct in IDL
 #[derive(Clone, PartialEq, ::prost::Message)]

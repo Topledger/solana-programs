@@ -228,6 +228,24 @@ pub fn map_accounts(
         
         // Add Mappings for other V2 Instructions
 
+        InstructionType::InitializeCustomizablePermissionlessLbPair => {
+            // Based on V1 IDL
+            assign_if_exists(&mut role_by_index, 0, "lbPair");
+            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension"); // Optional
+            assign_if_exists(&mut role_by_index, 2, "tokenMintX");
+            assign_if_exists(&mut role_by_index, 3, "tokenMintY");
+            assign_if_exists(&mut role_by_index, 4, "reserveX");
+            assign_if_exists(&mut role_by_index, 5, "reserveY");
+            assign_if_exists(&mut role_by_index, 6, "oracle");
+            assign_if_exists(&mut role_by_index, 7, "userTokenX"); // User token X
+            assign_if_exists(&mut role_by_index, 8, "funder"); // Signer
+            assign_if_exists(&mut role_by_index, 9, "tokenProgram");
+            assign_if_exists(&mut role_by_index, 10, "systemProgram");
+            assign_if_exists(&mut role_by_index, 11, "userTokenY"); // User token Y
+            assign_if_exists(&mut role_by_index, 12, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 13, "program");
+        },
+
         InstructionType::InitializeLbPair2 => {
             // Similar to V1 InitializeLbPair
             assign_if_exists(&mut role_by_index, 0, "lbPair");
@@ -247,22 +265,24 @@ pub fn map_accounts(
         },
 
         InstructionType::InitializeCustomizablePermissionlessLbPair2 => {
-            // Complex instruction, mapping base accounts similar to InitializeLbPair2
-            // Needs verification against exact IDL account list if possible
+            // Based on V2 IDL - Corrected
             assign_if_exists(&mut role_by_index, 0, "lbPair");
-            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension");
+            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension"); // Optional
             assign_if_exists(&mut role_by_index, 2, "tokenMintX");
             assign_if_exists(&mut role_by_index, 3, "tokenMintY");
             assign_if_exists(&mut role_by_index, 4, "reserveX");
             assign_if_exists(&mut role_by_index, 5, "reserveY");
             assign_if_exists(&mut role_by_index, 6, "oracle");
-            assign_if_exists(&mut role_by_index, 7, "funder");
-            assign_if_exists(&mut role_by_index, 8, "tokenProgram");
-            assign_if_exists(&mut role_by_index, 9, "tokenProgram2022"); // Potentially needed
-            assign_if_exists(&mut role_by_index, 10, "systemProgram");
-            assign_if_exists(&mut role_by_index, 11, "rent");
-            assign_if_exists(&mut role_by_index, 12, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 13, "program");
+            assign_if_exists(&mut role_by_index, 7, "userTokenX"); // User token X
+            assign_if_exists(&mut role_by_index, 8, "funder"); // Signer
+            assign_if_exists(&mut role_by_index, 9, "tokenBadgeX"); // Optional
+            assign_if_exists(&mut role_by_index, 10, "tokenBadgeY"); // Optional
+            assign_if_exists(&mut role_by_index, 11, "tokenProgramX"); // V2 split token programs
+            assign_if_exists(&mut role_by_index, 12, "tokenProgramY"); // V2 split token programs
+            assign_if_exists(&mut role_by_index, 13, "systemProgram");
+            assign_if_exists(&mut role_by_index, 14, "userTokenY"); // User token Y
+            assign_if_exists(&mut role_by_index, 15, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 16, "program");
         },
 
         InstructionType::ClaimFee2 => {
