@@ -719,7 +719,7 @@ message PbEventLogWrapper {
 
 message PbInitializeLbPair2Layout {
   optional int32 active_id = 1;
-  // padding field from IDL is omitted
+  repeated uint32 padding = 2; // [u8; 96] in IDL
 }
 
 message PbClaimFee2Layout {

@@ -1285,14 +1285,22 @@ pub fn process_instruction_data(data: &[u8], discriminator: &[u8]) -> Option<Ins
 
         // V2 Instructions (require more details from IDL - stubbed for now with empty args)
         InstructionType::InitializeLbPair2 => {
-            if data.len() < 12 { // 8 bytes discriminator + 4 bytes active_id
-                log::warn!("Data too short for InitializeLbPair2: {} bytes", data.len());
+            const PADDING_LEN: usize = 96;
+            const MIN_LEN: usize = 8 + 4 + PADDING_LEN; // discriminator + active_id + padding
+            if data.len() < MIN_LEN {
+                log::warn!("Data too short for InitializeLbPair2 (needs {} bytes): {} bytes found", MIN_LEN, data.len());
                 return None;
             }
-            // Use .ok() to map Ok(value) -> Some(value) [incl. 0], Err -> None
+            
             let active_id_opt = parse_i32(data, 8).ok();
+            
+            let padding_start_offset = 12;
+            let padding_bytes = &data[padding_start_offset..(padding_start_offset + PADDING_LEN)];
+            let padding_numeric = padding_bytes.iter().map(|&b| b as u32).collect::<Vec<u32>>();
+            
             args.instruction_args = Some(IArgs::InitializeLbPair2(PbInitializeLbPair2Layout {
                 active_id: active_id_opt,
+                padding: padding_numeric,
             }));
         },
 

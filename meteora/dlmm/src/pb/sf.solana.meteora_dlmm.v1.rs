@@ -1199,11 +1199,13 @@ pub mod pb_event_log_wrapper {
         DynamicFeeParameterUpdateLogFields(super::PbDynamicFeeParameterUpdateLogFields),
     }
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbInitializeLbPair2Layout {
-    /// padding field from IDL is omitted
     #[prost(int32, optional, tag = "1")]
     pub active_id: ::core::option::Option<i32>,
+    /// \[u8; 96\] in IDL
+    #[prost(uint32, repeated, tag = "2")]
+    pub padding: ::prost::alloc::vec::Vec<u32>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PbClaimFee2Layout {

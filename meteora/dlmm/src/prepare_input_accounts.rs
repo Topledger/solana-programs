@@ -280,19 +280,21 @@ pub fn map_accounts(
         InstructionType::InitializeLbPair2 => {
             // Similar to V1 InitializeLbPair
             assign_if_exists(&mut role_by_index, 0, "lbPair");
-            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension"); // Assuming it's still needed
+            assign_if_exists(&mut role_by_index, 1, "binArrayBitmapExtension");
             assign_if_exists(&mut role_by_index, 2, "tokenMintX");
             assign_if_exists(&mut role_by_index, 3, "tokenMintY");
             assign_if_exists(&mut role_by_index, 4, "reserveX");
             assign_if_exists(&mut role_by_index, 5, "reserveY");
             assign_if_exists(&mut role_by_index, 6, "oracle");
-            // presetParameter might differ or be optional in V2, check IDL if issues arise
-            assign_if_exists(&mut role_by_index, 7, "funder"); // Changed from presetParameter in V1
-            assign_if_exists(&mut role_by_index, 8, "tokenProgram"); // Typically Token Program (or Token-2022)
-            assign_if_exists(&mut role_by_index, 9, "systemProgram");
-            assign_if_exists(&mut role_by_index, 10, "rent");
-            assign_if_exists(&mut role_by_index, 11, "eventAuthority");
-            assign_if_exists(&mut role_by_index, 12, "program");
+            assign_if_exists(&mut role_by_index, 7, "presetParameter");
+            assign_if_exists(&mut role_by_index, 8, "funder"); 
+            assign_if_exists(&mut role_by_index, 9, "tokenBadgeX");
+            assign_if_exists(&mut role_by_index, 10, "tokenBadgeY");
+            assign_if_exists(&mut role_by_index, 11, "tokenProgramX"); 
+            assign_if_exists(&mut role_by_index, 12, "tokenProgramY"); 
+            assign_if_exists(&mut role_by_index, 13, "systemProgram");
+            assign_if_exists(&mut role_by_index, 14, "eventAuthority");
+            assign_if_exists(&mut role_by_index, 15, "program");
         },
 
         InstructionType::InitializeCustomizablePermissionlessLbPair2 => {
