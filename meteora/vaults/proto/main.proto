@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package sf.solana.meteora_vaults.v1;
+
+// Placeholder Meta message - Adapt from DLMM or define as needed
+message Meta {
+    string tx_id = 1;
+    uint64 block_slot = 2;
+    int64 block_time = 3;
+    string block_date = 4;
+    optional uint32 instruction_index = 5;
+    optional bool is_inner_instruction = 6;
+    optional uint32 inner_instruction_index = 7;
+    optional string signer = 8;           // Signer pubkey
+    optional string outer_program = 9; // Outer program ID if inner instruction
+    string instruction_type = 10;      // Name of the instruction
+    map<string, string> input_accounts = 11; // Map of roles to account pubkeys
+    optional InstructionArgs args = 12;    // Parsed instruction arguments
+}
+
+// --- Instruction Argument Layouts ---
+
+message PbInitializeLayout {
+    // No arguments
+}
+
+message PbEnableVaultLayout {
+    optional uint32 enabled = 1; // Corresponds to u8, using u32 for Protobuf compatibility
+}
+
+message PbSetOperatorLayout {
+    // No arguments
+}
+
+message PbStrategyBumpsLayout {
+    optional uint32 strategy_index = 1; // u8 -> u32
+    repeated uint32 other_bumps = 2;    // u8 array -> repeated u32
+}
+
+enum PbStrategyType {
+    PORT_FINANCE_WITHOUT_LM = 0;
+    PORT_FINANCE_WITH_LM = 1;
+    SOLEND_WITHOUT_LM = 2;
+    MANGO = 3;
+    SOLEND_WITH_LM = 4;
+    APRICOT_WITHOUT_LM = 5;
+    FRANCIUM = 6;
+    TULIP = 7;
+    VAULT = 8;
+    DRIFT = 9;
+    FRAKT = 10;
+    MARGINFI = 11;
+}
+
+message PbInitializeStrategyLayout {
+    optional PbStrategyBumpsLayout bumps = 1;
+    optional PbStrategyType strategy_type = 2;
+}
+
+message PbRemoveStrategyLayout {
+    // No arguments
+}
+
+message PbRemoveStrategy2Layout {
+    optional uint64 max_admin_pay_amount = 1;
+}
+
+message PbCollectDustLayout {
+    // No arguments
+}
+
+message PbAddStrategyLayout {
+    // No arguments
+}
+
+message PbDepositStrategyLayout {
+    optional uint64 amount = 1;
+}
+
+message PbWithdrawStrategyLayout {
+    optional uint64 amount = 1;
+}
+
+message PbWithdraw2Layout {
+    optional uint64 unmint_amount = 1;
+    optional uint64 min_out_amount = 2;
+}
+
+message PbDepositLayout {
+    optional uint64 token_amount = 1;
+    optional uint64 minimum_lp_token_amount = 2;
+}
+
+message PbWithdrawLayout {
+    optional uint64 unmint_amount = 1;
+    optional uint64 min_out_amount = 2;
+}
+
+message PbWithdrawDirectlyFromStrategyLayout {
+    optional uint64 unmint_amount = 1;
+    optional uint64 min_out_amount = 2;
+}
+
+message PbClaimRewardsLayout {
+    // No arguments
+}
+
+message PbPatchVaultFieldInStrategyLayout {
+    // No arguments
+}
+
+message PbWithdrawMangoLayout {
+    // No arguments
+}
+
+message PbIdlWriteLayout {
+     // No arguments
+}
+
+// Wrapper for instruction arguments using oneof
+message InstructionArgs {
+    oneof instruction_args {
+        PbInitializeLayout initialize = 1;
+        PbEnableVaultLayout enable_vault = 2;
+        PbSetOperatorLayout set_operator = 3;
+        PbInitializeStrategyLayout initialize_strategy = 4;
+        PbRemoveStrategyLayout remove_strategy = 5;
+        PbRemoveStrategy2Layout remove_strategy2 = 6;
+        PbCollectDustLayout collect_dust = 7;
+        PbAddStrategyLayout add_strategy = 8;
+        PbDepositStrategyLayout deposit_strategy = 9;
+        PbWithdrawStrategyLayout withdraw_strategy = 10;
+        PbWithdraw2Layout withdraw2 = 11;
+        PbDepositLayout deposit = 12;
+        PbWithdrawLayout withdraw = 13;
+        PbWithdrawDirectlyFromStrategyLayout withdraw_directly_from_strategy = 14;
+        PbClaimRewardsLayout claim_rewards = 15;
+        PbPatchVaultFieldInStrategyLayout patch_vault_field_in_strategy = 16;
+        PbWithdrawMangoLayout withdraw_mango = 17;
+        PbIdlWriteLayout idl_write = 18;
+    }
+}
+
+// Wrapper message for map output
+message VaultInstructions {
+    repeated Meta items = 1;
+} 

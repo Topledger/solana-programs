@@ -1,0 +1,46 @@
+[package]
+name = "substreams-solana-meteora-vault"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+substreams = "^0.6.0"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+substreams-solana-program-instructions = "0.1"
+bytes = "1.1.0"
+prost = "0.13"
+prost-types = "0.13"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+num-bigint = "0.4"
+bs58 = "0.5.0"
+base64 = "0.21.5"
+chrono = { version = "0.4", features = [ "std" ], default-features = false }
+hex = "0.4.3"
+log = "0.4.20"
+num-traits = "0.2"
+lazy_static = "1.4.0"
+anyhow = "1.0.75"
+borsh = "1.5.1"
+anchor-lang = { version = "0.31.1", features = ["idl-build", "derive"] }
+
+[build-dependencies]
+prost-build = "0.13"
+substreams-solana = { git = "https://github.com/streamingfast/substreams-solana", branch = "master" }
+anyhow = "1.0.75"
+anchor-idl = "0.3.1"       # for GeneratorOptions
+serde_json = "1.0"
+proc-macro2 = "1"
+darling = "0.14"
+quote = "1.0"
+syn = "1"
+heck = "0.5.0"
+sha2 = "0.10.7"
+
+[profile.release]
+lto = true
+opt-level = 's'
+strip = "debuginfo" 

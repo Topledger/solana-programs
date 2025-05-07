@@ -1,0 +1,27 @@
+specVersion: v0.1.0
+package:
+  name: meteora_vaults
+  version: v0.1.0
+
+imports:
+  sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
+
+protobuf:
+  files:
+    - proto/main.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/substreams_solana_meteora_vaults.wasm
+
+modules:
+  - name: map_block
+    kind: map
+    initialBlock: 0
+    inputs:
+      - source: sf.solana.type.v1.Block
+    output:
+      type: proto:sf.solana.meteora_vaults.v1.Instructions 
