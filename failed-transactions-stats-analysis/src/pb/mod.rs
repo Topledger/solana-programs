@@ -18,11 +18,11 @@ pub mod sf {
     }
 }
 pub mod sol {
-    pub mod block {
-        // @@protoc_insertion_point(attribute:sol.block.v1)
+    pub mod instructions {
+        // @@protoc_insertion_point(attribute:sol.instructions.v1)
         pub mod v1 {
-            include!("sol.block.v1.rs");
-            // @@protoc_insertion_point(sol.block.v1)
+            include!("sol.instructions.v1.rs");
+            // @@protoc_insertion_point(sol.instructions.v1)
         }
     }
     pub mod transactions {
