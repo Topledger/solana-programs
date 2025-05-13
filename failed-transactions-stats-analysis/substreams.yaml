@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'tl_solana_failed_transactions_stats_1_0_0'
-  version: v1.0.0
+  name: 'tl_solana_failed_transactions_stats_1_0_1'
+  version: v1.0.1
 
 protobuf:
   files:
@@ -21,6 +21,6 @@ modules:
   - name: map_block
     kind: map
     inputs:
-      - map: solana:blocks_without_votes
+      - source: sf.solana.type.v1.Block
     output:
       type: proto:sf.solana.transaction_stats.v1.Output
