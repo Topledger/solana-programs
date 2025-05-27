@@ -32,6 +32,7 @@ const AddLiquidityOneSidePrecise2: u64 = u64::from_le_bytes([33, 51, 163, 201, 1
 const RemoveLiquidity2: u64 = u64::from_le_bytes([230, 215, 82, 127, 241, 101, 227, 146]);
 const RemoveLiquidityByRange2: u64 = u64::from_le_bytes([204, 2, 195, 145, 53, 145, 145, 205]);
 const ClosePositionIfEmpty: u64 = u64::from_le_bytes([59, 124, 212, 118, 91, 152, 110, 157]);
+const ClosePosition2: u64 = u64::from_le_bytes([174, 90, 35, 115, 186, 40, 147, 226]);
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 #[repr(u8)]
@@ -498,6 +499,15 @@ pub fn parse_trade_instruction(
 
             result = Some(td);
         }
+
+        ClosePosition2 => {
+            td.instruction_type = "ClosePosition2".to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+
         AddLiquidityOneSidePrecise => {
             td.instruction_type = "AddLiquidityOneSidePrecise".to_string();
             td.pool = input_accounts.get(1).unwrap().to_string();

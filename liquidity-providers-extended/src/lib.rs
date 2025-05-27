@@ -119,123 +119,123 @@ fn get_trade_data(
 
     let mut result = None;
     match dapp_address.as_str() {
-        "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {
-            result =
-                dapps::dapp_whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP" => {
-            result =
-                dapps::dapp_9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8" => {
-            result =
-                dapps::dapp_675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK" => {
-            result =
-                dapps::dapp_CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S" => {
-            result =
-                dapps::dapp_EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c" => {
-            result =
-                dapps::dapp_2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ" => {
-            result =
-                dapps::dapp_SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
-            result =
-                dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB" => {
-            result =
-                dapps::dapp_Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
+        // "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc" => {
+        //     result =
+        //         dapps::dapp_whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP" => {
+        //     result =
+        //         dapps::dapp_9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8" => {
+        //     result =
+        //         dapps::dapp_675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK" => {
+        //     result =
+        //         dapps::dapp_CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S" => {
+        //     result =
+        //         dapps::dapp_EewxydAPCCVuNEyrVN68PuSYdQ7wKn27V9Gjeoi8dy3S::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c" => {
+        //     result =
+        //         dapps::dapp_2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ" => {
+        //     result =
+        //         dapps::dapp_SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt" => {
+        //     result =
+        //         dapps::dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB" => {
+        //     result =
+        //         dapps::dapp_Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
         "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo" => {
             result =
                 dapps::dapp_LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo::parse_trade_instruction(
@@ -249,32 +249,32 @@ fn get_trade_data(
                     inner_insrtuctions,
                 );
         }
-        "CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR" => {
-            result =
-                dapps::dapp_CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
-        "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C" => {
-            result =
-                dapps::dapp_CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C::parse_trade_instruction(
-                    &signer,
-                    instruction_data,
-                    &accounts,
-                    input_accounts,
-                    pre_token_balances,
-                    post_token_balances,
-                    inner_instruction_index,
-                    inner_insrtuctions,
-                );
-        }
+        // "CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR" => {
+        //     result =
+        //         dapps::dapp_CLMM9tUoggJu2wagPkkqs9eFG4BWhVBZWkP1qv3Sp7tR::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
+        // "CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C" => {
+        //     result =
+        //         dapps::dapp_CPMMoo8L3F4NbTegBCKVNunggL7H1ZpdTHKxQB5qKP1C::parse_trade_instruction(
+        //             &signer,
+        //             instruction_data,
+        //             &accounts,
+        //             input_accounts,
+        //             pre_token_balances,
+        //             post_token_balances,
+        //             inner_instruction_index,
+        //             inner_insrtuctions,
+        //         );
+        // }
         _ => {}
     }
 
