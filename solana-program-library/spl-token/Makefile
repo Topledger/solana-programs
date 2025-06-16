@@ -6,7 +6,7 @@ build:
 
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 296561424 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 311081162 -t +1000
 
 .PHONY: protogen
 protogen:
@@ -15,3 +15,13 @@ protogen:
 .PHONY: package
 package:
 	substreams pack ./substreams.yaml
+
+.PHONY wasm_pack:
+wasm_pack:
+	wasm-pack build --no-typescript --target no-modules
+
+.PHONY convert_and_gcloud_upload:
+convert_and_gcloud_upload:
+	go build utils/convert.go && mv convert utils/convert
+	utils/script.sh spl_token
+	
