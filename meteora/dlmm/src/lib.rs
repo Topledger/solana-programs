@@ -3,7 +3,7 @@ mod prepare_input_accounts;
 
 pub mod pb;
 
-use crate::pb::sf::solana::meteora_dlmm::v1::{Instructions, Meta};
+use crate::pb::sf::solana::meteora_dlmm::v1::{Output, Meta};
 use substreams_solana::pb::sf::solana::r#type::v1::{Block, CompiledInstruction};
 use substreams::log;
 use bs58;
@@ -16,7 +16,7 @@ pub const FUND_REWARD_DISCRIMINATOR: &[u8] = &[246, 228, 58, 130, 145, 170, 79, 
 #[substreams::handlers::map]
 fn map_block(
     block: Block,
-) -> Result<Instructions, substreams::errors::Error> {
+) -> Result<Output, substreams::errors::Error> {
     let mut processed_instructions: Vec<Meta> = Vec::new();
     let block_slot = block.slot;
     let block_time = block.block_time.as_ref().map_or(0, |t| t.timestamp);
@@ -158,6 +158,6 @@ fn map_block(
     log::info!("BLOCK SUMMARY: Processed {} Meteora DLMM instructions in block {}", 
              processed_instructions.len(), block_slot);
     
-    Ok(Instructions { instructions: processed_instructions })
+    Ok(Output { data: processed_instructions })
 }
 

@@ -3,8 +3,8 @@ syntax = "proto3";
 package sf.solana.meteora_dlmm.v1;
 
 // Main instructions container
-message Instructions {
-  repeated Meta instructions = 1;
+message Output {
+  repeated Meta data = 1;
 }
 
 // Metadata for an instruction

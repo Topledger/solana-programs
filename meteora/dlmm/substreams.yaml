@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: meteora_dlmm
-  version: v1.0.0
+  name: meteora_dlmm_v1_0_1
+  version: v1.0.1
 
 imports:
   sol: https://spkg.io/streamingfast/solana-common-v0.3.0.spkg
@@ -22,6 +22,6 @@ modules:
     kind: map
     initialBlock: 0
     inputs:
-      - source: sol:blocks_without_votes
+      - map: sol:blocks_without_votes
     output:
-      type: proto:sf.solana.meteora_dlmm.v1.Instructions 
+      type: proto:sf.solana.meteora_dlmm.v1.Output 
