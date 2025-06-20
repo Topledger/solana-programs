@@ -22,6 +22,7 @@ fn process_block(block: Block) -> Vec<BlockReward> {
         .unwrap_or_else(|| "2020-03-15".to_string());
 
     let block_time = block_time_option.map_or(0, |block_time| block_time.timestamp as u64);
+    let block_hash: String = block.blockhash;
 
     let mut block_rewards: Vec<BlockReward> = Vec::new();
 
@@ -30,12 +31,19 @@ fn process_block(block: Block) -> Vec<BlockReward> {
 
         block_reward.block_date = block_date.clone();
         block_reward.block_slot = block.slot as u64;
-        block_reward.block_time = block_time;
+        block_reward.block_timestamp = block_time;
         block_reward.pubkey = reward.pubkey.to_string();
         block_reward.lamports = reward.lamports as u64;
         block_reward.post_balance = reward.post_balance;
         block_reward.reward_type = reward_type_name(reward.reward_type).to_string();
-        block_reward.commission = reward.commission.to_string();
+        block_reward.commission = match reward.commission.parse::<u64>() {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("Invalid commission “{}”: {}", reward.commission, e);
+                0  // or some sensible default
+            }
+        };
+        block_reward.block_hash = block_hash.to_string();
 
         block_rewards.push(block_reward);
     });

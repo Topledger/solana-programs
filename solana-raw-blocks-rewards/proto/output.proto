@@ -9,10 +9,11 @@ message Output {
 message BlockReward {
   required string block_date = 1;
   required uint64 block_slot = 2;
-  required uint64 block_time = 3;
+  required uint64 block_timestamp = 3;
   required string pubkey = 4;
   required uint64 lamports = 5;
   required uint64 post_balance = 6;
   required string reward_type = 7;
-  required string commission = 8;
+  required uint64 commission = 8;
+  required string block_hash = 9;
 }
