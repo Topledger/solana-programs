@@ -25,6 +25,7 @@ pub mod dapp_Eo7WjKq67rjJQSZxS6z3YkapzY3eMj6Xy8X5EQVn5UaB;
 pub mod dapp_FLUXubRmkEi2q6K3Y9kBPg9248ggaZVsoSFhtJHSrm1X;
 pub mod dapp_GFXsSL5sSaDfNFQUYsHekbWBW1TsFdjDYzACh62tEHxn;
 pub mod dapp_H8W3ctz92svYg6mkn1UtGfu2aQr2fnUFHM1RhScEtQDt;
+pub mod dapp_HpNfyc2Saw7RKkQd8nEL4khUcuPhQ7WwY1B2qjx8jxFq;
 pub mod dapp_HyaB3W9q6XdA5xwpU4XnSZV94htfmbmqJXZcEbRaJutt;
 pub mod dapp_LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo;
 pub mod dapp_LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj;
