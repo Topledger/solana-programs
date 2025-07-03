@@ -740,6 +740,13 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "REALQqNEomY6cQGZJUGwywTBD2UmDT32rZcNnfxQ5N2" => {
+            result =
+                dapps::dapp_REALQqNEomY6cQGZJUGwywTBD2UmDT32rZcNnfxQ5N2::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
          "swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW" => {
              result =
                  dapps::dapp_swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW::parse_trade_instruction(
