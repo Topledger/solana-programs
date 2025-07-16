@@ -153,7 +153,7 @@ pub struct InitializeMultisig2Layout {
 pub struct InitializeMint2Layout {
     pub decimals: u8,
     pub mint_authority: PubkeyLayout,
-    pub freeze_authority: PubkeyLayout,
+    pub freeze_authority: Option<PubkeyLayout>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default, Serialize)]

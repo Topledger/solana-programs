@@ -175,13 +175,10 @@ fn get_outer_arg(
             arg.mint_authority =
                 get_b58_string(instruction.initializeMintArgs.mint_authority.value);
 
-            arg.freeze_authority = get_b58_string(
-                instruction
-                    .initializeMintArgs
-                    .freeze_authority
-                    .unwrap_or_default()
-                    .value,
-            );
+            // Only set freeze_authority if it's actually present (Some)
+            if let Some(freeze_authority) = instruction.initializeMintArgs.freeze_authority {
+                arg.freeze_authority = get_b58_string(freeze_authority.value);
+            }
         }
         "InitializeAccount" => {
             outerArg.instruction_type = String::from("InitializeAccount");
@@ -265,8 +262,10 @@ fn get_outer_arg(
             arg.decimals = Some(i32::from(instruction.initializeMint2Args.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMint2Args.mint_authority.value);
-            arg.freeze_authority =
-                get_b58_string(instruction.initializeMint2Args.freeze_authority.value);
+            // Only set freeze_authority if it's actually present (Some)
+            if let Some(freeze_authority) = instruction.initializeMint2Args.freeze_authority {
+                arg.freeze_authority = get_b58_string(freeze_authority.value);
+            }
         }
         "GetAccountDataSize" => {
             outerArg.instruction_type = String::from("GetAccountDataSize");
