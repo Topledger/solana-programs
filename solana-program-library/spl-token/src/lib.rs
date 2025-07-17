@@ -14,14 +14,26 @@ use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
 use utils::convert_to_date;
 
-#[derive(Default)]
-pub struct OuterArg {
-    pub instruction_type: String,
-    pub input_accounts: Accounts,
-    pub arg: Arg,
+use serde_json::json;
+use serde_wasm_bindgen;
+use std::panic;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen(start)]
+pub fn run() {
+    panic::set_hook(Box::new(console_error_panic_hook::hook));
 }
 
-#[substreams::handlers::map]
+#[wasm_bindgen]
+pub fn parse(join_key: &str, base58_str: &str, accounts_js: JsValue) -> JsValue {
+    let accounts: Vec<String> = accounts_js.into_serde().unwrap();
+    let decoded_bytes: Vec<u8> = bs58::decode(base58_str).into_vec().unwrap();
+    let mut data = parse_instruction(decoded_bytes, accounts);
+    data.joinKey = join_key.to_string();
+    serde_wasm_bindgen::to_value(&data).unwrap()
+}
+
+// #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     let slot = block.slot;
     let parent_slot = block.parent_slot;
@@ -101,6 +113,13 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     Ok(Output { data })
 }
 
+#[derive(Default)]
+pub struct OuterArg {
+    pub instruction_type: String,
+    pub input_accounts: Accounts,
+    pub arg: Arg,
+}
+
 fn handle_mints(
     mut obj: SplTokenMeta,
     pre_token_balances: &Vec<TokenBalance>,
@@ -155,11 +174,11 @@ fn get_outer_arg(
             arg.decimals = Some(i32::from(instruction.initializeMintArgs.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMintArgs.mint_authority.value);
-            arg.freeze_authority_option = Some(i32::from(
-                instruction.initializeMintArgs.freeze_authority_option,
-            ));
-            arg.freeze_authority =
-                get_b58_string(instruction.initializeMintArgs.freeze_authority.value);
+
+            // Only set freeze_authority if it's actually present (Some)
+            if let Some(freeze_authority) = instruction.initializeMintArgs.freeze_authority {
+                arg.freeze_authority = get_b58_string(freeze_authority.value);
+            }
         }
         "InitializeAccount" => {
             outerArg.instruction_type = String::from("InitializeAccount");
@@ -243,8 +262,10 @@ fn get_outer_arg(
             arg.decimals = Some(i32::from(instruction.initializeMint2Args.decimals));
             arg.mint_authority =
                 get_b58_string(instruction.initializeMint2Args.mint_authority.value);
-            arg.freeze_authority =
-                get_b58_string(instruction.initializeMint2Args.freeze_authority.value);
+            // Only set freeze_authority if it's actually present (Some)
+            if let Some(freeze_authority) = instruction.initializeMint2Args.freeze_authority {
+                arg.freeze_authority = get_b58_string(freeze_authority.value);
+            }
         }
         "GetAccountDataSize" => {
             outerArg.instruction_type = String::from("GetAccountDataSize");
