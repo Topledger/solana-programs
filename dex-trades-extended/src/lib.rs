@@ -511,9 +511,23 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "REALQqNEomY6cQGZJUGwywTBD2UmDT32rZcNnfxQ5N2" => {
+            result =
+                dapps::dapp_REALQqNEomY6cQGZJUGwywTBD2UmDT32rZcNnfxQ5N2::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
         "SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr" => {
             result =
                 dapps::dapp_SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "srAMMzfVHVAtgSJc8iH6CfKzuWuUTzLHVCE81QU1rgi" => {
+            result =
+                dapps::dapp_srAMMzfVHVAtgSJc8iH6CfKzuWuUTzLHVCE81QU1rgi::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );
@@ -561,6 +575,13 @@ fn get_trade_instruction(
         "2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c" => {
             result =
                 dapps::dapp_2wT8Yq49kHgDzXuPxZSaeLaH1qbmGXtEyPy64bL7aD3c::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "5quBtoiQqxF9Jv6KYKctB59NT3gtJD2Y65kdnB1Uev3h" => {
+            result =
+                dapps::dapp_5quBtoiQqxF9Jv6KYKctB59NT3gtJD2Y65kdnB1Uev3h::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );
@@ -791,6 +812,13 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
+        "HpNfyc2Saw7RKkQd8nEL4khUcuPhQ7WwY1B2qjx8jxFq" => {
+            result =
+                dapps::dapp_HpNfyc2Saw7RKkQd8nEL4khUcuPhQ7WwY1B2qjx8jxFq::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
         "obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y" => {
             result =
                 dapps::dapp_obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y::parse_trade_instruction(
@@ -843,6 +871,27 @@ fn get_trade_instruction(
         "ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY" => {
             result =
                 dapps::dapp_ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG" => {
+            result =
+                dapps::dapp_cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN" => {
+            result =
+                dapps::dapp_dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        "LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj" => {
+            result =
+                dapps::dapp_LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj::parse_trade_instruction(
                     instruction_data,
                     input_accounts,
                 );

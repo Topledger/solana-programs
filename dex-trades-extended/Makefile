@@ -6,7 +6,7 @@ build:
 
 .PHONY: stream
 stream: build
-	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 320568453 -t +1
+	substreams run -e $(ENDPOINT) substreams.yaml map_block -s 356513801 -t +1000
 
 .PHONY: protogen
 protogen:
