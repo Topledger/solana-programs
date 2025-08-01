@@ -35,4 +35,10 @@ message TradeData {
   required string bundled_position = 30;
   required string strategy_type = 31;
   optional uint32 bps_to_remove = 32;
+  optional DecodedLog decoded_logs = 33;
+}
+
+message DecodedLog {
+  required string event_name = 1;
+  map<string, string> fields = 2;
 }

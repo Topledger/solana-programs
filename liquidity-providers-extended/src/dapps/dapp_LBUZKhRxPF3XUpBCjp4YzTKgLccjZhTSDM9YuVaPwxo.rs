@@ -4,7 +4,7 @@ use core::str;
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
 use crate::{
-    pb::sf::solana::liquidity::providers::v1::TradeData,
+    pb::sf::solana::liquidity::providers::v1::{TradeData, DecodedLog},
     utils::{get_mint_address_for, get_token_transfer},
 };
 
@@ -33,6 +33,10 @@ const RemoveLiquidity2: u64 = u64::from_le_bytes([230, 215, 82, 127, 241, 101, 2
 const RemoveLiquidityByRange2: u64 = u64::from_le_bytes([204, 2, 195, 145, 53, 145, 145, 205]);
 const ClosePositionIfEmpty: u64 = u64::from_le_bytes([59, 124, 212, 118, 91, 152, 110, 157]);
 const ClosePosition2: u64 = u64::from_le_bytes([174, 90, 35, 115, 186, 40, 147, 226]);
+
+// Event detection constants
+const EVENT_LOG_DISCRIMINATOR: [u8; 8] = [228, 69, 165, 46, 81, 203, 154, 29];
+const REBALANCING_EVENT_DISCRIMINATOR: [u8; 8] = [0, 109, 117, 179, 61, 91, 199, 200];
 
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 #[repr(u8)]
@@ -138,6 +142,124 @@ struct RemoveLiquidityByRangeLayout {
     bpsToRemove: u16,
 }
 
+#[derive(BorshDeserialize, Debug)]
+struct RebalancingEvent {
+    lb_pair: [u8; 32],           // pubkey
+    position: [u8; 32],          // pubkey  
+    owner: [u8; 32],             // pubkey
+    active_bin_id: i32,
+    x_withdrawn_amount: u64,
+    x_added_amount: u64,
+    y_withdrawn_amount: u64,
+    y_added_amount: u64,
+    x_fee_amount: u64,
+    y_fee_amount: u64,
+    old_min_id: i32,
+    old_max_id: i32,
+    new_min_id: i32,
+    new_max_id: i32,
+    rewards: [u64; 2],
+}
+
+// Helper functions for event detection and parsing
+
+fn is_anchor_event(data: &[u8]) -> bool {
+    data.len() >= 8 && &data[0..8] == EVENT_LOG_DISCRIMINATOR
+}
+
+fn get_event_discriminator(data: &[u8]) -> Option<[u8; 8]> {
+    if data.len() >= 16 {
+        let mut disc = [0u8; 8];
+        disc.copy_from_slice(&data[8..16]);
+        Some(disc)
+    } else {
+        None
+    }
+}
+
+fn try_base58_decode(data_str: &str) -> Option<Vec<u8>> {
+    bs58::decode(data_str).into_vec().ok()
+}
+
+fn parse_rebalancing_event(
+    event_data: &[u8],
+    signer: &String,
+    accounts: &Vec<String>,
+) -> Option<TradeData> {
+    if let Ok(rebalancing) = RebalancingEvent::deserialize(&mut event_data.clone()) {
+        let mut td = TradeData::default();
+        td.instruction_type = "RebalancingLog".to_string();
+        td.lp_wallet = signer.to_string();
+        
+        // Create decoded logs
+        let mut fields = std::collections::HashMap::new();
+        fields.insert("lb_pair".to_string(), bs58::encode(&rebalancing.lb_pair).into_string());
+        fields.insert("position".to_string(), bs58::encode(&rebalancing.position).into_string());
+        fields.insert("owner".to_string(), bs58::encode(&rebalancing.owner).into_string());
+        fields.insert("active_bin_id".to_string(), rebalancing.active_bin_id.to_string());
+        fields.insert("x_withdrawn_amount".to_string(), rebalancing.x_withdrawn_amount.to_string());
+        fields.insert("x_added_amount".to_string(), rebalancing.x_added_amount.to_string());
+        fields.insert("y_withdrawn_amount".to_string(), rebalancing.y_withdrawn_amount.to_string());
+        fields.insert("y_added_amount".to_string(), rebalancing.y_added_amount.to_string());
+        fields.insert("x_fee_amount".to_string(), rebalancing.x_fee_amount.to_string());
+        fields.insert("y_fee_amount".to_string(), rebalancing.y_fee_amount.to_string());
+        fields.insert("old_min_id".to_string(), rebalancing.old_min_id.to_string());
+        fields.insert("old_max_id".to_string(), rebalancing.old_max_id.to_string());
+        fields.insert("new_min_id".to_string(), rebalancing.new_min_id.to_string());
+        fields.insert("new_max_id".to_string(), rebalancing.new_max_id.to_string());
+        fields.insert("rewards_0".to_string(), rebalancing.rewards[0].to_string());
+        fields.insert("rewards_1".to_string(), rebalancing.rewards[1].to_string());
+        
+        td.decoded_logs = Some(DecodedLog {
+            event_name: "Rebalancing".to_string(),
+            fields,
+        });
+        
+        // Set pool from lb_pair
+        td.pool = bs58::encode(&rebalancing.lb_pair).into_string();
+        td.position = bs58::encode(&rebalancing.position).into_string();
+        
+        Some(td)
+    } else {
+        None
+    }
+}
+
+fn parse_anchor_event(
+    event_discriminator: [u8; 8],
+    event_data: &[u8],
+    signer: &String,
+    accounts: &Vec<String>,
+) -> Option<TradeData> {
+    match event_discriminator {
+        REBALANCING_EVENT_DISCRIMINATOR => {
+            parse_rebalancing_event(event_data, signer, accounts)
+        }
+        _ => None
+    }
+}
+
+// Public utility function to parse base58 encoded event data
+pub fn parse_base58_event_data(
+    base58_data: &str,
+    signer: &String,
+    accounts: &Vec<String>,
+) -> Option<TradeData> {
+    if let Some(decoded_data) = try_base58_decode(base58_data) {
+        if is_anchor_event(&decoded_data) {
+            if let Some(event_discriminator) = get_event_discriminator(&decoded_data) {
+                return parse_anchor_event(
+                    event_discriminator,
+                    &decoded_data[16..],
+                    signer,
+                    accounts,
+                );
+            }
+        }
+    }
+    None
+}
+
 pub fn parse_trade_instruction(
     signer: &String,
     bytes_stream: Vec<u8>,
@@ -148,6 +270,21 @@ pub fn parse_trade_instruction(
     inner_idx: u32,
     inner_instructions: &Vec<InnerInstructions>,
 ) -> Option<TradeData> {
+    // Check if this is an Anchor CPI event first
+    if is_anchor_event(&bytes_stream) {
+        if let Some(event_discriminator) = get_event_discriminator(&bytes_stream) {
+            if let Some(event_result) = parse_anchor_event(
+                event_discriminator,
+                &bytes_stream[16..],
+                signer,
+                accounts,
+            ) {
+                return Some(event_result);
+            }
+        }
+    }
+
+    // If not an event or event parsing failed, continue with regular instruction parsing
     let (disc_bytes, rest) = bytes_stream.split_at(8);
     let disc_bytes_arr: [u8; 8] = disc_bytes.to_vec().try_into().unwrap();
     let discriminator: u64 = u64::from_le_bytes(disc_bytes_arr);
