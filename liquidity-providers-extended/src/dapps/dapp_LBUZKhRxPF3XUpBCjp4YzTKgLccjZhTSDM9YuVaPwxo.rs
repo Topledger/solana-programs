@@ -394,6 +394,7 @@ pub fn parse_trade_instruction(
                 RemoveLiquidityByRangeLayout::deserialize(&mut rest.clone()).unwrap();
             td.tick_lower_index = data.fromBinId;
             td.tick_upper_index = data.toBinId;
+            td.bps_to_remove = Some(data.bpsToRemove as u32);
 
             result = Some(td);
         }
@@ -768,6 +769,7 @@ pub fn parse_trade_instruction(
                 RemoveLiquidityByRangeLayout::deserialize(&mut rest.clone()).unwrap();
             td.tick_lower_index = data.fromBinId;
             td.tick_upper_index = data.toBinId;
+            td.bps_to_remove = Some(data.bpsToRemove as u32);
 
             result = Some(td);
         },
