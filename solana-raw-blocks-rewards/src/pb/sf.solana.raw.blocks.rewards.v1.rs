@@ -17,8 +17,8 @@ pub struct BlockReward {
     pub block_timestamp: u64,
     #[prost(string, required, tag="4")]
     pub pubkey: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag="5")]
-    pub lamports: u64,
+    #[prost(int64, required, tag="5")]
+    pub lamports: i64,
     #[prost(uint64, required, tag="6")]
     pub post_balance: u64,
     #[prost(string, required, tag="7")]

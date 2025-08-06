@@ -33,7 +33,7 @@ fn process_block(block: Block) -> Vec<BlockReward> {
         block_reward.block_slot = block.slot as u64;
         block_reward.block_timestamp = block_time;
         block_reward.pubkey = reward.pubkey.to_string();
-        block_reward.lamports = reward.lamports as u64;
+        block_reward.lamports = reward.lamports;
         block_reward.post_balance = reward.post_balance;
         block_reward.reward_type = reward_type_name(reward.reward_type).to_string();
         block_reward.commission = match reward.commission.parse::<u64>() {
