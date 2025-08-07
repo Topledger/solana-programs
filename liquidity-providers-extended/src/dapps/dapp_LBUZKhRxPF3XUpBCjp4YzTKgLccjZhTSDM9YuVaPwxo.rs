@@ -4,7 +4,7 @@ use core::str;
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
 use crate::{
-    pb::sf::solana::liquidity::providers::v1::{TradeData, DecodedLog},
+    pb::sf::solana::liquidity::providers::v1::{TradeData, DecodedLog, InstructionData},
     utils::{get_mint_address_for, get_token_transfer},
 };
 
@@ -33,6 +33,7 @@ const RemoveLiquidity2: u64 = u64::from_le_bytes([230, 215, 82, 127, 241, 101, 2
 const RemoveLiquidityByRange2: u64 = u64::from_le_bytes([204, 2, 195, 145, 53, 145, 145, 205]);
 const ClosePositionIfEmpty: u64 = u64::from_le_bytes([59, 124, 212, 118, 91, 152, 110, 157]);
 const ClosePosition2: u64 = u64::from_le_bytes([174, 90, 35, 115, 186, 40, 147, 226]);
+const RebalanceLiquidity: u64 = u64::from_le_bytes([92, 4, 176, 193, 119, 185, 83, 9]);
 
 // Event detection constants
 const EVENT_LOG_DISCRIMINATOR: [u8; 8] = [228, 69, 165, 46, 81, 203, 154, 29];
@@ -140,6 +141,42 @@ struct RemoveLiquidityByRangeLayout {
     fromBinId: i32,
     toBinId: i32,
     bpsToRemove: u16,
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct RemoveLiquidityParamsLayout {
+    min_bin_id: Option<i32>,
+    max_bin_id: Option<i32>,
+    bps: u16,
+    padding: [u8; 16],
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct AddLiquidityParamsLayout {
+    min_delta_id: i32,
+    max_delta_id: i32,
+    x0: u64,
+    y0: u64,
+    delta_x: u64,
+    delta_y: u64,
+    bit_flag: u8,
+    favor_x_in_active_id: bool,
+    padding: [u8; 16],
+}
+
+#[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
+struct RebalanceLiquidityParamsLayout {
+    active_id: i32,
+    max_active_bin_slippage: u16,
+    should_claim_fee: bool,
+    should_claim_reward: bool,
+    min_withdraw_x_amount: u64,
+    max_deposit_x_amount: u64,
+    min_withdraw_y_amount: u64,
+    max_deposit_y_amount: u64,
+    padding: [u8; 32],
+    removes: Vec<RemoveLiquidityParamsLayout>,
+    adds: Vec<AddLiquidityParamsLayout>,
 }
 
 #[derive(BorshDeserialize, Debug)]
@@ -915,6 +952,73 @@ pub fn parse_trade_instruction(
             td.pool = "".to_string();
             td.lp_wallet = signer.to_string();
             td.position = input_accounts.get(0).unwrap().to_string();
+
+            result = Some(td);
+        }
+        RebalanceLiquidity => {
+            td.instruction_type = "RebalanceLiquidity".to_string();
+            td.pool = input_accounts.get(1).unwrap().to_string();
+            td.account_a = input_accounts.get(3).unwrap().to_string();
+            td.account_b = input_accounts.get(4).unwrap().to_string();
+            td.lp_wallet = signer.to_string();
+            td.position = input_accounts.get(0).unwrap().to_string();
+
+            td.mint_a = get_mint_address_for(&td.account_a, post_token_balances, accounts);
+            td.mint_b = get_mint_address_for(&td.account_b, post_token_balances, accounts);
+
+            td.token_a_amount = get_token_transfer(
+                &td.account_a,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+            td.token_b_amount = get_token_transfer(
+                &td.account_b,
+                inner_idx,
+                inner_instructions,
+                accounts,
+                "destination".to_string(),
+            );
+
+            // Decode the rebalance liquidity parameters
+            if let Ok(data) = RebalanceLiquidityParamsLayout::deserialize(&mut rest.clone()) {
+                let mut args = std::collections::HashMap::new();
+                args.insert("active_id".to_string(), data.active_id.to_string());
+                args.insert("max_active_bin_slippage".to_string(), data.max_active_bin_slippage.to_string());
+                args.insert("should_claim_fee".to_string(), data.should_claim_fee.to_string());
+                args.insert("should_claim_reward".to_string(), data.should_claim_reward.to_string());
+                args.insert("min_withdraw_x_amount".to_string(), data.min_withdraw_x_amount.to_string());
+                args.insert("max_deposit_x_amount".to_string(), data.max_deposit_x_amount.to_string());
+                args.insert("min_withdraw_y_amount".to_string(), data.min_withdraw_y_amount.to_string());
+                args.insert("max_deposit_y_amount".to_string(), data.max_deposit_y_amount.to_string());
+                
+                // Add removes array
+                for (i, remove) in data.removes.iter().enumerate() {
+                    args.insert(format!("removes_{}_min_bin_id", i), 
+                              remove.min_bin_id.map_or("None".to_string(), |v| v.to_string()));
+                    args.insert(format!("removes_{}_max_bin_id", i), 
+                              remove.max_bin_id.map_or("None".to_string(), |v| v.to_string()));
+                    args.insert(format!("removes_{}_bps", i), remove.bps.to_string());
+                }
+                
+                // Add adds array
+                for (i, add) in data.adds.iter().enumerate() {
+                    args.insert(format!("adds_{}_min_delta_id", i), add.min_delta_id.to_string());
+                    args.insert(format!("adds_{}_max_delta_id", i), add.max_delta_id.to_string());
+                    args.insert(format!("adds_{}_x0", i), add.x0.to_string());
+                    args.insert(format!("adds_{}_y0", i), add.y0.to_string());
+                    args.insert(format!("adds_{}_delta_x", i), add.delta_x.to_string());
+                    args.insert(format!("adds_{}_delta_y", i), add.delta_y.to_string());
+                    args.insert(format!("adds_{}_bit_flag", i), add.bit_flag.to_string());
+                    args.insert(format!("adds_{}_favor_x_in_active_id", i), add.favor_x_in_active_id.to_string());
+                }
+
+                td.instruction_data = Some(InstructionData {
+                    instruction_name: "RebalanceLiquidity".to_string(),
+                    args,
+                });
+            }
 
             result = Some(td);
         }

@@ -36,9 +36,15 @@ message TradeData {
   required string strategy_type = 31;
   optional uint32 bps_to_remove = 32;
   optional DecodedLog decoded_logs = 33;
+  optional InstructionData instruction_data = 34;
 }
 
 message DecodedLog {
   required string event_name = 1;
   map<string, string> fields = 2;
+}
+
+message InstructionData {
+  required string instruction_name = 1;
+  map<string, string> args = 2;
 }

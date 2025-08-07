@@ -67,6 +67,8 @@ pub struct TradeData {
     pub bps_to_remove: ::core::option::Option<u32>,
     #[prost(message, optional, tag="33")]
     pub decoded_logs: ::core::option::Option<DecodedLog>,
+    #[prost(message, optional, tag="34")]
+    pub instruction_data: ::core::option::Option<InstructionData>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -75,5 +77,13 @@ pub struct DecodedLog {
     pub event_name: ::prost::alloc::string::String,
     #[prost(map="string, string", tag="2")]
     pub fields: ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct InstructionData {
+    #[prost(string, required, tag="1")]
+    pub instruction_name: ::prost::alloc::string::String,
+    #[prost(map="string, string", tag="2")]
+    pub args: ::std::collections::HashMap<::prost::alloc::string::String, ::prost::alloc::string::String>,
 }
 // @@protoc_insertion_point(module)
