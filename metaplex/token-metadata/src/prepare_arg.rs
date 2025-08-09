@@ -4,7 +4,7 @@ use crate::{
 };
 use instructions::parser::parse_instruction;
 
-pub fn prepare_arg(instruction_data: Vec<u8>, tx_id: String) -> Arg {
+pub fn prepare_arg(instruction_data: Vec<u8>) -> Arg {
     let mut arg: Arg = Arg::default();
     let mut instruction: Instruction = parse_instruction(instruction_data);
 

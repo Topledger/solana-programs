@@ -57,6 +57,7 @@ pub enum TokenStandardLayout {
     Fungible,
     NonFungibleEdition,
     ProgrammableNonFungible,
+    ProgrammableNonFungibleEdition,
 }
 
 impl TokenStandardLayout {
@@ -78,6 +79,9 @@ impl TokenStandardLayout {
             }
             TokenStandardLayout::ProgrammableNonFungible => {
                 result = "ProgrammableNonFungible".to_string();
+            }
+            TokenStandardLayout::ProgrammableNonFungibleEdition => {
+                result = "ProgrammableNonFungibleEdition".to_string();
             }
         }
 
@@ -134,43 +138,45 @@ impl UsesLayout {
     pub fn to_proto_struct(&self) -> PbUsesLayout {
         PbUsesLayout {
             use_method: self.useMethod.to_proto_struct(),
-            remaining: self.remaining,
-            total: self.total,
+            remaining: self.remaining.to_string(),
+            total: self.total.to_string(),
         }
     }
 }
 
-#[derive(BorshDeserialize, Debug, Default)]
-pub enum CollectionDetailsLayoutName {
-    #[default]
-    V1,
+#[derive(BorshDeserialize, Debug)]
+pub enum CollectionDetailsLayout {
+    V1 { size: u64 },
+    V2 { padding: [u8; 8] },
 }
 
-impl CollectionDetailsLayoutName {
-    pub fn to_proto_struct(&self) -> String {
-        let mut result = "".to_string();
-
-        match self {
-            CollectionDetailsLayoutName::V1 => {
-                result = "V1".to_string();
-            }
-        }
-
-        result
+impl Default for CollectionDetailsLayout {
+    fn default() -> Self {
+        CollectionDetailsLayout::V1 { size: 0 }
     }
-}
-
-#[derive(BorshDeserialize, Debug, Default)]
-pub struct CollectionDetailsLayout {
-    pub name: CollectionDetailsLayoutName,
-    pub size: u64,
 }
 
 impl CollectionDetailsLayout {
     pub fn to_proto_struct(&self) -> PbCollectionDetailsLayout {
+        let mut name: String = "".to_string();
+        let mut size: Option<String> = None;
+        let mut padding: Vec<u32> = vec![];
+
+        match self {
+            CollectionDetailsLayout::V1 { size: _size } => {
+                name = "V1".to_string();
+                size = Some(_size.to_string());
+            }
+            CollectionDetailsLayout::V2 { padding: _padding } => {
+                name = "V2".to_string();
+                padding = _padding.iter().map(|x| *x as u32).collect();
+            }
+        }
+
         PbCollectionDetailsLayout {
-            name: self.name.to_proto_struct(),
-            size: self.size,
+            name: name,
+            size: size,
+            padding: padding.to_vec(),
         }
     }
 }
@@ -311,7 +317,7 @@ impl PayloadTypeLayout {
         let mut val_pub_key = None;
         let mut val_seeds_vec = None;
         let mut val_leaf_info = None;
-        let mut val_int64 = None;
+        let mut val_int64: Option<String> = None;
 
         match &self.name {
             PayloadTypeLayoutName::Pubkey { val: value } => {
@@ -328,7 +334,7 @@ impl PayloadTypeLayout {
             }
             PayloadTypeLayoutName::Number { val: value } => {
                 name = "Number".to_string();
-                val_int64 = Some(*value);
+                val_int64 = Some(value.to_string());
             }
         }
 
@@ -453,7 +459,7 @@ pub struct PrintSupplyLayout {
 impl PrintSupplyLayout {
     pub fn to_proto_struct(&self) -> PbPrintSupplyLayout {
         let mut name: String = "Zero".to_string();
-        let mut val = None;
+        let mut val: Option<String> = None;
 
         match &self.name {
             PrintSupplyLayoutName::Zero => {
@@ -461,7 +467,7 @@ impl PrintSupplyLayout {
             }
             PrintSupplyLayoutName::Limited { val: value } => {
                 name = "Limited".to_string();
-                val = Some(*value);
+                val = Some(value.to_string());
             }
             PrintSupplyLayoutName::Unlimited => {
                 name = "Unlimited".to_string();
@@ -674,8 +680,12 @@ pub struct CreateMasterEditionArgsLayout {
 
 impl CreateMasterEditionArgsLayout {
     pub fn to_proto_struct(&self) -> PbCreateMasterEditionArgsLayout {
+        let mut max_supply: Option<String> = None;
+        if self.maxSupply.is_some() {
+            max_supply = Some(self.maxSupply.unwrap().to_string());
+        }
         PbCreateMasterEditionArgsLayout {
-            max_supply: self.maxSupply,
+            max_supply: max_supply,
         }
     }
 }
@@ -691,8 +701,8 @@ impl ReservationLayout {
     pub fn to_proto_struct(&self) -> PbReservationLayout {
         PbReservationLayout {
             address: self.address.to_proto_struct(),
-            spots_remaining: self.spotsRemaining,
-            total_spots: self.totalSpots,
+            spots_remaining: self.spotsRemaining.to_string(),
+            total_spots: self.totalSpots.to_string(),
         }
     }
 }
@@ -713,12 +723,16 @@ impl SetReservationListArgsLayout {
                 reservations.push(x.to_proto_struct());
             }
         }
+        let mut total_reservation_spots: Option<String> = None;
+        if self.totalReservationSpots.is_some() {
+            total_reservation_spots = Some(self.totalReservationSpots.unwrap().to_string());
+        }
 
         PbSetReservationListArgsLayout {
             reservations: reservations,
-            total_reservation_spots: self.totalReservationSpots,
-            offset: self.offset,
-            total_spot_offset: self.totalSpotOffset,
+            total_reservation_spots: total_reservation_spots,
+            offset: self.offset.to_string(),
+            total_spot_offset: self.totalSpotOffset.to_string(),
         }
     }
 }
@@ -731,7 +745,7 @@ pub struct MintPrintingTokensViaTokenArgsLayout {
 impl MintPrintingTokensViaTokenArgsLayout {
     pub fn to_proto_struct(&self) -> PbMintPrintingTokensViaTokenArgsLayout {
         PbMintPrintingTokensViaTokenArgsLayout {
-            supply: self.supply,
+            supply: self.supply.to_string(),
         }
     }
 }
@@ -744,7 +758,7 @@ pub struct MintNewEditionFromMasterEditionViaTokenArgsLayout {
 impl MintNewEditionFromMasterEditionViaTokenArgsLayout {
     pub fn to_proto_struct(&self) -> PbMintNewEditionFromMasterEditionViaTokenArgsLayout {
         PbMintNewEditionFromMasterEditionViaTokenArgsLayout {
-            edition: self.edition,
+            edition: self.edition.to_string(),
         }
     }
 }
@@ -843,7 +857,7 @@ pub struct UtilizeArgsLayout {
 impl UtilizeArgsLayout {
     pub fn to_proto_struct(&self) -> PbUtilizeArgsLayout {
         PbUtilizeArgsLayout {
-            number_of_uses: self.numberOfUses,
+            number_of_uses: self.numberOfUses.to_string(),
         }
     }
 }
@@ -856,7 +870,7 @@ pub struct ApproveUseAuthorityArgsLayout {
 impl ApproveUseAuthorityArgsLayout {
     pub fn to_proto_struct(&self) -> PbApproveUseAuthorityArgsLayout {
         PbApproveUseAuthorityArgsLayout {
-            number_of_uses: self.numberOfUses,
+            number_of_uses: self.numberOfUses.to_string(),
         }
     }
 }
@@ -890,7 +904,9 @@ pub struct SetCollectionSizeArgsLayout {
 
 impl SetCollectionSizeArgsLayout {
     pub fn to_proto_struct(&self) -> PbSetCollectionSizeArgsLayout {
-        PbSetCollectionSizeArgsLayout { size: self.size }
+        PbSetCollectionSizeArgsLayout {
+            size: self.size.to_string(),
+        }
     }
 }
 
@@ -902,7 +918,7 @@ pub struct TransferOutOfEscrowArgsLayout {
 impl TransferOutOfEscrowArgsLayout {
     pub fn to_proto_struct(&self) -> PbTransferOutOfEscrowArgsLayout {
         PbTransferOutOfEscrowArgsLayout {
-            amount: self.amount,
+            amount: self.amount.to_string(),
         }
     }
 }
@@ -937,7 +953,7 @@ impl BurnArgsLayout {
 
         PbBurnArgsLayout {
             name: name,
-            amount: amount.unwrap(),
+            amount: amount.unwrap_or_default().to_string(),
         }
     }
 }
@@ -996,7 +1012,7 @@ pub struct MintArgsLayout {
 impl MintArgsLayout {
     pub fn to_proto_struct(&self) -> PbMintArgsLayout {
         let mut name = "".to_string();
-        let mut amount: Option<u64> = None;
+        let mut amount: Option<String> = None;
         let mut authorization_data = None;
 
         match &self.name {
@@ -1005,7 +1021,7 @@ impl MintArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "V1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1067,6 +1083,9 @@ pub enum DelegateArgsLayoutName {
     ProgrammableConfigItemV1 {
         authorization_data: Option<AuthorizationDataLayout>,
     },
+    PrintDelegateV1 {
+        authorization_data: Option<AuthorizationDataLayout>,
+    },
 }
 
 impl Default for DelegateArgsLayoutName {
@@ -1086,7 +1105,7 @@ impl DelegateArgsLayout {
     pub fn to_proto_struct(&self) -> PbDelegateArgsLayout {
         let mut name = "".to_string();
         let mut authorization_data = None;
-        let mut amount: Option<u64> = None;
+        let mut amount: Option<String> = None;
         let mut locked_address = None;
 
         match &self.name {
@@ -1103,7 +1122,7 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "SaleV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1113,7 +1132,7 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "TransferV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1131,7 +1150,7 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "UtilityV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
@@ -1141,14 +1160,14 @@ impl DelegateArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "StakingV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }
             }
             DelegateArgsLayoutName::StandardV1 { amount: amt } => {
                 name = "StandardV1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
             }
             DelegateArgsLayoutName::LockedTransferV1 {
                 amount: amt,
@@ -1199,6 +1218,14 @@ impl DelegateArgsLayout {
                 name = "ProgrammableConfigItemV1".to_string();
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
+                }
+            }
+            DelegateArgsLayoutName::PrintDelegateV1 {
+                authorization_data: auth_date,
+            } => {
+                name = "PrintDelegateV1".to_string();
+                if auth_date.is_some() {
+                    authorization_data = Some(auth_date.as_ref().unwrap().to_proto_struct());
                 }
             }
         }
@@ -1474,7 +1501,7 @@ pub struct TransferArgsLayout {
 impl TransferArgsLayout {
     pub fn to_proto_struct(&self) -> PbTransferArgsLayout {
         let mut name = "".to_string();
-        let mut amount: Option<u64> = None;
+        let mut amount: Option<String> = None;
         let mut authorization_data = None;
 
         match &self.name {
@@ -1483,7 +1510,7 @@ impl TransferArgsLayout {
                 authorization_data: auth_data,
             } => {
                 name = "V1".to_string();
-                amount = Some(*amt);
+                amount = Some(amt.to_string());
                 if auth_data.is_some() {
                     authorization_data = Some(auth_data.as_ref().unwrap().to_proto_struct());
                 }

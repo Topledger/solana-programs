@@ -15,3 +15,12 @@ protogen:
 .PHONY: package
 package:
 	substreams pack ./substreams.yaml
+
+.PHONY wasm_pack:
+wasm_pack:
+	wasm-pack build --no-typescript --target no-modules
+
+.PHONY convert_and_gcloud_upload:
+convert_and_gcloud_upload:
+	go build utils/convert.go && mv convert utils/convert
+	utils/script.sh metaplex_token_metadata
