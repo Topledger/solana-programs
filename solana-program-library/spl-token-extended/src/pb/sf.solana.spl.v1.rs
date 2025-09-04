@@ -14,31 +14,29 @@ pub struct SplTokenMeta {
     pub block_time: i64,
     #[prost(string, required, tag="3")]
     pub tx_id: ::prost::alloc::string::String,
-    #[prost(string, required, tag="4")]
-    pub dapp: ::prost::alloc::string::String,
-    #[prost(uint64, required, tag="5")]
+    #[prost(uint64, required, tag="4")]
     pub block_slot: u64,
-    #[prost(uint32, required, tag="6")]
+    #[prost(uint32, required, tag="5")]
     pub instruction_index: u32,
-    #[prost(bool, required, tag="7")]
+    #[prost(bool, required, tag="6")]
     pub is_inner_instruction: bool,
-    #[prost(uint32, required, tag="8")]
+    #[prost(uint32, required, tag="7")]
     pub inner_instruction_index: u32,
-    #[prost(string, required, tag="9")]
+    #[prost(string, required, tag="8")]
     pub instruction_type: ::prost::alloc::string::String,
-    #[prost(message, required, tag="10")]
+    #[prost(message, required, tag="9")]
     pub input_accounts: Accounts,
-    #[prost(message, required, tag="11")]
+    #[prost(message, required, tag="10")]
     pub args: Arg,
-    #[prost(string, required, tag="12")]
+    #[prost(string, required, tag="11")]
     pub outer_program: ::prost::alloc::string::String,
-    #[prost(string, optional, tag="13")]
+    #[prost(string, optional, tag="12")]
     pub signer: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, optional, tag="14")]
+    #[prost(uint32, optional, tag="13")]
     pub tx_index: ::core::option::Option<u32>,
-    #[prost(uint64, optional, tag="15")]
+    #[prost(uint64, optional, tag="14")]
     pub fee: ::core::option::Option<u64>,
-    #[prost(uint32, optional, tag="16")]
+    #[prost(uint32, optional, tag="15")]
     pub num_signers: ::core::option::Option<u32>,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]

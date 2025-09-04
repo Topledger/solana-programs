@@ -55,7 +55,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         block_date: convert_to_date(timestamp),
                         block_time: timestamp,
                         tx_id: bs58::encode(&transaction.signatures[0]).into_string(),
-                        dapp: constants::PROGRAM_ADDRESS.to_string(),
                         block_slot: slot,
                         instruction_index: idx as u32,
                         is_inner_instruction: false,
@@ -92,7 +91,6 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         block_time: timestamp,
                                         tx_id: bs58::encode(&transaction.signatures[0])
                                             .into_string(),
-                                        dapp: constants::PROGRAM_ADDRESS.to_string(),
                                         block_slot: slot,
                                         instruction_index: idx as u32,
                                         is_inner_instruction: true,

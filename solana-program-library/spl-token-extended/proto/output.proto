@@ -10,19 +10,18 @@ message SplTokenMeta {
   required string block_date = 1;
   required int64 block_time = 2;
   required string tx_id = 3;
-  required string dapp = 4;
-  required uint64 block_slot = 5;
-  required uint32 instruction_index = 6;
-  required bool is_inner_instruction = 7;
-  required uint32 inner_instruction_index = 8;
-  required string instruction_type = 9;
-  required Accounts input_accounts = 10;
-  required Arg args = 11;
-  required string outer_program = 12;
-  optional string signer = 13;
-  optional uint32 tx_index = 14;
-  optional uint64 fee = 15;
-  optional uint32 num_signers = 16;
+  required uint64 block_slot = 4;
+  required uint32 instruction_index = 5;
+  required bool is_inner_instruction = 6;
+  required uint32 inner_instruction_index = 7;
+  required string instruction_type = 8;
+  required Accounts input_accounts = 9;
+  required Arg args = 10;
+  required string outer_program = 11;
+  optional string signer = 12;
+  optional uint32 tx_index = 13;
+  optional uint64 fee = 14;
+  optional uint32 num_signers = 15;
 }
 
 message Accounts {
