@@ -52,6 +52,6 @@ message Arg {
   optional string owner = 7;
   optional int32 decimals = 8;
   optional int32 extension_type = 9;
-  optional string ui_amount = 10;
+  optional double ui_amount = 10;
   optional int32 status = 11;
 }

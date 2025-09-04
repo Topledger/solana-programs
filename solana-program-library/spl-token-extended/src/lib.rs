@@ -287,27 +287,13 @@ fn find_destination_owner(
     None
 }
 
-fn calculate_ui_amount(amount: u64, decimals: u8) -> String {
+fn calculate_ui_amount(amount: u64, decimals: u8) -> f64 {
     if decimals == 0 {
-        return amount.to_string();
+        return amount as f64;
     }
     
-    let divisor = 10_u64.pow(decimals as u32);
-    let integer_part = amount / divisor;
-    let fractional_part = amount % divisor;
-    
-    if fractional_part == 0 {
-        integer_part.to_string()
-    } else {
-        // Remove trailing zeros from fractional part
-        let fractional_str = format!("{:0width$}", fractional_part, width = decimals as usize);
-        let trimmed = fractional_str.trim_end_matches('0');
-        if trimmed.is_empty() {
-            integer_part.to_string()
-        } else {
-            format!("{}.{}", integer_part, trimmed)
-        }
-    }
+    let divisor = 10_u64.pow(decimals as u32) as f64;
+    (amount as f64) / divisor
 }
 
 fn get_outer_arg(
@@ -446,7 +432,10 @@ fn get_outer_arg(
         }
         "UiAmountToAmount" => {
             outerArg.instruction_type = String::from("UiAmountToAmount");
-            arg.ui_amount = Some(instruction.uiAmountToAmountArgs.ui_amount);
+            // Parse the string ui_amount to f64
+            if let Ok(ui_amount_f64) = instruction.uiAmountToAmountArgs.ui_amount.parse::<f64>() {
+                arg.ui_amount = Some(ui_amount_f64);
+            }
         }
         "InitializeMintCloseAuthority" => {
             outerArg.instruction_type = String::from("InitializeMintCloseAuthority");

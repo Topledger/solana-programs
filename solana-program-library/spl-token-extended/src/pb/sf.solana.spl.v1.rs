@@ -94,8 +94,8 @@ pub struct Arg {
     pub decimals: ::core::option::Option<i32>,
     #[prost(int32, optional, tag="9")]
     pub extension_type: ::core::option::Option<i32>,
-    #[prost(string, optional, tag="10")]
-    pub ui_amount: ::core::option::Option<::prost::alloc::string::String>,
+    #[prost(double, optional, tag="10")]
+    pub ui_amount: ::core::option::Option<f64>,
     #[prost(int32, optional, tag="11")]
     pub status: ::core::option::Option<i32>,
 }
