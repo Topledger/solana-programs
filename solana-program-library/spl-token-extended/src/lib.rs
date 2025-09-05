@@ -290,6 +290,11 @@ fn calculate_ui_amount(amount: u64, decimals: u8) -> f64 {
         return amount as f64;
     }
     
+    // Cap decimals at 18 to prevent overflow/infinity
+    if decimals > 18 {
+        return 0.0;
+    }
+    
     let divisor = 10_u64.pow(decimals as u32) as f64;
     (amount as f64) / divisor
 }
