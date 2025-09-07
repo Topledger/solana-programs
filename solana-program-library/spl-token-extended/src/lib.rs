@@ -12,6 +12,7 @@ use pb::sf::solana::spl::v1::{Accounts, Arg, Output, SplTokenMeta};
 // use substreams::log;
 use substreams_solana::pb::sf::solana::r#type::v1::Block;
 use substreams_solana::pb::sf::solana::r#type::v1::TokenBalance;
+use substreams_solana::pb::sf::solana::r#type::v1::{CompiledInstruction, InnerInstructions, InnerInstruction};
 use utils::convert_to_date;
 
 #[derive(Default)]
@@ -46,6 +47,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                 None
             };
 
+            let instructions_clone = msg.instructions.clone();
             for (idx, inst) in msg.instructions.into_iter().enumerate() {
                 let program = &accounts[inst.program_id_index as usize];
 
@@ -69,7 +71,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                         num_signers: Some(num_signers),
                     };
 
-                    data.push(handle_mints_and_amounts(obj, &pre_token_balances, &post_token_balances, &accounts));
+                    data.push(handle_mints_and_amounts(obj, &pre_token_balances, &post_token_balances, &accounts, &instructions_clone, &meta.inner_instructions));
                 }
 
                 meta.inner_instructions
@@ -105,7 +107,7 @@ fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                         num_signers: Some(num_signers),
                                     };
 
-                                    data.push(handle_mints_and_amounts(obj, &pre_token_balances, &post_token_balances, &accounts));
+                                    data.push(handle_mints_and_amounts(obj, &pre_token_balances, &post_token_balances, &accounts, &instructions_clone, &meta.inner_instructions));
                                 }
                             },
                         )
@@ -122,26 +124,52 @@ fn handle_mints_and_amounts(
     pre_token_balances: &Vec<TokenBalance>,
     post_token_balances: &Vec<TokenBalance>,
     accounts: &Vec<String>,
+    instructions: &Vec<CompiledInstruction>,
+    inner_instructions: &Vec<InnerInstructions>,
 ) -> SplTokenMeta {
     match obj.instruction_type.as_str() {
         "Transfer" | "TransferChecked" => {
-            // Search for mint and decimals from source or destination account
-            let (mint, decimals) = find_mint_and_decimals(
+            // First try the existing approach: search for mint and decimals from source or destination account
+            let (mut mint, mut decimals) = find_mint_and_decimals(
                 &obj.input_accounts.source,
                 &obj.input_accounts.destination,
                 pre_token_balances,
                 post_token_balances,
                 accounts,
             );
-            obj.input_accounts.mint = mint;
             
-            // Find destination owner
-            if let Some(dest_owner) = find_destination_owner(
+            let mut destination_owner_from_balances = find_destination_owner(
                 &obj.input_accounts.destination,
                 pre_token_balances,
                 post_token_balances,
                 accounts,
-            ) {
+            );
+            
+            // If the existing approach failed, try the InitializeAccount fallback
+            if mint.is_none() {
+                let (fallback_mint, fallback_dest_owner, fallback_decimals) = find_mint_from_initialize_account_instructions(
+                    &obj.input_accounts.source,
+                    &obj.input_accounts.destination,
+                    instructions,
+                    inner_instructions,
+                    accounts,
+                    pre_token_balances,
+                    post_token_balances,
+                );
+                
+                mint = fallback_mint;
+                decimals = fallback_decimals;
+                
+                // Use destination owner from InitializeAccount if we didn't find it in balances
+                if destination_owner_from_balances.is_none() {
+                    destination_owner_from_balances = fallback_dest_owner;
+                }
+            }
+            
+            obj.input_accounts.mint = mint;
+            
+            // Set destination owner
+            if let Some(dest_owner) = destination_owner_from_balances {
                 obj.input_accounts.destination_owner = Some(dest_owner);
             }
             
@@ -297,6 +325,165 @@ fn calculate_ui_amount(amount: u64, decimals: u8) -> f64 {
     
     let divisor = 10_u64.pow(decimals as u32) as f64;
     (amount as f64) / divisor
+}
+
+fn find_mint_from_initialize_account_instructions(
+    source_account: &Option<String>,
+    destination_account: &Option<String>,
+    instructions: &Vec<CompiledInstruction>,
+    inner_instructions: &Vec<InnerInstructions>,
+    accounts: &Vec<String>,
+    pre_token_balances: &Vec<TokenBalance>,
+    post_token_balances: &Vec<TokenBalance>,
+) -> (Option<String>, Option<String>, Option<u8>) {
+    // Helper function to check a compiled instruction for InitializeAccount types
+    let check_compiled_instruction = |inst: &CompiledInstruction| -> Option<(String, String, String)> {
+        let program = &accounts[inst.program_id_index as usize];
+        if program == constants::PROGRAM_ADDRESS {
+            let outer_arg = get_outer_arg(inst.data.clone(), &inst.accounts, accounts);
+            match outer_arg.instruction_type.as_str() {
+                "InitializeAccount" => {
+                    if let (Some(mint), Some(account), Some(owner)) = (
+                        &outer_arg.input_accounts.mint,
+                        &outer_arg.input_accounts.account,
+                        &outer_arg.input_accounts.owner,
+                    ) {
+                        return Some((mint.clone(), account.clone(), owner.clone()));
+                    }
+                }
+                "InitializeAccount2" | "InitializeAccount3" => {
+                    if let (Some(mint), Some(account), Some(owner)) = (
+                        &outer_arg.input_accounts.mint,
+                        &outer_arg.input_accounts.account,
+                        &outer_arg.arg.owner,
+                    ) {
+                        return Some((mint.clone(), account.clone(), owner.clone()));
+                    }
+                }
+                _ => {}
+            }
+        }
+        None
+    };
+
+    // Helper function to check an inner instruction for InitializeAccount types
+    let check_inner_instruction = |inst: &InnerInstruction| -> Option<(String, String, String)> {
+        let program = &accounts[inst.program_id_index as usize];
+        if program == constants::PROGRAM_ADDRESS {
+            let outer_arg = get_outer_arg(inst.data.clone(), &inst.accounts, accounts);
+            match outer_arg.instruction_type.as_str() {
+                "InitializeAccount" => {
+                    if let (Some(mint), Some(account), Some(owner)) = (
+                        &outer_arg.input_accounts.mint,
+                        &outer_arg.input_accounts.account,
+                        &outer_arg.input_accounts.owner,
+                    ) {
+                        return Some((mint.clone(), account.clone(), owner.clone()));
+                    }
+                }
+                "InitializeAccount2" | "InitializeAccount3" => {
+                    if let (Some(mint), Some(account), Some(owner)) = (
+                        &outer_arg.input_accounts.mint,
+                        &outer_arg.input_accounts.account,
+                        &outer_arg.arg.owner,
+                    ) {
+                        return Some((mint.clone(), account.clone(), owner.clone()));
+                    }
+                }
+                _ => {}
+            }
+        }
+        None
+    };
+
+    // Collect all InitializeAccount data from the transaction
+    let mut initialize_accounts: Vec<(String, String, String)> = Vec::new();
+
+    // Search through all outer instructions
+    for inst in instructions {
+        if let Some((mint, account, owner)) = check_compiled_instruction(inst) {
+            initialize_accounts.push((mint, account, owner));
+        }
+    }
+
+    // Search through all inner instructions
+    for inner_instruction_group in inner_instructions {
+        for inst in &inner_instruction_group.instructions {
+            if let Some((mint, account, owner)) = check_inner_instruction(inst) {
+                initialize_accounts.push((mint, account, owner));
+            }
+        }
+    }
+
+    // Now find mint and destination owner from collected data
+    let mut found_mint: Option<String> = None;
+    let mut found_decimals: Option<u8> = None;
+    let mut destination_owner: Option<String> = None;
+
+    // First, try to find mint from source or destination account
+    for (mint, account, owner) in &initialize_accounts {
+        if let Some(src) = source_account {
+            if account == src {
+                found_mint = Some(mint.clone());
+                found_decimals = if mint == constants::WSOL_MINT {
+                    Some(9)
+                } else {
+                    find_decimals_for_mint(mint, pre_token_balances, post_token_balances)
+                };
+                break;
+            }
+        }
+        if let Some(dest) = destination_account {
+            if account == dest {
+                found_mint = Some(mint.clone());
+                found_decimals = if mint == constants::WSOL_MINT {
+                    Some(9)
+                } else {
+                    find_decimals_for_mint(mint, pre_token_balances, post_token_balances)
+                };
+                destination_owner = Some(owner.clone());
+                break;
+            }
+        }
+    }
+
+    // If we found a mint but no destination owner yet, look for destination owner
+    if found_mint.is_some() && destination_owner.is_none() {
+        if let Some(dest) = destination_account {
+            for (mint, account, owner) in &initialize_accounts {
+                if account == dest && mint == found_mint.as_ref().unwrap() {
+                    destination_owner = Some(owner.clone());
+                    break;
+                }
+            }
+        }
+    }
+
+    (found_mint, destination_owner, found_decimals)
+}
+
+fn find_decimals_for_mint(
+    mint: &str,
+    pre_token_balances: &Vec<TokenBalance>,
+    post_token_balances: &Vec<TokenBalance>,
+) -> Option<u8> {
+    // Search for this specific mint in pre_token_balances
+    for token_balance in pre_token_balances.iter() {
+        if token_balance.mint == mint {
+            return token_balance.ui_token_amount.as_ref()
+                .map(|ui_amount| ui_amount.decimals as u8);
+        }
+    }
+    
+    // Search for this specific mint in post_token_balances
+    for token_balance in post_token_balances.iter() {
+        if token_balance.mint == mint {
+            return token_balance.ui_token_amount.as_ref()
+                .map(|ui_amount| ui_amount.decimals as u8);
+        }
+    }
+    
+    None
 }
 
 fn get_outer_arg(
