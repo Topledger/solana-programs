@@ -145,8 +145,8 @@ fn handle_mints_and_amounts(
                 accounts,
             );
             
-            // If the existing approach failed, try the InitializeAccount fallback
-            if mint.is_none() {
+            // If the existing approach failed to find mint OR destination owner, try the InitializeAccount fallback
+            if mint.is_none() || destination_owner_from_balances.is_none() {
                 let (fallback_mint, fallback_dest_owner, fallback_decimals) = find_mint_from_initialize_account_instructions(
                     &obj.input_accounts.source,
                     &obj.input_accounts.destination,
@@ -157,10 +157,13 @@ fn handle_mints_and_amounts(
                     post_token_balances,
                 );
                 
-                mint = fallback_mint;
-                decimals = fallback_decimals;
+                // Use fallback mint only if primary method didn't find it
+                if mint.is_none() {
+                    mint = fallback_mint;
+                    decimals = fallback_decimals;
+                }
                 
-                // Use destination owner from InitializeAccount if we didn't find it in balances
+                // Use fallback destination owner only if primary method didn't find it
                 if destination_owner_from_balances.is_none() {
                     destination_owner_from_balances = fallback_dest_owner;
                 }
