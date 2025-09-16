@@ -181,64 +181,6 @@ fn handle_mints_and_amounts(
                 obj.args.ui_amount = Some(calculate_ui_amount(amount, decimals));
             }
         }
-        "Approve" | "ApproveChecked" => {
-            // Search for mint and decimals from source account
-            let (mint, decimals) = find_mint_and_decimals(
-                &obj.input_accounts.source,
-                &None,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-            );
-            obj.input_accounts.mint = mint;
-            
-            // Calculate UI amount if we have amount and decimals
-            if let (Some(amount), Some(decimals)) = (obj.args.amount, decimals) {
-                obj.args.ui_amount = Some(calculate_ui_amount(amount, decimals));
-            }
-        }
-        "MintTo" | "MintToChecked" => {
-            // Search for mint and decimals from destination account (account field for MintTo)
-            let (mint, decimals) = find_mint_and_decimals(
-                &obj.input_accounts.account,
-                &None,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-            );
-            obj.input_accounts.mint = mint;
-            
-            // Find owner of the destination account (account receiving minted tokens)
-            if let Some(account_owner) = find_destination_owner(
-                &obj.input_accounts.account,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-            ) {
-                obj.input_accounts.owner = Some(account_owner);
-            }
-            
-            // Calculate UI amount if we have amount and decimals
-            if let (Some(amount), Some(decimals)) = (obj.args.amount, decimals) {
-                obj.args.ui_amount = Some(calculate_ui_amount(amount, decimals));
-            }
-        }
-        "Burn" | "BurnChecked" => {
-            // Search for mint and decimals from source account (account field for Burn)
-            let (mint, decimals) = find_mint_and_decimals(
-                &obj.input_accounts.account,
-                &None,
-                pre_token_balances,
-                post_token_balances,
-                accounts,
-            );
-            obj.input_accounts.mint = mint;
-            
-            // Calculate UI amount if we have amount and decimals
-            if let (Some(amount), Some(decimals)) = (obj.args.amount, decimals) {
-                obj.args.ui_amount = Some(calculate_ui_amount(amount, decimals));
-            }
-        }
         _ => {
             // For other instructions, no special handling needed
         }
