@@ -1,0 +1,11 @@
+{
+  "@module": "jsonl_out",
+  "@block": 58589960,
+  "@type": "sf.substreams.sink.files.v1.Lines",
+  "@data": {
+    "lines": [
+      "{\"account_keys\":[\"8nLhJVG46Euwk4dWp3Nq6x9XyaqnNQeqps1rJLJchG3j\",\"95w5xe25GppgyjiQmXZ97939Q9DFDG8HL1KsmnMJRP3M\",\"SysvarRent111111111111111111111111111111111\",\"11111111111111111111111111111111\",\"Stake11111111111111111111111111111111111111\"],\"block_date\":\"2021-01-01\",\"block_slot\":58589960,\"block_time\":1609522945,\"compute_units_consumed\":null,\"executing_accounts\":[\"Stake11111111111111111111111111111111111111\",\"11111111111111111111111111111111\"],\"fees\":5000,\"id\":\"27gkJQXQB1E1eBgFv7RZc6P4PBPSWPLa6D5XhGFxeSvJqfFXg8CMkwUb6UK6vYjAjXEXLroEKv1wisnie5CnHZNW\",\"index\":125,\"instructions\":[{\"account_arguments\":[\"8nLhJVG46Euwk4dWp3Nq6x9XyaqnNQeqps1rJLJchG3j\",\"95w5xe25GppgyjiQmXZ97939Q9DFDG8HL1KsmnMJRP3M\"],\"data\":\"2XrypvHkTBCz8AM1onUbtAjcoGPsAXPThX5phG5YoM28DWxipTBogDfftNgWu2KdhxkTG9jH9iC8rQkzudLNv12h46AV4aKc55aHYmhtP1nEmqTgxgcavfjsdzXpcoHU6yGcKUs\",\"executing_account\":\"11111111111111111111111111111111\",\"inner_instructions\":[]},{\"account_arguments\":[\"95w5xe25GppgyjiQmXZ97939Q9DFDG8HL1KsmnMJRP3M\",\"SysvarRent111111111111111111111111111111111\"],\"data\":\"1111Ni4yCCW2fxAoJYsCm6oRkZyqFKB8kSfykVyauLQdzQm9mjNpkYGSKvuxu5mnZFnhamyiK3HSYcATNumD9p1n1eUSTbV4EgECspVNoyT5HcptWjbmFgii8XAh7VQTYk8XD2Agr2mnNZBstnh8FVQwQn43s\",\"executing_account\":\"Stake11111111111111111111111111111111111111\",\"inner_instructions\":[]}],\"log_messages\":[\"Program 11111111111111111111111111111111 invoke [1]\",\"Program 11111111111111111111111111111111 success\"],\"logs_truncated\":false,\"post_balances\":[4999995000,45000000000,1,1,1],\"post_token_balances\":[],\"pre_balances\":[50000000000,0,1,1,1],\"pre_token_balances\":[],\"program\":\"solana_native_staking\",\"readonly_signed_accounts\":0,\"readonly_unsigned_accounts\":3,\"required_signatures\":1,\"return_data\":null,\"signatures\":[\"27gkJQXQB1E1eBgFv7RZc6P4PBPSWPLa6D5XhGFxeSvJqfFXg8CMkwUb6UK6vYjAjXEXLroEKv1wisnie5CnHZNW\"],\"signer\":\"8nLhJVG46Euwk4dWp3Nq6x9XyaqnNQeqps1rJLJchG3j\",\"version\":\"legacy\"}"
+    ]
+  }
+}
+
