@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'programs_long_running_depin_v1_0_01'
-  version: v1.0.0
+  name: 'programs_long_running_depin_v1_0_2'
+  version: v1.0.2
 
 protobuf:
   files:
