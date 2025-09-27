@@ -1,7 +1,7 @@
 specVersion: v0.1.0
 package:
-  name: 'solana_native_staking_v1_0_0'
-  version: v1.0.0
+  name: 'solana_native_staking_v1_0_2'
+  version: v1.0.2
 
 protobuf:
   files:

@@ -13,7 +13,7 @@ use std::collections::HashSet;
 
 use substreams_solana::pb::sf::solana::r#type::v1::{
     Block, CompiledInstruction, InnerInstruction, Message, MessageHeader, TokenBalance,
-    Transaction, TransactionStatusMeta,
+    Transaction, TransactionStatusMeta
 };
 use utils::convert_to_date;
 
@@ -28,14 +28,16 @@ fn jsonl_out(block: Block) -> Result<Lines, substreams::errors::Error> {
 }
 
 fn process_block(block: Block) -> Vec<String> {
-    let block_time = block.block_time.as_ref();
-    let block_date = match block_time {
-        Some(block_time) => match convert_to_date(block_time.timestamp) {
-            Ok(date) => date,
-            Err(_) => "Error converting block time to date".to_string(),
-        },
-        None => "Block time is not available".to_string(),
-    };
+
+    const DEFAULT_TS: i64 = 1_577_836_800;
+
+    let block_time: i64 = block
+    .block_time
+    .as_ref()
+    .map(|bt| bt.timestamp)
+    .unwrap_or(DEFAULT_TS);
+
+    let block_date = convert_to_date(block_time).unwrap_or_else(|_| "Error converting block time to date".to_string());
     let block_slot = block.slot;
     let mut data = Vec::new();
     let programs_map = create_programs_map();
@@ -80,7 +82,7 @@ fn process_block(block: Block) -> Vec<String> {
         let mut transaction_stats = TransactionStats::default();
         transaction_stats.block_slot = block_slot as u32;
         transaction_stats.block_date = block_date.to_string();
-        transaction_stats.block_time = block_time.unwrap().timestamp as u64;
+        transaction_stats.block_time = block_time as u64;
 
         populate_transaction_stats(
             &mut transaction_stats,
