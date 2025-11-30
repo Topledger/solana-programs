@@ -3,6 +3,7 @@ use crate::trade_instruction::TradeInstruction;
 // TODO: Update these discriminators with the correct values for pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA
 const BUY_DISCRIMINATOR: u64 = u64::from_le_bytes([102, 6, 61, 18, 1, 218, 235, 234]); // Copied from 6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
 const SELL_DISCRIMINATOR: u64 = u64::from_le_bytes([51, 230, 133, 164, 1, 127, 131, 173]); // Copied from 6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
+const BUY_EXACT_QUOTE_IN_DISCRIMINATOR: u64 = u64::from_le_bytes([198, 46, 21, 82, 180, 217, 232, 112]);
 
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
@@ -39,6 +40,17 @@ pub fn parse_trade_instruction(
                 vault_a: accounts.get(7).map(|s| s.to_string()).unwrap_or_default(), // Your index 7
                 vault_b: accounts.get(8).map(|s| s.to_string()).unwrap_or_default(), // Your index 8
                 fee_account: Some(accounts.get(10).map(|s| s.to_string()).unwrap_or_default()), // Added fee_account with placeholder index 5
+                ..Default::default()
+            });
+        }
+        BUY_EXACT_QUOTE_IN_DISCRIMINATOR => {
+            result = Some(TradeInstruction {
+                dapp_address: String::from("pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"),
+                name: String::from("BuyExactQuoteIn"),
+                amm: accounts.get(0).map(|s| s.to_string()).unwrap_or_default(), // pool
+                vault_a: accounts.get(7).map(|s| s.to_string()).unwrap_or_default(), // pool_base_token_account
+                vault_b: accounts.get(8).map(|s| s.to_string()).unwrap_or_default(), // pool_quote_token_account
+                fee_account: Some(accounts.get(10).map(|s| s.to_string()).unwrap_or_default()), // protocol_fee_recipient_token_account
                 ..Default::default()
             });
         }

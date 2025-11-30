@@ -2,6 +2,7 @@ use crate::trade_instruction::TradeInstruction;
 
 const BUY_DISCRIMINATOR: u64 = u64::from_le_bytes([102, 6, 61, 18, 1, 218, 235, 234]);
 const SELL_DISCRIMINATOR: u64 = u64::from_le_bytes([51, 230, 133, 164, 1, 127, 131, 173]);
+const BUY_EXACT_SOL_IN_DISCRIMINATOR: u64 = u64::from_le_bytes([56, 252, 116, 8, 158, 223, 205, 95]);
 
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
@@ -28,6 +29,16 @@ pub fn parse_trade_instruction(
             result = Some(TradeInstruction {
                 dapp_address: String::from("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"),
                 name: String::from("Sell"),
+                amm: accounts.get(3).unwrap().to_string(),
+                vault_a: accounts.get(3).unwrap().to_string(),
+                vault_b: accounts.get(4).unwrap().to_string(),
+                ..Default::default()
+            });
+        }
+        BUY_EXACT_SOL_IN_DISCRIMINATOR => {
+            result = Some(TradeInstruction {
+                dapp_address: String::from("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P"),
+                name: String::from("BuyExactSolIn"),
                 amm: accounts.get(3).unwrap().to_string(),
                 vault_a: accounts.get(3).unwrap().to_string(),
                 vault_b: accounts.get(4).unwrap().to_string(),
