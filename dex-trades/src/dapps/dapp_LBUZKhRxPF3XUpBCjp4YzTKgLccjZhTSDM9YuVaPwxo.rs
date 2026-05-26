@@ -7,7 +7,8 @@ const SWAP_WITH_PRICE_IMPACT_DISCRIMINATOR: u64 =
 
 // New V2 instruction discriminators
 const SWAP2_DISCRIMINATOR: u64 = u64::from_le_bytes([65, 75, 63, 76, 235, 91, 91, 136]);
-const SWAP_EXACT_OUT2_DISCRIMINATOR: u64 = u64::from_le_bytes([43, 215, 247, 132, 137, 60, 243, 81]);
+const SWAP_EXACT_OUT2_DISCRIMINATOR: u64 =
+    u64::from_le_bytes([43, 215, 247, 132, 137, 60, 243, 81]);
 const SWAP_WITH_PRICE_IMPACT2_DISCRIMINATOR: u64 =
     u64::from_le_bytes([74, 98, 192, 214, 177, 51, 75, 51]);
 

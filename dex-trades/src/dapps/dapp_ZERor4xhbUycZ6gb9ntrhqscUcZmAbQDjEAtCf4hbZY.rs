@@ -16,7 +16,8 @@ pub fn parse_trade_instruction(
     let mut result = None;
 
     match discriminator {
-        SWAP_DISCRIMINATOR => { // This will now check for 6
+        SWAP_DISCRIMINATOR => {
+            // This will now check for 6
             // TODO: Verify account indices for amm, vault_a, vault_b, fee_account
             result = Some(TradeInstruction {
                 dapp_address: String::from("ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY"),
@@ -32,4 +33,4 @@ pub fn parse_trade_instruction(
     }
 
     return result;
-} 
+}

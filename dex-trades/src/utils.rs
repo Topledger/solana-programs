@@ -3,6 +3,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 use chrono::prelude::*;
 use substreams_solana::pb::sf::solana::r#type::v1::{InnerInstructions, TokenBalance};
 
+const PUMP_FUN_PROGRAM: &str = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
+
 #[derive(BorshSerialize, BorshDeserialize, Debug, Default)]
 pub struct TransferLayout {
     amount: u64,
@@ -82,7 +84,7 @@ pub fn get_amt(
         result = destination_transfer_amt;
     }
 
-    if result != 0.0 {
+    if result != 0.0 && !dapp_address.eq(PUMP_FUN_PROGRAM) {
         let index = accounts.iter().position(|r| r == address).unwrap();
         post_token_balances
             .iter()
@@ -107,7 +109,7 @@ pub fn get_token_transfer(
     post_balances: Vec<u64>,
     fee_account: Option<String>,
 ) -> f64 {
-    if dapp_address.eq("6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P") {
+    if dapp_address.eq(PUMP_FUN_PROGRAM) {
         return get_system_program_transfer(
             address,
             input_inner_idx,
@@ -223,7 +225,7 @@ pub fn get_token_transfer(
             inner_instructions,
             accounts,
             account_name_to_check,
-            fee_account
+            fee_account,
         );
         if _result.is_some() {
             result = _result.unwrap();

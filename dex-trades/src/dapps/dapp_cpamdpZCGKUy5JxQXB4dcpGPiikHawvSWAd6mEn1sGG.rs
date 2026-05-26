@@ -27,4 +27,4 @@ pub fn parse_trade_instruction(
     }
 
     return result;
-} 
+}

@@ -14,6 +14,9 @@ use utils::get_mint;
 use utils::{convert_to_date, get_amt};
 mod trade_instruction;
 
+const PUMP_FUN_PROGRAM: &str = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
+const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
+
 #[substreams::handlers::map]
 fn map_block(block: Block) -> Result<Output, substreams::errors::Error> {
     process_block(block)
@@ -59,6 +62,24 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
                         let td_name = td.name;
                         let td_dapp_address = td.dapp_address;
+                        let base_mint = get_trade_mint(
+                            &td.vault_a,
+                            &post_token_balances,
+                            &accounts,
+                            td_dapp_address.clone(),
+                            &td.base_mint,
+                        );
+                        let quote_mint = get_trade_mint(
+                            &td.vault_b,
+                            &post_token_balances,
+                            &accounts,
+                            "".to_string(),
+                            &td.quote_mint,
+                        );
+                        let base_amount_dapp_address =
+                            get_amount_dapp_address(&td_dapp_address, &base_mint);
+                        let quote_amount_dapp_address =
+                            get_amount_dapp_address(&td_dapp_address, &quote_mint);
 
                         data.push(TradeData {
                             block_date: convert_to_date(timestamp),
@@ -67,25 +88,15 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                             block_time: timestamp,
                             signer: accounts.get(0).unwrap().to_string(),
                             pool_address: td.amm,
-                            base_mint: get_mint(
-                                &td.vault_a,
-                                &post_token_balances,
-                                &accounts,
-                                td_dapp_address.clone(),
-                            ),
-                            quote_mint: get_mint(
-                                &td.vault_b,
-                                &post_token_balances,
-                                &accounts,
-                                "".to_string(),
-                            ),
+                            base_mint,
+                            quote_mint,
                             base_amount: get_amt(
                                 &td.vault_a,
                                 0 as u32,
                                 &inner_instructions,
                                 &accounts,
                                 &post_token_balances,
-                                td_dapp_address.clone(),
+                                base_amount_dapp_address,
                                 pre_balances.clone(),
                                 post_balances.clone(),
                                 td.fee_account.clone(),
@@ -96,7 +107,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                 &inner_instructions,
                                 &accounts,
                                 &post_token_balances,
-                                "".to_string(),
+                                quote_amount_dapp_address,
                                 pre_balances.clone(),
                                 post_balances.clone(),
                                 td.fee_account.clone(),
@@ -201,6 +212,30 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
 
                                         let inner_td_name = inner_td.name;
                                         let inner_td_dapp_address = inner_td.dapp_address;
+                                        let inner_base_mint = get_trade_mint(
+                                            &inner_td.vault_a,
+                                            &post_token_balances,
+                                            &accounts,
+                                            inner_td_dapp_address.clone(),
+                                            &inner_td.base_mint,
+                                        );
+                                        let inner_quote_mint = get_trade_mint(
+                                            &inner_td.vault_b,
+                                            &post_token_balances,
+                                            &accounts,
+                                            "".to_string(),
+                                            &inner_td.quote_mint,
+                                        );
+                                        let inner_base_amount_dapp_address =
+                                            get_amount_dapp_address(
+                                                &inner_td_dapp_address,
+                                                &inner_base_mint,
+                                            );
+                                        let inner_quote_amount_dapp_address =
+                                            get_amount_dapp_address(
+                                                &inner_td_dapp_address,
+                                                &inner_quote_mint,
+                                            );
 
                                         data.push(TradeData {
                                             block_date: convert_to_date(timestamp),
@@ -210,25 +245,15 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                             block_time: timestamp,
                                             signer: accounts.get(0).unwrap().to_string(),
                                             pool_address: inner_td.amm,
-                                            base_mint: get_mint(
-                                                &inner_td.vault_a,
-                                                &post_token_balances,
-                                                &accounts,
-                                                inner_td_dapp_address.clone(),
-                                            ),
-                                            quote_mint: get_mint(
-                                                &inner_td.vault_b,
-                                                &post_token_balances,
-                                                &accounts,
-                                                "".to_string(),
-                                            ),
+                                            base_mint: inner_base_mint,
+                                            quote_mint: inner_quote_mint,
                                             base_amount: get_amt(
                                                 &inner_td.vault_a,
                                                 inner_idx as u32,
                                                 &inner_instructions,
                                                 &accounts,
                                                 &post_token_balances,
-                                                inner_td_dapp_address.clone(),
+                                                inner_base_amount_dapp_address,
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
                                                 inner_td.fee_account.clone(),
@@ -239,7 +264,7 @@ fn process_block(block: Block) -> Result<Output, substreams::errors::Error> {
                                                 &inner_instructions,
                                                 &accounts,
                                                 &post_token_balances,
-                                                "".to_string(),
+                                                inner_quote_amount_dapp_address,
                                                 pre_balances.clone(),
                                                 post_balances.clone(),
                                                 inner_td.fee_account.clone(),
@@ -747,17 +772,37 @@ fn get_trade_instruction(
                     input_accounts,
                 );
         }
-         "swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW" => {
-             result =
-                 dapps::dapp_swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW::parse_trade_instruction(
-                     instruction_data,
-                     input_accounts,
-                 );
-         }
-         _ => {}
-     }
+        "swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW" => {
+            result =
+                dapps::dapp_swapFpHZwjELNnjvThjajtiVmkz3yPQEHjLtka2fwHW::parse_trade_instruction(
+                    instruction_data,
+                    input_accounts,
+                );
+        }
+        _ => {}
+    }
 
     return result;
+}
+
+fn get_trade_mint(
+    vault: &String,
+    post_token_balances: &Vec<TokenBalance>,
+    accounts: &Vec<String>,
+    dapp_address: String,
+    decoded_mint: &Option<String>,
+) -> String {
+    decoded_mint
+        .clone()
+        .unwrap_or_else(|| get_mint(vault, post_token_balances, accounts, dapp_address))
+}
+
+fn get_amount_dapp_address(dapp_address: &String, mint: &String) -> String {
+    if dapp_address.eq(PUMP_FUN_PROGRAM) && mint.eq(SOL_MINT) {
+        return dapp_address.clone();
+    }
+
+    "".to_string()
 }
 
 fn get_signer_balance_change(pre_balances: &Vec<u64>, post_balances: &Vec<u64>) -> i64 {
