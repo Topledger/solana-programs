@@ -10,6 +10,7 @@ const BUY_EXACT_QUOTE_IN_V2_DISCRIMINATOR: u64 =
     u64::from_le_bytes([194, 171, 28, 70, 104, 77, 91, 47]);
 
 const PUMP_FUN_PROGRAM: &str = "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P";
+const SOL_MINT: &str = "So11111111111111111111111111111111111111112";
 
 pub fn parse_trade_instruction(
     bytes_stream: Vec<u8>,
@@ -68,14 +69,21 @@ pub fn parse_trade_instruction(
 }
 
 fn parse_v2_instruction(accounts: Vec<String>, name: &str) -> TradeInstruction {
+    let quote_mint = accounts.get(2).unwrap().to_string();
+    let quote_vault = if quote_mint.eq(SOL_MINT) {
+        accounts.get(10).unwrap().to_string()
+    } else {
+        accounts.get(12).unwrap().to_string()
+    };
+
     TradeInstruction {
         dapp_address: String::from(PUMP_FUN_PROGRAM),
         name: String::from(name),
         amm: accounts.get(10).unwrap().to_string(),
         vault_a: accounts.get(11).unwrap().to_string(),
-        vault_b: accounts.get(12).unwrap().to_string(),
+        vault_b: quote_vault,
         base_mint: Some(accounts.get(1).unwrap().to_string()),
-        quote_mint: Some(accounts.get(2).unwrap().to_string()),
+        quote_mint: Some(quote_mint),
         fee_account: Some(accounts.get(17).unwrap().to_string()),
         ..Default::default()
     }
