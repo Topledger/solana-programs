@@ -1,0 +1,22 @@
+syntax = "proto2";
+
+package sf.solana.programs.compute.budget.v1;
+
+message ComputeBudgetMeta {
+  required string block_date = 1;
+  required int64 block_time = 2;
+  required string tx_id = 3;
+  required string dapp = 4;
+  required uint64 block_slot = 5;
+  required uint32 instruction_index = 7;
+  required bool is_inner_instruction = 8;
+  required uint32 inner_instruction_index = 9;
+  required string instruction_type = 10;
+  optional uint32 bytes = 11;
+  optional uint32 units = 12;
+  optional uint64 micro_lamports = 13;
+}
+
+message Output {
+  repeated ComputeBudgetMeta data = 1;
+}
